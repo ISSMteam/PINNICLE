@@ -7,7 +7,9 @@ class domain:
     def __init__(self, path):
         if is_file_ext(path, '.exp'):
             self.vertices = self.get_polygon_vertices(path)
-            self.domain = dde.geometry.Polygon(self.vertices)
+            self.geometry = dde.geometry.Polygon(self.vertices)
+        else:
+            raise TypeError("File type in "+path+" is currently not supported!")
 
     def get_polygon_vertices(self, filepath):
         """

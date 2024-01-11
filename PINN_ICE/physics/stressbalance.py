@@ -1,14 +1,15 @@
 import deepxde as dde
-#import tensorflow as tf
+from . import physics
 
-class SSA2D:
+class SSA2D(physics):
+    """
+    SSA on 2D problem
+    """
     def __init__(self, mu, n=3.0):
+        super().__init__()
         # viscosity 
         self.mu = mu
         self.n = n
-        self.rhoi = 917.0
-        self.g = 9.81
-        self.yts = 3600.0*24*365
 
     def pde(self, x, sol):
         # unpacking normalized values
