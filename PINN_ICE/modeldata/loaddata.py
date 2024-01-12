@@ -73,14 +73,9 @@ def prep_2D_data_all(path, N_f=None, N_u=None, N_s=None, N_H=None, N_C=None, Fli
     xub = X_star.max(axis=0)
     umin = u_star.min(axis=0)
     umax = u_star.max(axis=0)
-    ulb = {}
-    uub = {}
-    ulb["uv"] = umin[0:2]
-    uub["uv"] = umax[0:2]
-    ulb["sH"] = umin[2:4]
-    uub["sH"] = umax[2:4]
-    ulb["C"] = umin[4:5]
-    uub["C"] = umax[4:5]
+    names = ['u', 'v', 's', 'H', 'C']
+    ulb = {k:umin[i] for i, k in enumerate(names)}
+    uub = {k:umax[i] for i, k in enumerate(names)}
 
     # set Dirichlet boundary conditions
     idbc = np.transpose(np.asarray(DBC>0).nonzero())
@@ -110,11 +105,15 @@ def prep_2D_data_all(path, N_f=None, N_u=None, N_s=None, N_H=None, N_C=None, Fli
     # velocity data
     if N_u:
         idx = np.random.choice(X_.shape[0], N_u, replace=False)
-        X_train["uv"] = X_[idx,:]
-        u_train["uv"] = u_[idx, 0:2]
+        X_train["u"] = X_[idx,:]
+        u_train["u"] = u_[idx, 0:1]
+        X_train["v"] = X_[idx,:]
+        u_train["v"] = u_[idx, 1:2]
     else:
-        X_train["uv"] = X_bc
-        u_train["uv"] = u_bc[:, 0:2]
+        X_train["u"] = X_bc
+        u_train["u"] = u_bc[:, 0:1]
+        X_train["v"] = X_[idx,:]
+        u_train["v"] = u_[idx, 1:2]
         # if solve for velocity, we need to set the ice front boundary to be collocation points as well
         X_f = np.vstack((X_f,X_cf))
 
