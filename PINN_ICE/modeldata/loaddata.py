@@ -114,8 +114,6 @@ def prep_2D_data_all(path, N_f=None, N_u=None, N_s=None, N_H=None, N_C=None, Fli
         u_train["u"] = u_bc[:, 0:1]
         X_train["v"] = X_[idx,:]
         u_train["v"] = u_[idx, 1:2]
-        # if solve for velocity, we need to set the ice front boundary to be collocation points as well
-        X_f = np.vstack((X_f,X_cf))
 
     # surface elevation, always available, use the maximum points among all the other data set
     if N_s is None:
