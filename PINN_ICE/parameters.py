@@ -91,3 +91,28 @@ class data_parameter(parameterBase):
             raise SyntaxError("The length of datanames does not match datalength!")
 
 
+class nn_parameter(parameterBase):
+    """
+    parameters of nn
+    """
+    def __init__(self, param_dict={}):
+        super().__init__(param_dict)
+
+    def set_default(self):
+        # nn architecture
+        self.input_size = 2
+        self.output_size = 0
+        self.num_neurons = 0
+        self.num_layers = 0
+        self.activation = "tanh"
+        self.initializer = "Glorot uniform"
+
+        #  scaling parameters
+        self.input_lb = None
+        self.input_ub = None
+        self.output_lb = None
+        self.output_ub = None
+
+    def check_consisteny(self):
+        pass
+

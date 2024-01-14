@@ -19,4 +19,6 @@ def test_data_parameter():
     with pytest.raises(Exception):
         d = pinn.parameters.data_parameter({"name":['u', 'v'], "size":[1, 2, 3]})
 
-
+def test_nn_parameter():
+    d = pinn.parameters.nn_parameter()
+    assert hasattr(d, "param_dict"), "Default attribute 'param_dict' not found"
