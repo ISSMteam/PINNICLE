@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-class parameterBase(ABC):
+class parameterBase(ABC): 
     """
     Abstract class of parameters in the experiment
     """
@@ -13,10 +13,20 @@ class parameterBase(ABC):
         # update parameters
         self.set_parameters(self.param_dict)
 
+        # check consistency
+        self.check_consisteny()
+
     @abstractmethod
     def set_default(self):
         """
         set default values
+        """
+        pass
+
+    @abstractmethod
+    def check_consisteny(self):
+        """
+        check consistency of the parameter data
         """
         pass
 
@@ -27,7 +37,7 @@ class parameterBase(ABC):
         if isinstance(pdict, dict):
             for key, value in pdict.items():
                 setattr(self, key, value)
-
+    
     def set_parameters(self, pdict: dict):
         """
         find all the keys from pdict which are avalible in the class, update the values
@@ -37,6 +47,7 @@ class parameterBase(ABC):
                 # only update attribute the key
                 if hasattr(self, key):
                     setattr(self, key, value)
+
     def has_keys(self, keys):
         """
         if all the keys are in the class, return true, otherwise return false
@@ -46,7 +57,6 @@ class parameterBase(ABC):
         else:
             return False
 
-        
 class domain_parameter(parameterBase):
     """
     parameters of domain
@@ -55,4 +65,29 @@ class domain_parameter(parameterBase):
         super().__init__(param_dict)
 
     def set_default(self):
+        # shape file to define the outer boundary of the domain
         self.shapefile = None
+
+    def check_consisteny(self):
+        pass
+
+class data_parameter(parameterBase):
+    """
+    parameters of data
+    """
+    def __init__(self, param_dict={}):
+        super().__init__(param_dict)
+
+    def set_default(self):
+        # name list of the data used in PINN
+        self.name = []
+        # length of each data in used
+        self.size = []
+
+    def check_consisteny(self):
+        if len(self.name) == len(self.size):
+            pass
+        else:
+            raise SyntaxError("The length of datanames does not match datalength!")
+
+
