@@ -22,3 +22,13 @@ def test_data_parameter():
 def test_nn_parameter():
     d = pinn.parameters.nn_parameter()
     assert hasattr(d, "param_dict"), "Default attribute 'param_dict' not found"
+
+    assert not d.is_input_scaling()
+    d.input_lb = 1
+    d.input_ub = 10
+    assert d.is_input_scaling()
+
+    assert not d.is_output_scaling()
+    d.output_lb = 1
+    d.output_ub = 10
+    assert d.is_output_scaling()

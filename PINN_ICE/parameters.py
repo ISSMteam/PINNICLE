@@ -99,6 +99,9 @@ class nn_parameter(parameterBase):
         super().__init__(param_dict)
 
     def set_default(self):
+        """
+        default values: 
+        """
         # nn architecture
         self.input_size = 2
         self.output_size = 0
@@ -115,4 +118,22 @@ class nn_parameter(parameterBase):
 
     def check_consisteny(self):
         pass
+    
+    def is_input_scaling(self):
+        """
+        if the input boundaries are provided
+        """
+        if (self.input_lb is not None) and (self.input_ub is not None):
+            return True
+        else:
+            return False
+
+    def is_output_scaling(self):
+        """
+        if the output boundaries are provided
+        """
+        if (self.output_lb is not None) and (self.output_ub is not None):
+            return True
+        else:
+            return False
 
