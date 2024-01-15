@@ -3,7 +3,7 @@ import numpy as np
 from ..utils import *
 import deepxde as dde
 
-class domain:
+class Domain:
     def __init__(self, path):
         if is_file_ext(path, '.exp'):
             self.vertices = self.get_polygon_vertices(path)
@@ -13,6 +13,7 @@ class domain:
 
     def get_polygon_vertices(self, filepath):
         """
+        load exp domain file
         """
         df = pd.read_csv(filepath)
 
