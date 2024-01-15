@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+import numpy as np
 
 
 class ParameterBase(ABC):
@@ -166,6 +167,24 @@ class PhysicsParameter(ParameterBase):
         pass
 
 
+class TrainingParameter(ParameterBase):
+    """
+    parameter of training
+    """
+    def __init__(self, param_dict={}):
+        super().__init__(param_dict)
+
+    def set_default(self):
+        self.epochs = 0
+        self.optimizer = "adam"
+        self.loss_function = "MSE"
+        self.learning_rate = 0
+        self.loss_weights = []
+
+    def check_consisteny(self):
+        pass
+
+
 class Parameters(ParameterBase):
     """
     parameters of the pinn, including domain, data, nn, and physics
@@ -176,15 +195,17 @@ class Parameters(ParameterBase):
         self.update_parameters()
 
     def __str__(self):
-        return "Parameters: \n" + str(self.domain) + str(self.data) + str(self.nn) + str(self.physics)
+        return "Parameters: \n" + str(self.training) + str(self.domain) + str(self.data) + str(self.nn) + str(self.physics)
 
     def set_default(self):
+        self.training = TrainingParameter()
         self.domain = DomainParameter()
         self.data = DataParameter()
         self.nn = NNParameter()
         self.physics = PhysicsParameter()
 
     def set_parameters(self, param_dict):
+        self.training = TrainingParameter(param_dict)
         self.domain = DomainParameter(param_dict)
         self.data = DataParameter(param_dict)
         self.nn = NNParameter(param_dict)
@@ -200,6 +221,7 @@ class Parameters(ParameterBase):
         # data.name is a subset of physics.variables
         if (any(x not in self.physics.variables for x in self.data.datasize)):
             raise ValueError("names in 'datasize' does not match the name in 'variables'")
+        # TODO: length of training.loss_weights equals to equations+datasize
         pass
 
     def update_parameters(self):
