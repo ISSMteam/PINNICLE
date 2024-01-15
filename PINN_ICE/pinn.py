@@ -1,10 +1,10 @@
 import deepxde as dde
 
 from . import physics
-from . import nn
 from . import domain
 from .parameters import Parameters
 from .modeldata import Data
+from .nn import NN
 
 
 class PINN:
@@ -14,6 +14,7 @@ class PINN:
 
         # main components
         self.domain = domain.Domain(self.param.domain.shapefile)
+        self.param.nn.set_parameters({"input_lb": self.domain.geometry.bbox[0,:], "input_ub": self.domain.geometry.bbox[1,:]})
 
         # training data
         self.training_data = [dde.icbc.PointSetBC(data.X[d], data.sol[d], component=i) for i,d in enumerate(self.param.physics.variables)]
@@ -31,7 +32,7 @@ class PINN:
                 num_test=None)
 
         # define the neural network in use
-#        self.nn = nn
+        self.nn = NN(self.param.nn)
 
         # weights
 

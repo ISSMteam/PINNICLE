@@ -15,10 +15,12 @@ class NN:
         # apply transform
         # by default, use min-max scale for the input
         if self.parameters.is_input_scaling():
+            print(f"add input transform with {self.parameters.input_lb} and {self.parameters.input_ub}")
             self._add_input_transform(minmax_scale)
 
         # upscale the output by min-max
         if self.parameters.is_output_scaling():
+            print(f"add output transform with {self.parameters.output_lb} and {self.parameters.output_ub}")
             self._add_output_transform(up_scale)
 
     def createFNN(self):
