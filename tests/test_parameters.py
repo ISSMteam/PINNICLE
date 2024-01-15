@@ -13,11 +13,11 @@ def test_domain_parameter():
     assert d.has_keys(newat) == True
 
 def test_data_parameter():
-    d = pinn.parameters.DataParameter({"name":['u', 'v'], "size":[4000, 4000]})
+    d = pinn.parameters.DataParameter({"dataname":['u', 'v'], "datasize":[4000, 4000]})
     assert hasattr(d, "param_dict"), "Default attribute 'param_dict' not found"
 
     with pytest.raises(Exception):
-        d = pinn.parameters.DataParameter({"name":['u', 'v'], "size":[1, 2, 3]})
+        d = pinn.parameters.DataParameter({"dataname":['u', 'v'], "datasize":[1, 2, 3]})
 
 def test_nn_parameter():
     d = pinn.parameters.NNParameter()

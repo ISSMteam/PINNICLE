@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+
 class ParameterBase(ABC):
     """
     Abstract class of parameters in the experiment
@@ -20,7 +21,7 @@ class ParameterBase(ABC):
         """
         display all attributes except 'param_dict'
         """
-        return  "\t" + type(self).__name__ + ": \n" + \
+        return "\t" + type(self).__name__ + ": \n" + \
                 ("\n".join(["\t\t" + k + ":\t" + str(self.__dict__[k]) for k in self.__dict__ if k != "param_dict"]))+"\n"
 
     @abstractmethod
@@ -89,15 +90,14 @@ class DataParameter(ParameterBase):
 
     def set_default(self):
         # name list of the data used in PINN
-        self.name = []
+        self.dataname = []
         # length of each data in used
-        self.size = []
+        self.datasize = []
 
     def check_consisteny(self):
-        if len(self.name) == len(self.size):
-            pass
-        else:
-            raise SyntaxError("The length of datanames does not match datalength!")
+        if len(self.dataname) != len(self.datasize):
+            raise ValueError("The length of 'dataname' does not match 'datasize'!")
+        pass
 
 
 class NNParameter(ParameterBase):
@@ -146,6 +146,7 @@ class NNParameter(ParameterBase):
         else:
             return False
 
+
 class PhysicsParameter(ParameterBase):
     """
     parameter of physics
@@ -158,11 +159,12 @@ class PhysicsParameter(ParameterBase):
         self.equations = []
         # name(s) of the dependent variables
         self.dependent = ['x', 'y']
-        # name(s) of the variables in the equation 
+        # name(s) of the variables in the equation
         self.variables = []
 
     def check_consisteny(self):
         pass
+
 
 class Parameters(ParameterBase):
     """
@@ -171,23 +173,38 @@ class Parameters(ParameterBase):
     def __init__(self, param_dict={}):
         super().__init__(param_dict)
 
+        self.update_parameters()
+
     def __str__(self):
         return "Parameters: \n" + str(self.domain) + str(self.data) + str(self.nn) + str(self.physics)
-        
+
     def set_default(self):
-        self.domain = DomainParameter() 
-        self.data = DataParameter() 
-        self.nn = NNParameter() 
-        self.physics = PhysicsParameter() 
+        self.domain = DomainParameter()
+        self.data = DataParameter()
+        self.nn = NNParameter()
+        self.physics = PhysicsParameter()
 
     def set_parameters(self, param_dict):
-        self.domain = DomainParameter(param_dict) 
-        self.data = DataParameter(param_dict) 
-        self.nn = NNParameter(param_dict) 
-        self.physics = PhysicsParameter(param_dict) 
+        self.domain = DomainParameter(param_dict)
+        self.data = DataParameter(param_dict)
+        self.nn = NNParameter(param_dict)
+        self.physics = PhysicsParameter(param_dict)
 
     def check_consisteny(self):
         # input size of nn equals to dependent in physics
+        if self.nn.input_size != len(self.physics.dependent):
+            raise ValueError("'input_size' does not match the number of 'dependent'")
         # out size of nn equals to variables in physics
+        if self.nn.output_size != len(self.physics.variables):
+            raise ValueError("'output_size' does not match the number of 'variables'")
+        # data.name is a subset of physics.variables
+        if (any(x not in self.physics.variables for x in self.data.dataname)):
+            raise ValueError("'dataname' does not match the name in 'variables'")
         pass
-    
+
+    def update_parameters(self):
+        """
+        update parameters according to the input
+        """
+        # set component id in data according to the order in physics
+        pass
