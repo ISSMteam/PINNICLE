@@ -76,6 +76,8 @@ class DomainParameter(ParameterBase):
     def set_default(self):
         # shape file to define the outer boundary of the domain
         self.shapefile = None
+        # number of collocation points used in the domain
+        self.num_collocation_points = 0
 
     def check_consisteny(self):
         pass
