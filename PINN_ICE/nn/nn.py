@@ -1,9 +1,9 @@
 import deepxde as dde
 from .helper import minmax_scale, up_scale
-from ..parameters import nn_parameter
+from ..parameters import NNParameter
 
 class NN:
-    def __init__(self, parameters=nn_parameter()):
+    def __init__(self, parameters=NNParameter()):
         """
         general class for constructing nerual network
         """

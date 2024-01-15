@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 
-class parameterBase(ABC): 
+
+class ParameterBase(ABC):
     """
     Abstract class of parameters in the experiment
     """
@@ -37,7 +38,7 @@ class parameterBase(ABC):
         if isinstance(pdict, dict):
             for key, value in pdict.items():
                 setattr(self, key, value)
-    
+
     def set_parameters(self, pdict: dict):
         """
         find all the keys from pdict which are avalible in the class, update the values
@@ -52,12 +53,13 @@ class parameterBase(ABC):
         """
         if all the keys are in the class, return true, otherwise return false
         """
-        if isinstance(keys, dict) or isinstance(keys, list): 
-            return all([hasattr(self,k) for k in keys])
+        if isinstance(keys, dict) or isinstance(keys, list):
+            return all([hasattr(self, k) for k in keys])
         else:
             return False
 
-class domain_parameter(parameterBase):
+
+class DomainParameter(ParameterBase):
     """
     parameters of domain
     """
@@ -71,7 +73,8 @@ class domain_parameter(parameterBase):
     def check_consisteny(self):
         pass
 
-class data_parameter(parameterBase):
+
+class DataParameter(ParameterBase):
     """
     parameters of data
     """
@@ -91,7 +94,7 @@ class data_parameter(parameterBase):
             raise SyntaxError("The length of datanames does not match datalength!")
 
 
-class nn_parameter(parameterBase):
+class NNParameter(ParameterBase):
     """
     parameters of nn
     """
@@ -100,7 +103,7 @@ class nn_parameter(parameterBase):
 
     def set_default(self):
         """
-        default values: 
+        default values:
         """
         # nn architecture
         self.input_size = 2
@@ -118,7 +121,7 @@ class nn_parameter(parameterBase):
 
     def check_consisteny(self):
         pass
-    
+
     def is_input_scaling(self):
         """
         if the input boundaries are provided
@@ -136,4 +139,3 @@ class nn_parameter(parameterBase):
             return True
         else:
             return False
-

@@ -18,11 +18,11 @@ def test_upscale():
 
 def test_new_nn():
     p = pinn.nn.NN()
-    d = pinn.parameters.nn_parameter()
+    d = pinn.parameters.NNParameter()
     assert (p.parameters.__dict__ == d.__dict__)
 
 def test_input_scale_nn():
-    d = pinn.parameters.nn_parameter()
+    d = pinn.parameters.NNParameter()
     d.input_lb = 1.0
     d.input_ub = 10.0
     p = pinn.nn.NN(d)
@@ -30,7 +30,7 @@ def test_input_scale_nn():
     assert np.all(abs(p.net._input_transform(x)) < 1.0+np.finfo(float).eps)
 
 def test_input_scale_nn():
-    d = pinn.parameters.nn_parameter()
+    d = pinn.parameters.NNParameter()
     d.output_lb = 1.0
     d.output_ub = 10.0
     p = pinn.nn.NN(d)
