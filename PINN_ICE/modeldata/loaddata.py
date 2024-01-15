@@ -166,3 +166,80 @@ def prep_2D_data_all(path, N_f=None, N_u=None, N_s=None, N_H=None, N_C=None, Fli
         u_train["C"] = u_bc[:, 4:5]
 
     return X_star, u_star, X_train, u_train, X_bc, u_bc, X_cf, n_cf, xub, xlb, uub, ulb, mu  #}}}
+def prep_2D_data(path, datasize={}): #{{{
+    # Reading SSA ref solutions: x, y-coordinates, provide ALL the variables in u_train
+    data = load_matlab_data(path)
+    # names of the data needed
+    names = ["u", "v", "s", "H", "C"]
+    # viscosity
+    mu = data['mu']
+
+    x = data['x']
+    y = data['y']
+
+    # real() is to make it float by default, in case of zeroes
+    Exact_vx = np.real(data['vx'].flatten()[:,None])
+    Exact_vy = np.real(data['vy'].flatten()[:,None])
+    Exact_h = np.real(data['h'].flatten()[:,None])
+    Exact_H = np.real(data['H'].flatten()[:,None])
+    Exact_C = np.real(data['C'].flatten()[:,None])
+
+    # boundary nodes
+    DBC = data['DBC'].flatten()[:,None]
+
+    # Preparing the inputs x and y for predictions in one single array, as X_star
+    X_star = np.hstack((x.flatten()[:,None], y.flatten()[:,None]))
+
+    # Preparing the testing u_star and vy_star
+    u_star = np.hstack((Exact_vx.flatten()[:,None], Exact_vy.flatten()[:,None], Exact_h.flatten()[:,None], Exact_H.flatten()[:,None], Exact_C.flatten()[:,None] ))
+
+    # Domain bounds: for regularization and generate training set
+    umin = u_star.min(axis=0)
+    umax = u_star.max(axis=0)
+    ulb = {k:umin[i] for i, k in enumerate(names)}
+    uub = {k:umax[i] for i, k in enumerate(names)}
+
+    # set Dirichlet boundary conditions
+    idbc = np.transpose(np.asarray(DBC>0).nonzero())
+    X_bc = X_star[idbc[:,0],:]
+    u_bc = u_star[idbc[:,0],:]
+
+    # Stacking them in multidimensional tensors for training, only use ice covered area
+    icemask = data['icemask'].flatten()[:,None]
+    iice = np.transpose(np.asarray(icemask>0).nonzero())
+    X_ = np.vstack([X_star[iice[:,0],:]])
+    u_ = np.vstack([u_star[iice[:,0],:]])
+
+    # calving front info
+    cx = data['cx'].flatten()[:,None]
+    cy = data['cy'].flatten()[:,None]
+    nx = data['smoothnx'].flatten()[:,None]
+    ny = data['smoothny'].flatten()[:,None]
+
+    X_cf = np.hstack((cx.flatten()[:,None], cy.flatten()[:,None]))
+    n_cf = np.hstack((nx.flatten()[:,None], ny.flatten()[:,None]))
+
+    # Getting the corresponding X_train and u_train(which is now scarce boundary/initial coordinates)
+    X_train = {}
+    u_train = {}
+
+    # Generating a uniform random sample from ints between 0, and the size of x_u_train, of size N_u (initial data size) and without replacement (unique)
+    for i, key in enumerate(names):
+        trainFlag = True
+        if key not in datasize:
+            trainFlag = False
+        else:
+            if datasize[key]:
+                trainFlag = True
+            else:
+                trainFlag = False
+
+        if trainFlag:
+            idx = np.random.choice(X_.shape[0], datasize[key], replace=False)
+            X_train[key] = X_[idx,:]
+            u_train[key] = u_[idx, i:i+1]
+        else:
+            X_train[key] = X_bc
+            u_train[key] = u_bc[:, i:i+1]
+
+    return X_star, u_star, X_train, u_train, X_bc, u_bc, X_cf, n_cf, uub, ulb, mu  #}}}
