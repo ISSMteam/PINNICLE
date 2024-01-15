@@ -1,9 +1,9 @@
 import deepxde as dde
-from . import physics
+from .physics import Physics
 
-class SSA2D(physics):
+class SSA2DUniformMu(Physics):
     """
-    SSA on 2D problem
+    SSA on 2D problem with uniform mu
     """
     def __init__(self, mu, n=3.0):
         super().__init__()
@@ -45,3 +45,4 @@ class SSA2D(physics):
         f2 = sigma21 + sigma22 - alpha*v/(u_norm+1e-30) - self.rhoi*self.g*H*s_y
     
         return [f1, f2]
+
