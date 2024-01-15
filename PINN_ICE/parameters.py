@@ -180,6 +180,7 @@ class TrainingParameter(ParameterBase):
         self.loss_function = "MSE"
         self.learning_rate = 0
         self.loss_weights = []
+        self.save_path = ""
 
     def check_consisteny(self):
         pass

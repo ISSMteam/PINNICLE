@@ -74,11 +74,13 @@ class PINN:
         # compile the model
         self.model.compile(opt, loss=loss, lr=0.001, loss_weights=loss_weights)
 
-    def train(self):
-        self.loss_history, self.train_state = self.model.train(iterations=self.param.training.epochs, 
+    def train(self, iterations=0):
+        if iterations == 0:
+            iterations = self.param.training.epochs
+        self.loss_history, self.train_state = self.model.train(iterations=iterations,
                 display_every=10000, disregard_previous_best=True)
 
         #dde.saveplot(loss_history, train_state, issave=True, isplot=False, output_dir=modelFolder)
 
-        #model.save(modelFolder+"pinn/model")
+        self.model.save(self.param.training.save_path)
 
