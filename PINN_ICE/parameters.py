@@ -89,14 +89,12 @@ class DataParameter(ParameterBase):
         super().__init__(param_dict)
 
     def set_default(self):
-        # name list of the data used in PINN
-        self.dataname = []
-        # length of each data in used
-        self.datasize = []
+        """
+        length of each data in used, leave no data variable(sol) empty or set to None
+        """
+        self.datasize = {}
 
     def check_consisteny(self):
-        if len(self.dataname) != len(self.datasize):
-            raise ValueError("The length of 'dataname' does not match 'datasize'!")
         pass
 
 
@@ -198,13 +196,18 @@ class Parameters(ParameterBase):
         if self.nn.output_size != len(self.physics.variables):
             raise ValueError("'output_size' does not match the number of 'variables'")
         # data.name is a subset of physics.variables
-        if (any(x not in self.physics.variables for x in self.data.dataname)):
-            raise ValueError("'dataname' does not match the name in 'variables'")
+        if (any(x not in self.physics.variables for x in self.data.datasize)):
+            raise ValueError("names in 'datasize' does not match the name in 'variables'")
         pass
 
     def update_parameters(self):
         """
         update parameters according to the input
         """
+        # set the size of variables not given in data to None
+        for x in self.physics.variables:
+            if x not in self.data.datasize:
+                self.data.datasize[x] = None
+
         # set component id in data according to the order in physics
         pass

@@ -16,9 +16,6 @@ def test_data_parameter():
     d = pinn.parameters.DataParameter({"dataname":['u', 'v'], "datasize":[4000, 4000]})
     assert hasattr(d, "param_dict"), "Default attribute 'param_dict' not found"
 
-    with pytest.raises(Exception):
-        d = pinn.parameters.DataParameter({"dataname":['u', 'v'], "datasize":[1, 2, 3]})
-
 def test_nn_parameter():
     d = pinn.parameters.NNParameter()
     assert hasattr(d, "param_dict"), "Default attribute 'param_dict' not found"
@@ -44,3 +41,10 @@ def test_parameters():
     assert p.nn.__dict__ == nn.__dict__
     assert p.physics.__dict__ == physics.__dict__
 
+def test_parameters_variable_mathc_outputsize():
+    with pytest.raises(Exception):
+        d = pinn.Parameters({"variables":["u", "v"], "output_size":1})
+
+def test_parameters_variable_mathc_data():
+    with pytest.raises(Exception):
+        d = pinn.Parameters({"datasize":{"u":100}, "variables":["v"], "output_size":1})
