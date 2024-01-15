@@ -32,3 +32,15 @@ def test_nn_parameter():
     d.output_lb = 1
     d.output_ub = 10
     assert d.is_output_scaling()
+
+def test_parameters():
+    p = pinn.Parameters()
+    domain = pinn.parameters.DomainParameter()
+    data = pinn.parameters.DataParameter()
+    nn = pinn.parameters.NNParameter()
+    physics = pinn.parameters.PhysicsParameter()
+    assert p.domain.__dict__ == domain.__dict__
+    assert p.data.__dict__ == data.__dict__
+    assert p.nn.__dict__ == nn.__dict__
+    assert p.physics.__dict__ == physics.__dict__
+

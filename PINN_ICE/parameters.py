@@ -20,8 +20,8 @@ class ParameterBase(ABC):
         """
         display all attributes except 'param_dict'
         """
-        return "class of "+ type(self).__name__ + ": \n" + \
-                ("\n\t".join([k+":\t"+str(self.__dict__[k]) for k in self.__dict__ if k != "param_dict"]))
+        return  "\t" + type(self).__name__ + ": \n" + \
+                ("\n".join(["\t\t" + k + ":\t" + str(self.__dict__[k]) for k in self.__dict__ if k != "param_dict"]))+"\n"
 
     @abstractmethod
     def set_default(self):
@@ -171,6 +171,9 @@ class Parameters(ParameterBase):
     def __init__(self, param_dict={}):
         super().__init__(param_dict)
 
+    def __str__(self):
+        return "Parameters: \n" + str(self.domain) + str(self.data) + str(self.nn) + str(self.physics)
+        
     def set_default(self):
         self.domain = DomainParameter() 
         self.data = DataParameter() 
