@@ -12,7 +12,7 @@ inputFileName="Helheim_Weertman_iT080_PINN_fastflow_CF"
 expFileName = "fastflow_CF.exp"
 
 # path for loading data and saving models
-repoPath = "../examples/"
+repoPath = "./examples/"
 appDataPath = os.path.join(repoPath, "dataset")
 path = os.path.join(appDataPath, inputFileName)
 yts =3600*24*365
