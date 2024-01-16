@@ -83,11 +83,33 @@ class PINN:
         self.model.compile(opt, loss=loss, lr=0.001, loss_weights=loss_weights)
 
     def train(self, iterations=0):
+        """
+        train the model
+        """
         if iterations == 0:
             iterations = self.param.training.epochs
+        # start training
         self.loss_history, self.train_state = self.model.train(iterations=iterations,
                 display_every=10000, disregard_previous_best=True)
 
         dde.saveplot(self.loss_history, self.train_state, issave=True, isplot=False, output_dir=self.param.training.save_path)
-        self.model.save(self.param.training.save_path+"pinn/model")
+    
+    def save_model(self, path="", subfolder="pinn", name="model"):
+        """
+        save the neural network to the hard disk
 
+        """
+        if path == "":
+            path = self.param.training.save_path
+        self.model.save(f"{path}/{subfolder}/{name}")
+
+    def load_model(self, path="", epochs=-1, subfolder="pinn", name="model"):
+        """
+        laod the neural network from saved model
+        """
+        if epochs == -1:
+            epochs = self.param.training.epochs
+        if path == "":
+            path = self.param.training.save_path
+
+        self.model.restore(f"{path}/{subfolder}/{name}-{epochs}.ckpt")
