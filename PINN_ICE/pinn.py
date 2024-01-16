@@ -13,16 +13,15 @@ class PINN:
     class of a PINN model
     """
     def __init__(self, params={}, training_data=Data()):
-        # initialize data
+        # load setup parameters
         self.param = Parameters(params)
 
         # main components
         self.domain = domain.Domain(self.param.domain.shapefile)
         self.param.nn.set_parameters({"input_lb": self.domain.geometry.bbox[0,:], "input_ub": self.domain.geometry.bbox[1,:]})
 
-        # training data
-        self.training_data = [dde.icbc.PointSetBC(training_data.X[d], training_data.sol[d], component=i) 
-                for i,d in enumerate(self.param.physics.variables) if d in training_data.sol]
+        # update training data
+        self.training_data = self.update_training_data(training_data)
 
         # check if training data exceed the scaling range, also wrap output_lb and output_ub with np.array
         for i,d in enumerate(self.param.physics.variables):
@@ -35,12 +34,14 @@ class PINN:
         self.param.nn.output_ub = np.array(self.param.nn.output_ub)
 
         # set physics
-        self.physics = physics.SSA2DUniformMu(params["mu"])
+        # TODO: change to add physics
+        if "SSA" in self.param.physics.equations:
+            self.pdes = physics.SSA2DUniformMu(params["mu"]).pde
 
         #  deepxde data object
         self.data = dde.data.PDE(
                 self.domain.geometry,
-                self.physics.pde,
+                self.pdes,
                 self.training_data,  # all the data loss will be evaluated
                 num_domain=self.param.domain.num_collocation_points, # collocation points
                 num_boundary=0,  # no need to set for data misfit, unless add calving front boundary, etc.
@@ -51,6 +52,13 @@ class PINN:
 
         # setup the deepxde model
         self.model = dde.Model(self.data, self.nn.net)
+
+    def update_training_data(self, training_data):
+        """
+        update data set used for the training
+        """
+        return [dde.icbc.PointSetBC(training_data.X[d], training_data.sol[d], component=i) 
+                for i,d in enumerate(self.param.physics.variables) if d in training_data.sol]
 
     # TODO: add update data, update net, ...
 
