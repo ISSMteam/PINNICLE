@@ -7,7 +7,7 @@ from . import physics
 from . import domain
 from .parameters import Parameters
 from .modeldata import Data
-from .nn import NN
+from .nn import FNN
 
 
 class PINN:
@@ -50,7 +50,7 @@ class PINN:
                 num_test=None)
 
         # define the neural network in use
-        self.nn = NN(self.param.nn)
+        self.nn = FNN(self.param.nn)
 
         # setup the deepxde model
         self.model = dde.Model(self.data, self.nn.net)
