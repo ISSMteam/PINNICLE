@@ -1,5 +1,7 @@
 import deepxde as dde
 import numpy as np
+import json
+import os
 
 from . import physics
 from . import domain
@@ -97,9 +99,31 @@ class PINN:
             self.save_history()
             self.save_model()
 
+    def save_setting(self, path=""):
+        """
+        save settings from self.param.param_dict
+        """
+        path = self.check_path(path)
+        with open(path+"params.json", "w") as fp:
+            json.dump(self.param.param_dict, fp)
+    
+    def load_setting(self, path="", filename="params.json"):
+        """
+        load the settings from file
+        """
+        path = self.check_path(path, loadOnly=True)
+        if os.path.isfile(path+filename):
+            with open(path+filename, 'r') as fp:
+                data = json.load(fp)
+        else:
+            data = {}
+        return data
+
     def save_history(self, path=""):
-        if path =="":
-            path = self.param.training.save_path
+        """
+        save training history
+        """
+        path = self.check_path(path)
         dde.saveplot(self.loss_history, self.train_state, issave=True, isplot=False, output_dir=path)
     
     def save_model(self, path="", subfolder="pinn", name="model"):
@@ -107,8 +131,7 @@ class PINN:
         save the neural network to the hard disk
 
         """
-        if path == "":
-            path = self.param.training.save_path
+        path = self.check_path(path)
         self.model.save(f"{path}/{subfolder}/{name}")
 
     def load_model(self, path="", epochs=-1, subfolder="pinn", name="model"):
@@ -117,7 +140,17 @@ class PINN:
         """
         if epochs == -1:
             epochs = self.param.training.epochs
+
+        path = self.check_path(path, loadOnly=True)
+        self.model.restore(f"{path}/{subfolder}/{name}-{epochs}.ckpt")
+
+    def check_path(self, path, loadOnly=False):
+        """
+        check the path, set to default, and create folder if needed
+        """
         if path == "":
             path = self.param.training.save_path
-
-        self.model.restore(f"{path}/{subfolder}/{name}-{epochs}.ckpt")
+        # recursively create paths
+        if not loadOnly:
+            os.makedirs(path, exist_ok=True)
+        return path
