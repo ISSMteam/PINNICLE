@@ -181,6 +181,8 @@ class TrainingParameter(ParameterBase):
         self.learning_rate = 0
         self.loss_weights = []
         self.save_path = ""
+        self.is_save = True
+        self.is_plot = False
 
     def check_consisteny(self):
         pass

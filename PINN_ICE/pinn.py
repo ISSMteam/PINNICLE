@@ -92,7 +92,15 @@ class PINN:
         self.loss_history, self.train_state = self.model.train(iterations=iterations,
                 display_every=10000, disregard_previous_best=True)
 
-        dde.saveplot(self.loss_history, self.train_state, issave=True, isplot=False, output_dir=self.param.training.save_path)
+        # save history and model variables
+        if self.param.training.is_save: 
+            self.save_history()
+            self.save_model()
+
+    def save_history(self, path=""):
+        if path =="":
+            path = self.param.training.save_path
+        dde.saveplot(self.loss_history, self.train_state, issave=True, isplot=False, output_dir=path)
     
     def save_model(self, path="", subfolder="pinn", name="model"):
         """
