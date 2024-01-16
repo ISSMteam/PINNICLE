@@ -2,6 +2,9 @@ import matplotlib.pyplot as plt
 from scipy.interpolate import griddata
 import numpy as np
 import math
+import matplotlib.pyplot as plt
+import matplotlib as mpl
+from matplotlib.colors import ListedColormap
 
 def cmap_Rignot():
     """
