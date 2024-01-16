@@ -28,8 +28,8 @@ hp["learning_rate"] = 0.001
 hp["loss_function"] = "MSE"
 
 # NN
-hp["input_size"] = 2
-hp["output_size"] = 5
+hp["input_variables"] = ["x","y"]
+hp["output_variables"] = ["u", "v", "s", "H", "C"]
 hp["activation"] = "tanh"
 hp["initializer"] = "Glorot uniform"
 hp["num_neurons"] = 20
@@ -45,7 +45,6 @@ hp["shapefile"] = os.path.join(repoPath, "dataset", expFileName)
 hp["num_collocation_points"] = 9000
 
 # physics
-hp["variables"] = ["u", "v", "s", "H", "C"]
 hp["equations"] = ["SSA"]
 hp["mu"] = 1.26802073401e+08
 

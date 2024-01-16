@@ -113,8 +113,8 @@ class NNParameter(ParameterBase):
         default values:
         """
         # nn architecture
-        self.input_size = 2
-        self.output_size = 0
+        self.input_variables = []
+        self.output_variables = []
         self.num_neurons = 0
         self.num_layers = 0
         self.activation = "tanh"
@@ -126,7 +126,18 @@ class NNParameter(ParameterBase):
         self.output_lb = None
         self.output_ub = None
 
+    def set_parameters(self, pdict: dict):
+        super().set_parameters(pdict)
+        self.input_size = len(self.input_variables)
+        self.output_size = len(self.output_variables)
+
     def check_consisteny(self):
+        # input size of nn equals to dependent in physics
+        if self.input_size != len(self.input_variables):
+            raise ValueError("'input_size' does not match the number of 'input_variables'")
+        # out size of nn equals to variables in physics
+        if self.output_size != len(self.output_variables):
+            raise ValueError("'output_size' does not match the number of 'output_variables'")
         pass
 
     def is_input_scaling(self):
@@ -158,10 +169,6 @@ class PhysicsParameter(ParameterBase):
     def set_default(self):
         # name(s) of the equations
         self.equations = []
-        # name(s) of the dependent variables
-        self.dependent = ['x', 'y']
-        # name(s) of the variables in the equation
-        self.variables = []
 
     def check_consisteny(self):
         pass
@@ -215,15 +222,9 @@ class Parameters(ParameterBase):
         self.physics = PhysicsParameter(param_dict)
 
     def check_consisteny(self):
-        # input size of nn equals to dependent in physics
-        if self.nn.input_size != len(self.physics.dependent):
-            raise ValueError("'input_size' does not match the number of 'dependent'")
-        # out size of nn equals to variables in physics
-        if self.nn.output_size != len(self.physics.variables):
-            raise ValueError("'output_size' does not match the number of 'variables'")
         # data.name is a subset of physics.variables
-        if (any(x not in self.physics.variables for x in self.data.datasize)):
-            raise ValueError("names in 'datasize' does not match the name in 'variables'")
+        if (any(x not in self.nn.output_variables for x in self.data.datasize)):
+            raise ValueError("names in 'datasize' does not match the name in 'output_variables'")
         # TODO: length of training.loss_weights equals to equations+datasize
         pass
 
@@ -232,7 +233,7 @@ class Parameters(ParameterBase):
         update parameters according to the input
         """
         # set the size of variables not given in data to None
-        for x in self.physics.variables:
+        for x in self.nn.output_variables:
             if x not in self.data.datasize:
                 self.data.datasize[x] = None
 

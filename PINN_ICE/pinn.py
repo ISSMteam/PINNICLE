@@ -26,7 +26,7 @@ class PINN:
         self.training_data = self.update_training_data(training_data)
 
         # check if training data exceed the scaling range, also wrap output_lb and output_ub with np.array
-        for i,d in enumerate(self.param.physics.variables):
+        for i,d in enumerate(self.param.nn.output_variables):
             if d in training_data.sol:
                 if np.max(training_data.sol[d]) > self.param.nn.output_ub[i]:
                     self.param.nn.output_ub[i] = np.max(training_data.sol[d])
@@ -60,7 +60,7 @@ class PINN:
         update data set used for the training
         """
         return [dde.icbc.PointSetBC(training_data.X[d], training_data.sol[d], component=i) 
-                for i,d in enumerate(self.param.physics.variables) if d in training_data.sol]
+                for i,d in enumerate(self.param.nn.output_variables) if d in training_data.sol]
 
     # TODO: add update data, update net, ...
 
