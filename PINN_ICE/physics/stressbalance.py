@@ -1,14 +1,14 @@
 import deepxde as dde
 from .physics import Physics
 
-class SSA2DUniformMu(Physics):
+class SSA2DUniformB(Physics):
     """
-    SSA on 2D problem with uniform mu
+    SSA on 2D problem with uniform B
     """
-    def __init__(self, mu, n=3.0):
+    def __init__(self, B, n=3.0):
         super().__init__()
         # viscosity 
-        self.mu = mu
+        self.B = B
         self.n = n
 
     def pde(self, x, sol):
@@ -23,7 +23,7 @@ class SSA2DUniformMu(Physics):
         v_y = dde.grad.jacobian(sol, x, i=1, j=1)
         s_y = dde.grad.jacobian(sol, x, i=2, j=1)
     
-        eta = 0.5*self.mu *(u_x**2.0 + v_y**2.0 + 0.25*(u_y+v_x)**2.0 + u_x*v_y+1.0e-15)**(0.5*(1.0-self.n)/self.n)
+        eta = 0.5*self.B *(u_x**2.0 + v_y**2.0 + 0.25*(u_y+v_x)**2.0 + u_x*v_y+1.0e-15)**(0.5*(1.0-self.n)/self.n)
         # stress tensor
         etaH = eta * H
         B11 = etaH*(4*u_x + 2*v_y)

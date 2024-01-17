@@ -34,8 +34,8 @@ hp["loss_function"] = "MSE"
 hp["save_path"] = modelFolder
 
 # NN
-hp["input_size"] = 2
-hp["output_size"] = 5
+hp["input_variables"] = ["x","y"]
+hp["output_variables"] = ["u", "v", "s", "H", "C"]
 hp["activation"] = "tanh"
 hp["initializer"] = "Glorot uniform"
 hp["num_neurons"] = 20
@@ -51,12 +51,11 @@ hp["shapefile"] = os.path.join(repoPath, "dataset", expFileName)
 hp["num_collocation_points"] = 9000
 
 # physics
-hp["variables"] = ["u", "v", "s", "H", "C"]
 hp["equations"] = ["SSA"]
-hp["mu"] = 1.26802073401e+08
+hp["B"] = 1.26802073401e+08
 
 # load the data
-X_star, u_star, X_train, u_train, X_bc, u_bc, X_cf, n_cf, uub, ulb, mu = \
+X_star, u_star, X_train, u_train, X_bc, u_bc, X_cf, n_cf, uub, ulb, B = \
 pinn.modeldata.prep_2D_data(path, hp["datasize"])
 data = pinn.modeldata.Data(X=X_train, sol=u_train)
 experiment = pinn.PINN(hp, training_data=data)

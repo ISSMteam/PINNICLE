@@ -38,7 +38,7 @@ class PINN:
         # set physics
         # TODO: change to add physics
         if "SSA" in self.param.physics.equations:
-            self.pdes = physics.SSA2DUniformMu(params["mu"]).pde
+            self.pdes = physics.SSA2DUniformB(params["B"]).pde
 
         #  deepxde data object
         self.data = dde.data.PDE(

@@ -47,7 +47,7 @@ def prep_2D_data_all(path, N_f=None, N_u=None, N_s=None, N_H=None, N_C=None, Fli
     data = load_matlab_data(path)
 
     # viscosity
-    mu = data['mu']
+    B = data['mu']
 
     x = data['x']
     y = data['y']
@@ -165,14 +165,14 @@ def prep_2D_data_all(path, N_f=None, N_u=None, N_s=None, N_H=None, N_C=None, Fli
         X_train["C"] = X_bc
         u_train["C"] = u_bc[:, 4:5]
 
-    return X_star, u_star, X_train, u_train, X_bc, u_bc, X_cf, n_cf, xub, xlb, uub, ulb, mu  #}}}
+    return X_star, u_star, X_train, u_train, X_bc, u_bc, X_cf, n_cf, xub, xlb, uub, ulb, B  #}}}
 def prep_2D_data(path, datasize={}): #{{{
     # Reading SSA ref solutions: x, y-coordinates, provide ALL the variables in u_train
     data = load_matlab_data(path)
     # names of the data needed
     names = ["u", "v", "s", "H", "C"]
     # viscosity
-    mu = data['mu']
+    B = data['mu']
 
     x = data['x']
     y = data['y']
@@ -242,4 +242,4 @@ def prep_2D_data(path, datasize={}): #{{{
             X_train[key] = X_bc
             u_train[key] = u_bc[:, i:i+1]
 
-    return X_star, u_star, X_train, u_train, X_bc, u_bc, X_cf, n_cf, uub, ulb, mu  #}}}
+    return X_star, u_star, X_train, u_train, X_bc, u_bc, X_cf, n_cf, uub, ulb, B  #}}}

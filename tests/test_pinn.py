@@ -46,11 +46,11 @@ hp["num_collocation_points"] = 9000
 
 # physics
 hp["equations"] = ["SSA"]
-hp["mu"] = 1.26802073401e+08
+hp["B"] = 1.26802073401e+08
 
 def test_loaddata():
     # load the data
-    X_star, u_star, X_train, u_train, X_bc, u_bc, X_cf, n_cf, uub, ulb, mu = \
+    X_star, u_star, X_train, u_train, X_bc, u_bc, X_cf, n_cf, uub, ulb, B = \
     pinn.modeldata.prep_2D_data(path, hp["datasize"])
     data = pinn.modeldata.Data(X=X_train, sol=u_train)
 
