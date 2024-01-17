@@ -1,7 +1,7 @@
 import deepxde as dde
-from .physics import Physics
+from .constants import PhysicsBase
 
-class SSA2DUniformB(Physics):
+class SSA2DUniformB(PhysicsBase):
     """
     SSA on 2D problem with uniform B
     """
@@ -11,7 +11,13 @@ class SSA2DUniformB(Physics):
         self.B = B
         self.n = n
 
+        # list of dependent and independent variables of the model
+        self.input_variables = ["x", "y"]       # x, y
+        self.output_variables = ["u", "v", "s", "H", "C"]      # u, v, s, H, C
+
     def pde(self, x, sol):
+        """
+        """
         # unpacking normalized values
         u, v, s, H, C = sol[:, 0:1], sol[:, 1:2], sol[:, 2:3], sol[:, 3:4], sol[:, 4:5]
     
