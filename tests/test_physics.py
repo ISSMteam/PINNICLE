@@ -8,15 +8,15 @@ def test_update_cid():
 
     # input id
     i_var = ["y", "x"]
-    assert ssa.input_id == [0, 1]
+    assert ssa.input_var["x"] == 0
     ssa.update_id(global_input_var=i_var)
-    assert ssa.input_id == [1, 0]
+    assert ssa.input_var["x"] == 1
 
     # output id
     o_var = ["u", "v", "H", "s", "a", "C"]
-    assert ssa.output_id == [0, 1, 2, 3, 4]
+    assert ssa.output_var["H"] == 3
     ssa.update_id(global_output_var=o_var)
-    assert ssa.output_id == [0, 1, 3, 2, 5]
+    assert ssa.output_var["H"] == 2
 
     # Check exceptions
     with pytest.raises(Exception):
