@@ -11,16 +11,24 @@ class PhysicsBase(ABC):
         self.yts    = 3600.0*24*365     # year to second (s)
 
         # list of dependent and independent variables of the model
-        self.input_variables = []       # x, y, z, t, etc.
-        self.output_variables = []      # u, v, s, H, etc.
+        self.local_input_var = []       # x, y, z, t, etc.
+        self.local_output_var = []      # u, v, s, H, etc.
 
-        # component id
-        self.cid = []
+        # list of global component id of the local input and output
+        self.input_id = []
+        self.output_id = []
 
-    def update_cid(self, global_output_variables):
+    def update_id(self, global_input_var=None, global_output_var=None):
         """ update component id, always remeber to call this in compiling the model
+
+        Args:
+            global_output_variables: List of output_variables from nn, these variables 
+                are shared across all the physics
         """
-        self.cid = [global_output_variables.index(o) for o in self.output_variables]
+        if global_input_var is not None:
+            self.input_id = [global_input_var.index(o) for o in self.local_input_var]
+        if global_output_var is not None:
+            self.output_id = [global_output_var.index(o) for o in self.local_output_var]
         
     @abstractmethod
     def pde(self, input_var, output_var):

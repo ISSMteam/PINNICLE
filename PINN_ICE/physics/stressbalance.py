@@ -11,14 +11,15 @@ class SSA2DUniformB(PhysicsBase):
         self.n = n
 
         # list of dependent and independent variables of the model
-        self.input_variables = ["x", "y"]       # x, y
-        self.output_variables = ["u", "v", "s", "H", "C"]      # u, v, s, H, C
+        self.local_input_var = ["x", "y"]       # x, y
+        self.local_output_var = ["u", "v", "s", "H", "C"]      # u, v, s, H, C
 
-        # list of component id 
-        self.cid = [0, 1, 2, 3, 4]                 # the order of output_variables in the nn
+        # list of global component id of the local input and output
+        self.input_id = [0, 1]                          # id of input_variables in the nn
+        self.output_id = [0, 1, 2, 3, 4]                # id of output_variables in the nn
 
 
-    def pde(self, x, sol):
+    def pde(self, input_var, output_var):
         """ residual of SSA 2D PDEs
         """
         # unpacking normalized values
