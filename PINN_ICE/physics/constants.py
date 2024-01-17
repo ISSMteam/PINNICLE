@@ -40,7 +40,7 @@ class PhysicsBase(ABC):
             self.output_var = {o:global_output_var.index(o) for o in self.output_var}
         
     @abstractmethod
-    def pde(self, input_var, output_var):
+    def pde(self, nn_input_var, nn_output_var):
         """ pde function used in deepxde
         """
         return
