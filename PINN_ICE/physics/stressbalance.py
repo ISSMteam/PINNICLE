@@ -2,8 +2,7 @@ import deepxde as dde
 from .constants import PhysicsBase
 
 class SSA2DUniformB(PhysicsBase):
-    """
-    SSA on 2D problem with uniform B
+    """ SSA on 2D problem with uniform B
     """
     def __init__(self, B, n=3.0):
         super().__init__()
@@ -15,8 +14,12 @@ class SSA2DUniformB(PhysicsBase):
         self.input_variables = ["x", "y"]       # x, y
         self.output_variables = ["u", "v", "s", "H", "C"]      # u, v, s, H, C
 
+        # list of component id 
+        self.cid = [0, 1, 2, 3, 4]                 # the order of output_variables in the nn
+
+
     def pde(self, x, sol):
-        """
+        """ residual of SSA 2D PDEs
         """
         # unpacking normalized values
         u, v, s, H, C = sol[:, 0:1], sol[:, 1:2], sol[:, 2:3], sol[:, 3:4], sol[:, 4:5]
@@ -51,4 +54,3 @@ class SSA2DUniformB(PhysicsBase):
         f2 = sigma21 + sigma22 - alpha*v/(u_norm+1e-30) - self.constants.rhoi*self.constants.g*H*s_y
     
         return [f1, f2]
-

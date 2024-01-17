@@ -1,8 +1,7 @@
 from abc import ABC, abstractmethod
 
 class PhysicsBase(ABC):
-    """
-    base class of all the physics
+    """ base class of all the physics
     """
     def __init__(self):
         # Physical constants in [SI]
@@ -15,9 +14,16 @@ class PhysicsBase(ABC):
         self.input_variables = []       # x, y, z, t, etc.
         self.output_variables = []      # u, v, s, H, etc.
 
+        # component id
+        self.cid = []
+
+    def update_cid(self, global_output_variables):
+        """ update component id, always remeber to call this in compiling the model
+        """
+        self.cid = [global_output_variables.index(o) for o in self.output_variables]
+        
     @abstractmethod
     def pde(self, input_var, output_var):
-        """
-        pde function used in deepxde
+        """ pde function used in deepxde
         """
         return
