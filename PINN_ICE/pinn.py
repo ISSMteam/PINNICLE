@@ -8,7 +8,7 @@ from . import domain
 from .parameters import Parameters
 from .modeldata import Data
 from .nn import FNN
-from .utils import save_dict_to_json, load_dict_from_json
+from .utils import save_dict_to_json, load_dict_from_json, History
 
 
 class PINN:
@@ -39,22 +39,26 @@ class PINN:
         # set physics
         # TODO: change to add physics
         if "SSA" in self.param.physics.equations:
-            self.pdes = physics.SSA2DUniformB(params["B"]).pde
+            self.physics = physics.SSA2DUniformB(params["B"])
 
         #  deepxde data object
         self.data = dde.data.PDE(
                 self.domain.geometry,
-                self.pdes,
+                self.physics.pde,
                 self.training_data,  # all the data loss will be evaluated
                 num_domain=self.param.domain.num_collocation_points, # collocation points
                 num_boundary=0,  # no need to set for data misfit, unless add calving front boundary, etc.
                 num_test=None)
 
+        # TODO: add more physics
+        self.loss_names = self.physics.residuals + list(training_data.sol.keys())
+
         # define the neural network in use
         self.nn = FNN(self.param.nn)
 
-        # setup the deepxde model
+        # setup the deepxde model: data+pde
         self.model = dde.Model(self.data, self.nn.net)
+
 
     def update_training_data(self, training_data):
         """
@@ -92,7 +96,7 @@ class PINN:
         if iterations == 0:
             iterations = self.param.training.epochs
         # start training
-        self.loss_history, self.train_state = self.model.train(iterations=iterations,
+        self._loss_history, self._train_state = self.model.train(iterations=iterations,
                 display_every=10000, disregard_previous_best=True)
 
         # save history and model variables
@@ -113,11 +117,11 @@ class PINN:
         return load_dict_from_json(path, filename)
 
     def save_history(self, path=""):
-        """
-        save training history
+        """ save training history
         """
         path = self.check_path(path)
-        dde.saveplot(self.loss_history, self.train_state, issave=True, isplot=False, output_dir=path)
+        self.history = History(self._loss_history, self.loss_names)
+        self.history.save(path)
     
     def save_model(self, path="", subfolder="pinn", name="model"):
         """

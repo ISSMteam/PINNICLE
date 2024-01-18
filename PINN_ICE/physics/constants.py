@@ -15,6 +15,9 @@ class PhysicsBase(ABC):
         self.input_var = {}       # x, y, z, t, etc.
         self.output_var = {}      # u, v, s, H, etc.
 
+        # residual list
+        self.residuals = []
+
     def get_input_list(self):
         """ get the List of names of input variables
         """

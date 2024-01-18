@@ -22,10 +22,11 @@ loss_weights[3] = loss_weights[3] * yts*yts
 
 hp = {}
 # General parameters
-hp["epochs"] = 10
+hp["epochs"] = 2
 hp["loss_weights"] = loss_weights
 hp["learning_rate"] = 0.001
 hp["loss_function"] = "MSE"
+hp["is_save"] = False
 
 # NN
 hp["input_variables"] = ["x","y"]
@@ -54,7 +55,7 @@ def test_loaddata():
     pinn.utils.prep_2D_data(path, hp["datasize"])
     data = pinn.modeldata.Data(X=X_train, sol=u_train)
 
-def test_pinn():
+def test_compile():
     experiment = pinn.PINN(hp)
     experiment.compile()
 
@@ -62,3 +63,13 @@ def test_save_and_load_setting(tmp_path):
     experiment = pinn.PINN(hp)
     experiment.save_setting(path=tmp_path)
     assert experiment.param.param_dict == experiment.load_setting(path=tmp_path)
+
+def test_train(tmp_path):
+    hp["save_path"] = tmp_path
+    hp["is_save"] = True
+    X_star, u_star, X_train, u_train, X_bc, u_bc, X_cf, n_cf, uub, ulb, mu = \
+    pinn.utils.prep_2D_data(path, hp["datasize"])
+    data = pinn.modeldata.Data(X=X_train, sol=u_train)
+    experiment = pinn.PINN(hp, training_data=data)
+    experiment.compile()
+    experiment.train()

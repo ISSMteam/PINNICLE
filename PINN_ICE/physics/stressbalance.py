@@ -13,6 +13,7 @@ class SSA2DUniformB(PhysicsBase):
         # Dict of input and output used in this model, and their component id
         self.input_var = {"x":0, "y":1}        
         self.output_var = {"u":0, "v":1, "s":2, "H":3, "C":4}
+        self.residuals = ["f1", "f2"]
 
     def pde(self, nn_input_var, nn_output_var):
         """ residual of SSA 2D PDEs
