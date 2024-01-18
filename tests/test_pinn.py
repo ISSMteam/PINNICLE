@@ -57,3 +57,8 @@ def test_loaddata():
 def test_pinn():
     experiment = pinn.PINN(hp)
     experiment.compile()
+
+def test_save_and_load_setting(tmp_path):
+    experiment = pinn.PINN(hp)
+    experiment.save_setting(path=tmp_path)
+    assert experiment.param.param_dict == experiment.load_setting(path=tmp_path)

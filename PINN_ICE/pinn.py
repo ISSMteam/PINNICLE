@@ -8,6 +8,7 @@ from . import domain
 from .parameters import Parameters
 from .modeldata import Data
 from .nn import FNN
+from .utils import save_dict_to_json, load_dict_from_json
 
 
 class PINN:
@@ -100,24 +101,16 @@ class PINN:
             self.save_model()
 
     def save_setting(self, path=""):
-        """
-        save settings from self.param.param_dict
+        """ save settings from self.param.param_dict
         """
         path = self.check_path(path)
-        with open(path+"params.json", "w") as fp:
-            json.dump(self.param.param_dict, fp)
+        save_dict_to_json(self.param.param_dict, path, "params.json")
     
     def load_setting(self, path="", filename="params.json"):
-        """
-        load the settings from file
+        """ load the settings from file
         """
         path = self.check_path(path, loadOnly=True)
-        if os.path.isfile(path+filename):
-            with open(path+filename, 'r') as fp:
-                data = json.load(fp)
-        else:
-            data = {}
-        return data
+        return load_dict_from_json(path, filename)
 
     def save_history(self, path=""):
         """
