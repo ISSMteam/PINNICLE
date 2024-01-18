@@ -102,6 +102,7 @@ class PINN:
         # save history and model variables
         if self.param.training.is_save: 
             self.save_history()
+            self.save_setting()
             self.save_model()
 
     def save_setting(self, path=""):
