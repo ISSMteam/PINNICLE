@@ -95,14 +95,17 @@ class PINN:
         """
         if iterations == 0:
             iterations = self.param.training.epochs
+        # save settings before training
+        if self.param.training.is_save:
+            self.save_setting()
+
         # start training
         self._loss_history, self._train_state = self.model.train(iterations=iterations,
                 display_every=10000, disregard_previous_best=True)
 
-        # save history and model variables
+        # save history and model variables after training
         if self.param.training.is_save: 
             self.save_history()
-            self.save_setting()
             self.save_model()
 
     def save_setting(self, path=""):

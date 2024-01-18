@@ -65,7 +65,7 @@ def test_save_and_load_setting(tmp_path):
     assert experiment.param.param_dict == experiment.load_setting(path=tmp_path)
 
 def test_train(tmp_path):
-    hp["save_path"] = tmp_path
+    hp["save_path"] = str(tmp_path)
     hp["is_save"] = True
     X_star, u_star, X_train, u_train, X_bc, u_bc, X_cf, n_cf, uub, ulb, mu = \
     pinn.utils.prep_2D_data(path, hp["datasize"])
