@@ -3,12 +3,12 @@ import numpy as np
 import json
 import os
 
+from .utils import save_dict_to_json, load_dict_from_json, History
+from .nn import FNN
 from . import physics
-from . import domain
+from .domain import Domain
 from .parameters import Parameters
 from .modeldata import Data
-from .nn import FNN
-from .utils import save_dict_to_json, load_dict_from_json, History
 
 
 class PINN:
@@ -20,7 +20,7 @@ class PINN:
         self.param = Parameters(params)
 
         # main components
-        self.domain = domain.Domain(self.param.domain.shapefile)
+        self.domain = Domain(self.param.domain.shapefile)
         self.param.nn.set_parameters({"input_lb": self.domain.geometry.bbox[0,:], "input_ub": self.domain.geometry.bbox[1,:]})
 
         # update training data
@@ -102,11 +102,19 @@ class PINN:
         # start training
         self._loss_history, self._train_state = self.model.train(iterations=iterations,
                 display_every=10000, disregard_previous_best=True)
+        
+        # prepare history
+        self.history = History(self._loss_history, self.loss_names)
 
         # save history and model variables after training
         if self.param.training.is_save: 
             self.save_history()
             self.save_model()
+
+        # plot history and best results
+        if self.param.training.is_plot: 
+            self.plot_history()
+
 
     def save_setting(self, path=""):
         """ save settings from self.param.param_dict
@@ -124,20 +132,22 @@ class PINN:
         """ save training history
         """
         path = self.check_path(path)
-        self.history = History(self._loss_history, self.loss_names)
         self.history.save(path)
     
-    def save_model(self, path="", subfolder="pinn", name="model"):
+    def plot_history(self, path=""):
+        """ plot training history
         """
-        save the neural network to the hard disk
+        path = self.check_path(path)
+        self.history.plot(path)
 
+    def save_model(self, path="", subfolder="pinn", name="model"):
+        """save the neural network to the hard disk
         """
         path = self.check_path(path)
         self.model.save(f"{path}/{subfolder}/{name}")
 
     def load_model(self, path="", epochs=-1, subfolder="pinn", name="model"):
-        """
-        laod the neural network from saved model
+        """laod the neural network from saved model
         """
         if epochs == -1:
             epochs = self.param.training.epochs
@@ -146,8 +156,7 @@ class PINN:
         self.model.restore(f"{path}/{subfolder}/{name}-{epochs}.ckpt")
 
     def check_path(self, path, loadOnly=False):
-        """
-        check the path, set to default, and create folder if needed
+        """check the path, set to default, and create folder if needed
         """
         if path == "":
             path = self.param.training.save_path
