@@ -3,7 +3,7 @@ import numpy as np
 import json
 import os
 
-from .utils import save_dict_to_json, load_dict_from_json, History
+from .utils import save_dict_to_json, load_dict_from_json, History, plot_solutions
 from .nn import FNN
 from . import physics
 from .domain import Domain
@@ -59,15 +59,17 @@ class PINN:
         # setup the deepxde model: data+pde
         self.model = dde.Model(self.data, self.nn.net)
 
-
-    def update_training_data(self, training_data):
-        """
-        update data set used for the training
-        """
-        return [dde.icbc.PointSetBC(training_data.X[d], training_data.sol[d], component=i) 
-                for i,d in enumerate(self.param.nn.output_variables) if d in training_data.sol]
-
     # TODO: add update data, update net, ...
+
+    def check_path(self, path, loadOnly=False):
+        """check the path, set to default, and create folder if needed
+        """
+        if path == "":
+            path = self.param.training.save_path
+        # recursively create paths
+        if not loadOnly:
+            os.makedirs(path, exist_ok=True)
+        return path
 
     def compile(self, opt=None, loss=None, lr=None, loss_weights=None):
         """
@@ -89,6 +91,58 @@ class PINN:
         # compile the model
         self.model.compile(opt, loss=loss, lr=0.001, loss_weights=loss_weights)
 
+    def load_model(self, path="", epochs=-1, subfolder="pinn", name="model"):
+        """laod the neural network from saved model
+        """
+        if epochs == -1:
+            epochs = self.param.training.epochs
+
+        path = self.check_path(path, loadOnly=True)
+        self.model.restore(f"{path}/{subfolder}/{name}-{epochs}.ckpt")
+
+    def load_setting(self, path="", filename="params.json"):
+        """ load the settings from file
+        """
+        path = self.check_path(path, loadOnly=True)
+        return load_dict_from_json(path, filename)
+
+    def plot_history(self, path=""):
+        """ plot training history
+        """
+        path = self.check_path(path)
+        self.history.plot(path)
+
+    def plot_predictions(self, path="", **kwargs):
+        """ plot model predictions
+        Args:
+            path (Path, str): Path to save the figures
+            X_ref (dict): Coordinates of the reference solutions, if None, then just plot the predicted solutions
+            u_ref (dict): Reference solutions, if None, then just plot the predicted solutions
+            cols (int): Number of columns of subplot
+        """
+        path = self.check_path(path)
+#        plot_solutions(self, path=path, X_ref=X_ref, sol_ref=sol_ref, **kwargs)
+        plot_solutions(self, path=path, **kwargs)
+
+
+    def save_history(self, path=""):
+        """ save training history
+        """
+        path = self.check_path(path)
+        self.history.save(path)
+
+    def save_model(self, path="", subfolder="pinn", name="model"):
+        """save the neural network to the hard disk
+        """
+        path = self.check_path(path)
+        self.model.save(f"{path}/{subfolder}/{name}")
+
+    def save_setting(self, path=""):
+        """ save settings from self.param.param_dict
+        """
+        path = self.check_path(path)
+        save_dict_to_json(self.param.param_dict, path, "params.json")
+    
     def train(self, iterations=0):
         """
         train the model
@@ -115,52 +169,11 @@ class PINN:
         if self.param.training.is_plot: 
             self.plot_history()
 
+    def update_training_data(self, training_data):
+        """
+        update data set used for the training
+        """
+        return [dde.icbc.PointSetBC(training_data.X[d], training_data.sol[d], component=i) 
+                for i,d in enumerate(self.param.nn.output_variables) if d in training_data.sol]
 
-    def save_setting(self, path=""):
-        """ save settings from self.param.param_dict
-        """
-        path = self.check_path(path)
-        save_dict_to_json(self.param.param_dict, path, "params.json")
-    
-    def load_setting(self, path="", filename="params.json"):
-        """ load the settings from file
-        """
-        path = self.check_path(path, loadOnly=True)
-        return load_dict_from_json(path, filename)
 
-    def save_history(self, path=""):
-        """ save training history
-        """
-        path = self.check_path(path)
-        self.history.save(path)
-    
-    def plot_history(self, path=""):
-        """ plot training history
-        """
-        path = self.check_path(path)
-        self.history.plot(path)
-
-    def save_model(self, path="", subfolder="pinn", name="model"):
-        """save the neural network to the hard disk
-        """
-        path = self.check_path(path)
-        self.model.save(f"{path}/{subfolder}/{name}")
-
-    def load_model(self, path="", epochs=-1, subfolder="pinn", name="model"):
-        """laod the neural network from saved model
-        """
-        if epochs == -1:
-            epochs = self.param.training.epochs
-
-        path = self.check_path(path, loadOnly=True)
-        self.model.restore(f"{path}/{subfolder}/{name}-{epochs}.ckpt")
-
-    def check_path(self, path, loadOnly=False):
-        """check the path, set to default, and create folder if needed
-        """
-        if path == "":
-            path = self.param.training.save_path
-        # recursively create paths
-        if not loadOnly:
-            os.makedirs(path, exist_ok=True)
-        return path
