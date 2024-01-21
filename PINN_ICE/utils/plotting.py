@@ -40,10 +40,10 @@ def plot_solutions(pinn, path="", X_ref=None, sol_ref=None, cols=None, **kwargs)
 
         # if ref solution is provided
         if (sol_ref is not None) and (X_ref is not None):
-            plot_data |= {k+"_ref":griddata(X_ref, sol_ref[:,i].flatten(), (X, Y), method='cubic') for i,k in enumerate(pinn.param.nn.output_variables)}
-            vranges |= {k+"_ref":vranges[k+"_pred"] for k in pinn.param.nn.output_variables}
-            plot_data |= {k+"_diff":(plot_data[k+"_pred"] - plot_data[k+"_ref"]) for k in pinn.param.nn.output_variables}
-            vranges |= {k+"_diff":[-0.1*max(np.abs(vranges[k+"_pred"])), 0.1*max(np.abs(vranges[k+"_pred"]))] for k in pinn.param.nn.output_variables}
+            plot_data.update({k+"_ref":griddata(X_ref, sol_ref[:,i].flatten(), (X, Y), method='cubic') for i,k in enumerate(pinn.param.nn.output_variables)})
+            vranges.update({k+"_ref":vranges[k+"_pred"] for k in pinn.param.nn.output_variables})
+            plot_data.update({k+"_diff":(plot_data[k+"_pred"] - plot_data[k+"_ref"]) for k in pinn.param.nn.output_variables})
+            vranges.update({k+"_diff":[-0.1*max(np.abs(vranges[k+"_pred"])), 0.1*max(np.abs(vranges[k+"_pred"]))] for k in pinn.param.nn.output_variables})
 
         # plot
         n = len(plot_data)
