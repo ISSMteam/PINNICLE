@@ -12,34 +12,25 @@ from .modeldata import Data
 
 
 class PINN:
-    """
-    class of a PINN model
+    """ a basic PINN model
     """
     def __init__(self, params={}, training_data=Data()):
         # load setup parameters
         self.param = Parameters(params)
 
-        # main components
+        # set physics, all the rest steps depend on what pdes are included in the model
+        # TODO: change to add physics
+        if "SSA" in self.param.physics.equations:
+            self.physics = physics.SSA2DUniformB(params["B"])
+
+        # domain of the model
         self.domain = Domain(self.param.domain.shapefile)
-        self.param.nn.set_parameters({"input_lb": self.domain.geometry.bbox[0,:], "input_ub": self.domain.geometry.bbox[1,:]})
 
         # update training data
         self.training_data = self.update_training_data(training_data)
 
-        # check if training data exceed the scaling range, also wrap output_lb and output_ub with np.array
-        for i,d in enumerate(self.param.nn.output_variables):
-            if d in training_data.sol:
-                if np.max(training_data.sol[d]) > self.param.nn.output_ub[i]:
-                    self.param.nn.output_ub[i] = np.max(training_data.sol[d])
-                if np.min(training_data.sol[d]) < self.param.nn.output_lb[i]:
-                    self.param.nn.output_lb[i] = np.min(training_data.sol[d])
-        self.param.nn.output_lb = np.array(self.param.nn.output_lb)
-        self.param.nn.output_ub = np.array(self.param.nn.output_ub)
-
-        # set physics
-        # TODO: change to add physics
-        if "SSA" in self.param.physics.equations:
-            self.physics = physics.SSA2DUniformB(params["B"])
+        # automate the input scaling according to the domain, this step need to be done before setting up NN
+        self._update_ub_lb_in_nn(training_data)
 
         #  deepxde data object
         self.data = dde.data.PDE(
@@ -50,8 +41,9 @@ class PINN:
                 num_boundary=0,  # no need to set for data misfit, unless add calving front boundary, etc.
                 num_test=None)
 
+        # the names of the loss: the order of data follows 'output_variables'
         # TODO: add more physics
-        self.loss_names = self.physics.residuals + list(training_data.sol.keys())
+        self.loss_names = self.physics.residuals + [d for d in self.param.nn.output_variables if d in training_data.sol]
 
         # define the neural network in use
         self.nn = FNN(self.param.nn)
@@ -121,9 +113,7 @@ class PINN:
             cols (int): Number of columns of subplot
         """
         path = self.check_path(path)
-#        plot_solutions(self, path=path, X_ref=X_ref, sol_ref=sol_ref, **kwargs)
         plot_solutions(self, path=path, **kwargs)
-
 
     def save_history(self, path=""):
         """ save training history
@@ -144,8 +134,7 @@ class PINN:
         save_dict_to_json(self.param.param_dict, path, "params.json")
     
     def train(self, iterations=0):
-        """
-        train the model
+        """ train the model
         """
         if iterations == 0:
             iterations = self.param.training.epochs
@@ -170,10 +159,25 @@ class PINN:
             self.plot_history()
 
     def update_training_data(self, training_data):
-        """
-        update data set used for the training
+        """ update data set used for the training, the order follows 'output_variables'
         """
         return [dde.icbc.PointSetBC(training_data.X[d], training_data.sol[d], component=i) 
                 for i,d in enumerate(self.param.nn.output_variables) if d in training_data.sol]
 
+    def _update_ub_lb_in_nn(self, training_data):
+        """ update input/output scalings parameters for nn
+        """
+        # automate the input scaling according to the domain
+        self.param.nn.set_parameters({"input_lb": self.domain.geometry.bbox[0,:], "input_ub": self.domain.geometry.bbox[1,:]})
 
+        # check if training data exceed the scaling range
+        for i,d in enumerate(self.param.nn.output_variables):
+            if d in training_data.sol:
+                if np.max(training_data.sol[d]) > self.param.nn.output_ub[i]:
+                    self.param.nn.output_ub[i] = np.max(training_data.sol[d])
+                if np.min(training_data.sol[d]) < self.param.nn.output_lb[i]:
+                    self.param.nn.output_lb[i] = np.min(training_data.sol[d])
+
+        # wrap output_lb and output_ub with np.array
+        self.param.nn.output_lb = np.array(self.param.nn.output_lb)
+        self.param.nn.output_ub = np.array(self.param.nn.output_ub)
