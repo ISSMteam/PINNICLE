@@ -15,23 +15,19 @@ class PINN:
     """ a basic PINN model
     """
     def __init__(self, params={}, training_data=Data()):
-        # load setup parameters
+        # Step 1: load setup parameters
         self.param = Parameters(params)
 
-        # set physics, all the rest steps depend on what pdes are included in the model
+        # Step 2: set physics, all the rest steps depend on what pdes are included in the model
         # TODO: change to add physics
         if "SSA" in self.param.physics.equations:
             self.physics = physics.SSA2DUniformB(params["B"])
 
+        # Step 3: set up deepxde training data object: pde+data
         # domain of the model
         self.domain = Domain(self.param.domain.shapefile)
-
         # update training data
         self.training_data = self.update_training_data(training_data)
-
-        # automate the input scaling according to the domain, this step need to be done before setting up NN
-        self._update_ub_lb_in_nn(training_data)
-
         #  deepxde data object
         self.data = dde.data.PDE(
                 self.domain.geometry,
@@ -40,15 +36,17 @@ class PINN:
                 num_domain=self.param.domain.num_collocation_points, # collocation points
                 num_boundary=0,  # no need to set for data misfit, unless add calving front boundary, etc.
                 num_test=None)
-
         # the names of the loss: the order of data follows 'output_variables'
         # TODO: add more physics
         self.loss_names = self.physics.residuals + [d for d in self.param.nn.output_variables if d in training_data.sol]
 
+        # Step 4: set up neural networks
+        # automate the input scaling according to the domain, this step need to be done before setting up NN
+        self._update_ub_lb_in_nn(training_data)
         # define the neural network in use
         self.nn = FNN(self.param.nn)
 
-        # setup the deepxde model: data+pde
+        # Step 5: setup the deepxde PINN model
         self.model = dde.Model(self.data, self.nn.net)
 
     # TODO: add update data, update net, ...
