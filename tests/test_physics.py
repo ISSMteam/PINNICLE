@@ -29,9 +29,20 @@ def test_Physics_SSA():
     hp["scalar_variables"] = {"B":1.26802073401e+08}
     phy = Physics(PhysicsParameter(hp))
 
-    assert phy.input_var == {'x': 0, 'y': 1}
-    assert phy.output_var == {'u': 0, 'v': 1, 's': 2, 'H': 3, 'C': 4}
+    assert phy.input_var == ['x', 'y']
+    assert phy.output_var == ['u', 'v', 's', 'H', 'C']
     assert phy.residuals == ['fSSA1', 'fSSA2']
+
+def test_Physics_MOLHO():
+    hp = {}
+    hp["equations"] = ["MOLHO"]
+    hp["scalar_variables"] = {"B":1.26802073401e+08}
+    phy = Physics(PhysicsParameter(hp))
+
+    assert phy.input_var == ['x', 'y']
+    assert phy.output_var == ['u', 'v',  'u_base', 'v_base', 's', 'H', 'C']
+    assert phy.residuals == ['fMOLHO1', 'fMLHO2']
+    assert phy.physics[0].output_var == {'u': 0, 'v': 1, 'u_base': 2, 'v_base': 3, 's': 4, 'H': 5, 'C': 6}
 
 def test_Physics_SSA_MOLHO():
     hp = {}
@@ -39,6 +50,7 @@ def test_Physics_SSA_MOLHO():
     hp["scalar_variables"] = {"B":1.26802073401e+08}
     phy = Physics(PhysicsParameter(hp))
 
-    assert phy.input_var == {'x': 0, 'y': 1}
-    assert phy.output_var == {'u': 0, 'v': 1, 's': 2, 'H': 3, 'C': 4, 'u_base': 5, 'v_base': 6}
+    assert phy.input_var == ['x', 'y']
+    assert phy.output_var == ['u', 'v', 's', 'H', 'C', 'u_base', 'v_base']
     assert phy.residuals == ['fSSA1', 'fSSA2', 'fMOLHO1', 'fMLHO2']
+    assert phy.physics[1].output_var == {'u': 0, 'v': 1, 'u_base': 5, 'v_base': 6, 's': 2, 'H': 3, 'C': 4}

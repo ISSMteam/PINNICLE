@@ -17,7 +17,9 @@ class Physics:
         self.input_var = self._update_global_variables([p.input_var for p in self.physics])
         self.output_var = self._update_global_variables([p.output_var for p in self.physics])
 
-        # update the index in the nn
+        # update the index in each of physics
+        for p in self.physics:
+            p.update_id(self.input_var, self.output_var)
 
         # update residual list
         self.residuals = list(itertools.chain.from_iterable([p.residuals for p in self.physics]))
@@ -35,15 +37,14 @@ class Physics:
         
     def _update_global_variables(self, local_var_list):
         """ Update global variables based on a list of local varialbes,
-            find all unqiue keys, then assign ids to them, from 0 to n
+            find all unqiue keys, then put in one single List
         """
-        # merge all dict
+        # merge all dict, get all unique keys
         global_var = {}
         for d in local_var_list:
             global_var.update(d)
 
-        # assign ids
-        return {k:i for i,k in enumerate(global_var.keys())}
+        return list(global_var.keys())
 
     def equations(self, nn_input_var, nn_output_var):
         """ a wrapper of all the equations used in the PINN
