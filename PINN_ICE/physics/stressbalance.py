@@ -12,6 +12,7 @@ class SSA2DUniformB(PhysicsBase):
         self.n = n
 
         # Dict of input and output used in this model, and their component id
+        # Note the ids will be reassigned after adding all physics together
         self.input_var = {"x":0, "y":1}        
         self.output_var = {"u":0, "v":1, "s":2, "H":3, "C":4}
         self.residuals = ["fSSA1", "fSSA2"]
@@ -80,7 +81,7 @@ class MOLHO(PhysicsBase):
 
         # Dict of input and output used in this model, and their component id
         self.input_var = {"x":0, "y":1}        
-        self.output_var = {"u":0, "v":1, "u_base":5, "v_base":6, "s":2, "H":3, "C":4}
+        self.output_var = {"u":0, "v":1, "u_base":2, "v_base":3, "s":4, "H":5, "C":6}
         self.residuals = ["fMOLHO1", "fMLHO2"]
 
     def pde(self, nn_input_var, nn_output_var):
