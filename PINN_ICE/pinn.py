@@ -5,7 +5,7 @@ import os
 
 from .utils import save_dict_to_json, load_dict_from_json, History, plot_solutions
 from .nn import FNN
-from . import physics
+from .physics import Physics
 from .domain import Domain
 from .parameters import Parameters
 from .modeldata import Data
@@ -19,9 +19,7 @@ class PINN:
         self.param = Parameters(params)
 
         # Step 2: set physics, all the rest steps depend on what pdes are included in the model
-        # TODO: change to add physics
-        if "SSA" in self.param.physics.equations:
-            self.physics = physics.SSA2DUniformB(params["B"])
+        self.physics = Physics(self.param.physics)
 
         # Step 3: set up deepxde training data object: pde+data
         # domain of the model
@@ -31,7 +29,7 @@ class PINN:
         #  deepxde data object
         self.data = dde.data.PDE(
                 self.domain.geometry,
-                self.physics.pde,
+                self.physics.equations,
                 self.training_data,  # all the data loss will be evaluated
                 num_domain=self.param.domain.num_collocation_points, # collocation points
                 num_boundary=0,  # no need to set for data misfit, unless add calving front boundary, etc.

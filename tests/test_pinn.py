@@ -47,7 +47,7 @@ hp["num_collocation_points"] = 9000
 
 # physics
 hp["equations"] = ["SSA"]
-hp["B"] = 1.26802073401e+08
+hp["scalar_variables"] = {"B":1.26802073401e+08}
 
 def test_loaddata():
     # load the data

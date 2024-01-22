@@ -3,8 +3,7 @@ import numpy as np
 
 
 class ParameterBase(ABC):
-    """
-    Abstract class of parameters in the experiment
+    """ Abstract class of parameters in the experiment
     """
     def __init__(self, param_dict):
         self.param_dict = param_dict
@@ -160,8 +159,7 @@ class NNParameter(ParameterBase):
 
 
 class PhysicsParameter(ParameterBase):
-    """
-    parameter of physics
+    """ parameter of physics
     """
     def __init__(self, param_dict={}):
         super().__init__(param_dict)
@@ -169,14 +167,15 @@ class PhysicsParameter(ParameterBase):
     def set_default(self):
         # name(s) of the equations
         self.equations = []
+        # scalar variables: name:value
+        self.scalar_variables = {}
 
     def check_consisteny(self):
         pass
 
 
 class TrainingParameter(ParameterBase):
-    """
-    parameter of training
+    """ parameter of training
     """
     def __init__(self, param_dict={}):
         super().__init__(param_dict)
@@ -196,8 +195,7 @@ class TrainingParameter(ParameterBase):
 
 
 class Parameters(ParameterBase):
-    """
-    parameters of the pinn, including domain, data, nn, and physics
+    """ parameters of the pinn, including domain, data, nn, and physics
     """
     def __init__(self, param_dict={}):
         super().__init__(param_dict)
