@@ -41,7 +41,7 @@ def test_Physics_MOLHO():
 
     assert phy.input_var == ['x', 'y']
     assert phy.output_var == ['u', 'v',  'u_base', 'v_base', 's', 'H', 'C']
-    assert phy.residuals == ['fMOLHO1', 'fMLHO2']
+    assert phy.residuals == ['fMOLHO 1', 'fMOLHO 2', 'fMOLHO base 1', 'fMOLHO base 2']
     assert phy.physics[0].output_var == {'u': 0, 'v': 1, 'u_base': 2, 'v_base': 3, 's': 4, 'H': 5, 'C': 6}
 
 def test_Physics_SSA_MOLHO():
@@ -52,5 +52,5 @@ def test_Physics_SSA_MOLHO():
 
     assert phy.input_var == ['x', 'y']
     assert phy.output_var == ['u', 'v', 's', 'H', 'C', 'u_base', 'v_base']
-    assert phy.residuals == ['fSSA1', 'fSSA2', 'fMOLHO1', 'fMLHO2']
+    assert phy.residuals == ['fSSA1', 'fSSA2', 'fMOLHO 1', 'fMOLHO 2', 'fMOLHO base 1', 'fMOLHO base 2']
     assert phy.physics[1].output_var == {'u': 0, 'v': 1, 'u_base': 5, 'v_base': 6, 's': 2, 'H': 3, 'C': 4}

@@ -20,6 +20,7 @@ class PINN:
 
         # Step 2: set physics, all the rest steps depend on what pdes are included in the model
         self.physics = Physics(self.param.physics)
+        # TODO assign physic.input_var, output_var to nn and data
 
         # Step 3: set up deepxde training data object: pde+data
         # domain of the model
