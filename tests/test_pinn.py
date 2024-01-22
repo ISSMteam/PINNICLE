@@ -58,6 +58,7 @@ def test_loaddata():
 def test_compile():
     experiment = pinn.PINN(hp)
     experiment.compile()
+    assert experiment.loss_names == ['fSSA1', 'fSSA2']
 
 def test_save_and_load_setting(tmp_path):
     experiment = pinn.PINN(hp)
@@ -73,3 +74,4 @@ def test_train(tmp_path):
     experiment = pinn.PINN(hp, training_data=data)
     experiment.compile()
     experiment.train()
+    assert experiment.loss_names == ['fSSA1', 'fSSA2', 'u', 'v', 's', 'H', 'C']
