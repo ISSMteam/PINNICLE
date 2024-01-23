@@ -18,10 +18,16 @@ class SSA2DUniformB(PhysicsBase): #{{{
 
         # default lower and upper bounds of the output in [SI] unit
         self.output_lb = {"u":-1.0e4/self.yts, "v":-1.0e4/self.yts, "s":-1.0e3, "H":10.0, "C":0.01}
-        self.output_ub = {"u":1.0e4/self.yts, "v":1.0e4/self.yts, "s":2.5e3, "H":1000.0, "C":1.0e4}
+        self.output_ub = {"u":1.0e4/self.yts, "v":1.0e4/self.yts, "s":2.5e3, "H":2000.0, "C":1.0e4}
+
+        # default scaling: data to 1 in [SI]
+        self.data_weights = {"u":1.0e-8*self.yts**2.0, "v":1.0e-8*self.yts**2.0, "s":1.0e-6, "H":1.0e-6, "C":1.0e-8}
 
         # names of the residuals
         self.residuals = ["fSSA1", "fSSA2"]
+
+        # default weights
+        self.pde_weights = [1.0e-10, 1.0e-10]
 
     def pde(self, nn_input_var, nn_output_var):
         """ residual of SSA 2D PDEs
@@ -89,10 +95,15 @@ class MOLHO(PhysicsBase): #{{{
 
         # default lower and upper bounds of the output in [SI] unit
         self.output_lb = {"u":-1.0e4/self.yts, "v":-1.0e4/self.yts, "u_base":-1.0e4/self.yts, "v_base":-1.0e4/self.yts, "s":-1.0e3, "H":10.0, "C":0.01}
-        self.output_ub = {"u":1.0e4/self.yts, "v":1.0e4/self.yts, "u_base":1.0e4/self.yts, "v_base":1.0e4/self.yts, "s":2.5e3, "H":1000.0, "C":1.0e4}
+        self.output_ub = {"u":1.0e4/self.yts, "v":1.0e4/self.yts, "u_base":1.0e4/self.yts, "v_base":1.0e4/self.yts, "s":2.5e3, "H":2000.0, "C":1.0e4}
+
+        # default scaling: data to 1 in [SI]
+        self.data_weights = {"u":1.0e-8*self.yts**2.0, "v":1.0e-8*self.yts**2.0, "u_base":1.0e-8*self.yts**2.0, "v_base":1.0e-8*self.yts**2.0, "s":1.0e-6, "H":1.0e-6, "C":1.0e-8}
 
         # residual names
         self.residuals = ["fMOLHO 1", "fMOLHO 2", "fMOLHO base 1", "fMOLHO base 2"]
+
+        self.pde_weights = [1.0e-10, 1.0e-10, 1.0e-10, 1.0e-10]
 
         # gauss points for integration
         self.constants = {"gauss_x":[0.5, 0.23076534494715845, 0.7692346550528415, 0.04691007703066802, 0.9530899229693319],

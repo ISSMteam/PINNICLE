@@ -19,8 +19,14 @@ class PhysicsBase(ABC):
         self.output_lb = {}
         self.output_ub = {}
 
+        # default weights to scale the data misfit
+        self.data_weights = {}
+
         # residual name list
         self.residuals = []
+
+        # default pde weights
+        self.pde_weights = []
 
     def get_input_list(self):
         """ get the List of names of input variables

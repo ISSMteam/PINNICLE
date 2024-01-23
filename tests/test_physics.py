@@ -34,6 +34,8 @@ def test_Physics_SSA():
     assert phy.residuals == ['fSSA1', 'fSSA2']
     assert len(phy.output_lb) == 5
     assert len(phy.output_ub) == 5
+    assert len(phy.data_weights) == 5
+    assert len(phy.pde_weights) == 2
 
 def test_Physics_MOLHO():
     hp = {}
@@ -47,6 +49,8 @@ def test_Physics_MOLHO():
     assert phy.physics[0].output_var == {'u': 0, 'v': 1, 'u_base': 2, 'v_base': 3, 's': 4, 'H': 5, 'C': 6}
     assert len(phy.output_lb) == 7
     assert len(phy.output_ub) == 7
+    assert len(phy.data_weights) == 7
+    assert len(phy.pde_weights) == 4
 
 def test_Physics_SSA_MOLHO():
     hp = {}
@@ -64,3 +68,5 @@ def test_Physics_SSA_MOLHO():
     assert len(phy.output_lb) == 7
     assert len(phy.output_ub) == 7
     assert phy.output_lb[5] == phy2.output_lb[2]
+    assert len(phy.data_weights) == 7
+    assert len(phy.pde_weights) == 6

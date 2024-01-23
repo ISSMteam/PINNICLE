@@ -20,7 +20,7 @@ class PINN:
 
         # Step 2: set physics, all the rest steps depend on what pdes are included in the model
         self.physics = Physics(self.param.physics)
-        # assign physic.input_var, output_var to nn
+        # assign default physic.input_var, output_var, outout_lb, and output_ub to nn
         self._update_nn_parameters()
 
         # Step 3: set up deepxde training data object: pde+data
@@ -38,7 +38,9 @@ class PINN:
                 num_test=None)
 
         # the names of the loss: the order of data follows 'output_variables'
-        self.loss_names = self.physics.residuals + [d for d in self.param.nn.output_variables if d in training_data.sol]
+        self.loss_names = self.physics.residuals + [d for d in self.physics.output_var if d in training_data.sol]
+        # update the weights for training in the same order
+        self.param.training.loss_weights = self.physics.pde_weights + [self.physics.data_weights[i] for i,d in enumerate(self.physics.output_var) if d in training_data.sol]
 
         # Step 4: set up neural networks
         # automate the input scaling according to the domain, this step need to be done before setting up NN
@@ -48,8 +50,6 @@ class PINN:
 
         # Step 5: setup the deepxde PINN model
         self.model = dde.Model(self.data, self.nn.net)
-
-    # TODO: add update data, update net, ...
 
     def check_path(self, path, loadOnly=False):
         """check the path, set to default, and create folder if needed
@@ -163,9 +163,12 @@ class PINN:
                 for i,d in enumerate(self.param.nn.output_variables) if d in training_data.sol]
 
     def _update_nn_parameters(self):
-        """ assign physic.input_var, output_var to nn
+        """ assign physic.input_var, output_var, output_lb, and output_ub to nn
         """
-        self.param.nn.set_parameters({"input_variables": self.physics.input_var, "output_variables": self.physics.output_var})
+        self.param.nn.set_parameters({"input_variables": self.physics.input_var, 
+            "output_variables": self.physics.output_var, 
+            "output_lb": self.physics.output_lb,
+            "output_ub": self.physics.output_ub})
 
     def _update_ub_lb_in_nn(self, training_data):
         """ update input/output scalings parameters for nn

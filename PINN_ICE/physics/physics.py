@@ -24,12 +24,15 @@ class Physics:
         # find the min and max of the lb and ub of the output_var among all physics
         self.output_lb = []
         self.output_ub = []
+        self.data_weights = []
         for k in self.output_var:
             self.output_lb.append(min([p.output_lb[k] for p in self.physics if k in p.output_lb]))
             self.output_ub.append(max([p.output_ub[k] for p in self.physics if k in p.output_ub]))
+            self.data_weights.append(max([p.data_weights[k] for p in self.physics if k in p.data_weights]))
 
         # update residual list
         self.residuals = list(itertools.chain.from_iterable([p.residuals for p in self.physics]))
+        self.pde_weights = list(itertools.chain.from_iterable([p.pde_weights for p in self.physics]))
 
     def _add_physics(self, eq, parameters):
         """ add physics to the model

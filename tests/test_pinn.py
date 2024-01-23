@@ -33,8 +33,6 @@ hp["activation"] = "tanh"
 hp["initializer"] = "Glorot uniform"
 hp["num_neurons"] = 20
 hp["num_layers"] = 6
-hp["output_lb"] = [-200/yts, -5000/yts, -900, 10, 0.01]
-hp["output_ub"] = [7500/yts, 800/yts, 1600, 1700, 8500]
 
 # data
 hp["datasize"] = {"u":4000, "v":4000, "s":4000, "H":4000, "C":None}
@@ -53,10 +51,15 @@ def test_loaddata():
     pinn.utils.prep_2D_data(path, hp["datasize"])
     data = pinn.modeldata.Data(X=X_train, sol=u_train)
 
-def test_compile():
+def test_compile_no_data():
     experiment = pinn.PINN(hp)
     experiment.compile()
     assert experiment.loss_names == ['fSSA1', 'fSSA2']
+    assert experiment.param.nn.output_variables == ['u', 'v', 's', 'H', 'C']
+    assert experiment.param.nn.output_lb[0]<0.0
+    assert experiment.param.nn.output_ub[0]>0.0
+    assert experiment.param.nn.output_lb[1]<0.0
+    assert experiment.param.nn.output_ub[1]>0.0
 
 def test_save_and_load_setting(tmp_path):
     experiment = pinn.PINN(hp)
