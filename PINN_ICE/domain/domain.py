@@ -11,7 +11,7 @@ class Domain:
             self.vertices = self.get_polygon_vertices(self.parameters.shapefile)
             self.geometry = dde.geometry.Polygon(self.vertices)
         else:
-            raise TypeError("File type in "+path+" is currently not supported!")
+            raise TypeError("File type in "+self.parameters.shapefile+" is currently not supported!")
 
     def get_polygon_vertices(self, filepath):
         """
