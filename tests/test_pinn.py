@@ -29,8 +29,6 @@ hp["loss_function"] = "MSE"
 hp["is_save"] = False
 
 # NN
-hp["input_variables"] = ["x","y"]
-hp["output_variables"] = ["u", "v", "s", "H", "C"]
 hp["activation"] = "tanh"
 hp["initializer"] = "Glorot uniform"
 hp["num_neurons"] = 20

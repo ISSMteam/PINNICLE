@@ -1,12 +1,14 @@
+from ..parameters import DomainParameter
+from ..utils import is_file_ext
 import pandas as pd
 import numpy as np
-from ..utils import *
 import deepxde as dde
 
 class Domain:
-    def __init__(self, path):
-        if is_file_ext(path, '.exp'):
-            self.vertices = self.get_polygon_vertices(path)
+    def __init__(self, parameters=DomainParameter()):
+        self.parameters = parameters
+        if is_file_ext(self.parameters.shapefile, '.exp'):
+            self.vertices = self.get_polygon_vertices(self.parameters.shapefile)
             self.geometry = dde.geometry.Polygon(self.vertices)
         else:
             raise TypeError("File type in "+path+" is currently not supported!")

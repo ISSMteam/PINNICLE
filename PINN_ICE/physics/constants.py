@@ -15,7 +15,11 @@ class PhysicsBase(ABC):
         self.input_var = {}       # x, y, z, t, etc.
         self.output_var = {}      # u, v, s, H, etc.
 
-        # residual list
+        # default lower and upper bounds of the output in [SI] unit
+        self.output_lb = {}
+        self.output_ub = {}
+
+        # residual name list
         self.residuals = []
 
     def get_input_list(self):

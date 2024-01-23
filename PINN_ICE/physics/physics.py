@@ -21,6 +21,13 @@ class Physics:
         for p in self.physics:
             p.update_id(self.input_var, self.output_var)
 
+        # find the min and max of the lb and ub of the output_var among all physics
+        self.output_lb = []
+        self.output_ub = []
+        for k in self.output_var:
+            self.output_lb.append(min([p.output_lb[k] for p in self.physics if k in p.output_lb]))
+            self.output_ub.append(max([p.output_ub[k] for p in self.physics if k in p.output_ub]))
+
         # update residual list
         self.residuals = list(itertools.chain.from_iterable([p.residuals for p in self.physics]))
 

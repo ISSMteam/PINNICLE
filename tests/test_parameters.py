@@ -41,6 +41,6 @@ def test_parameters():
     assert p.nn.__dict__ == nn.__dict__
     assert p.physics.__dict__ == physics.__dict__
 
-def test_parameters_variable_match_data():
-    with pytest.raises(Exception):
-        d = pinn.Parameters({"datasize":{"u":100}, "output_variables":["v"], "output_size":1})
+#def test_parameters_variable_match_data():
+#    with pytest.raises(Exception):
+#        d = pinn.Parameters({"datasize":{"u":100}, "output_variables":["v"], "output_size":1})

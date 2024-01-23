@@ -220,10 +220,9 @@ class Parameters(ParameterBase):
         self.physics = PhysicsParameter(param_dict)
 
     def check_consisteny(self):
-        # data.name is a subset of physics.variables
-        if (any(x not in self.nn.output_variables for x in self.data.datasize)):
-            raise ValueError("names in 'datasize' does not match the name in 'output_variables'")
-        # TODO: length of training.loss_weights equals to equations+datasize
+        # length of training.loss_weights equals to equations+datasize
+        #if (any(x not in self.nn.output_variables for x in self.data.datasize)):
+        #    raise ValueError("names in 'datasize' does not match the name in 'output_variables'")
         pass
 
     def update_parameters(self):

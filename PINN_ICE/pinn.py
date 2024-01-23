@@ -20,11 +20,12 @@ class PINN:
 
         # Step 2: set physics, all the rest steps depend on what pdes are included in the model
         self.physics = Physics(self.param.physics)
-        # TODO assign physic.input_var, output_var to nn and data
+        # assign physic.input_var, output_var to nn
+        self._update_nn_parameters()
 
         # Step 3: set up deepxde training data object: pde+data
         # domain of the model
-        self.domain = Domain(self.param.domain.shapefile)
+        self.domain = Domain(self.param.domain)
         # update training data
         self.training_data = self.update_training_data(training_data)
         #  deepxde data object
@@ -35,8 +36,8 @@ class PINN:
                 num_domain=self.param.domain.num_collocation_points, # collocation points
                 num_boundary=0,  # no need to set for data misfit, unless add calving front boundary, etc.
                 num_test=None)
+
         # the names of the loss: the order of data follows 'output_variables'
-        # TODO: add more physics
         self.loss_names = self.physics.residuals + [d for d in self.param.nn.output_variables if d in training_data.sol]
 
         # Step 4: set up neural networks
@@ -160,6 +161,11 @@ class PINN:
         """
         return [dde.icbc.PointSetBC(training_data.X[d], training_data.sol[d], component=i) 
                 for i,d in enumerate(self.param.nn.output_variables) if d in training_data.sol]
+
+    def _update_nn_parameters(self):
+        """ assign physic.input_var, output_var to nn
+        """
+        self.param.nn.set_parameters({"input_variables": self.physics.input_var, "output_variables": self.physics.output_var})
 
     def _update_ub_lb_in_nn(self, training_data):
         """ update input/output scalings parameters for nn
