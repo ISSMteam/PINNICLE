@@ -1,4 +1,4 @@
-from . import parameter
+from .parameter import *
 from . import utils
 from . import physics
 from . import modeldata
