@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
-class PhysicsBase(ABC):
-    """ base class of all the physics
+class EquationBase(ABC):
+    """ base class of all the equations
     """
     def __init__(self):
         # Physical constants in [SI]
@@ -11,9 +11,10 @@ class PhysicsBase(ABC):
         self.yts    = 3600.0*24*365     # year to second (s)
 
         # Dict of dependent and independent variables of the model, the values are
-        # the global component id in the NN
-        self.input_var = {}       # x, y, z, t, etc.
-        self.output_var = {}      # u, v, s, H, etc.
+        # the global component id in the Physics, these two dicts are maps from local 
+        # to global
+        self.local_input_var = {}       # x, y, z, t, etc.
+        self.local_output_var = {}      # u, v, s, H, etc.
 
         # default lower and upper bounds of the output in [SI] unit
         self.output_lb = {}
@@ -31,12 +32,12 @@ class PhysicsBase(ABC):
     def get_input_list(self):
         """ get the List of names of input variables
         """
-        return list(self.input_var.keys())
+        return list(self.local_input_var.keys())
 
     def get_output_list(self):
         """ get the List of names of output variables
         """
-        return list(self.output_var.keys())
+        return list(self.local_output_var.keys())
 
     def update_id(self, global_input_var=None, global_output_var=None):
         """ update component id, always remeber to call this in compiling the model
@@ -48,9 +49,9 @@ class PhysicsBase(ABC):
                 are shared across all the physics
         """
         if global_input_var is not None:
-            self.input_var = {o:global_input_var.index(o) for o in self.input_var}
+            self.local_input_var = {o:global_input_var.index(o) for o in self.local_input_var}
         if global_output_var is not None:
-            self.output_var = {o:global_output_var.index(o) for o in self.output_var}
+            self.local_output_var = {o:global_output_var.index(o) for o in self.local_output_var}
         
     @abstractmethod
     def pde(self, nn_input_var, nn_output_var):

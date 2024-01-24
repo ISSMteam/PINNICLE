@@ -11,14 +11,14 @@ class Physics:
         self.parameters = parameters
 
         # add all physics 
-        self.physics = [self._add_physics(eq, parameters) for eq in parameters.equations] 
+        self.equations = [self._add_equations(eq, parameters) for eq in parameters.equations] 
 
-        # update input, output variable list for nn
-        self.input_var = self._update_global_variables([p.input_var for p in self.physics])
-        self.output_var = self._update_global_variables([p.output_var for p in self.physics])
+        # update (global) input, output variable list from local_input_var and local_output_var of each equations
+        self.input_var = self._update_global_variables([p.local_input_var for p in self.equations])
+        self.output_var = self._update_global_variables([p.local_output_var for p in self.equations])
 
         # update the index in each of physics
-        for p in self.physics:
+        for p in self.equations:
             p.update_id(self.input_var, self.output_var)
 
         # find the min and max of the lb and ub of the output_var among all physics
@@ -26,22 +26,24 @@ class Physics:
         self.output_ub = []
         self.data_weights = []
         for k in self.output_var:
-            self.output_lb.append(min([p.output_lb[k] for p in self.physics if k in p.output_lb]))
-            self.output_ub.append(max([p.output_ub[k] for p in self.physics if k in p.output_ub]))
-            self.data_weights.append(max([p.data_weights[k] for p in self.physics if k in p.data_weights]))
+            self.output_lb.append(min([p.output_lb[k] for p in self.equations if k in p.output_lb]))
+            self.output_ub.append(max([p.output_ub[k] for p in self.equations if k in p.output_ub]))
+            self.data_weights.append(max([p.data_weights[k] for p in self.equations if k in p.data_weights]))
 
         # update residual list
-        self.residuals = list(itertools.chain.from_iterable([p.residuals for p in self.physics]))
-        self.pde_weights = list(itertools.chain.from_iterable([p.pde_weights for p in self.physics]))
+        self.residuals = list(itertools.chain.from_iterable([p.residuals for p in self.equations]))
+        self.pde_weights = list(itertools.chain.from_iterable([p.pde_weights for p in self.equations]))
 
-    def _add_physics(self, eq, parameters):
-        """ add physics to the model
+    def _add_equations(self, eq, parameters):
+        """ add equations to the model
         """
         if eq == "SSA":
             return stressbalance.SSA2DUniformB(parameters.scalar_variables["B"])
         if eq == "MOLHO":
             return stressbalance.MOLHO(parameters.scalar_variables["B"])
         # TODO: add mass conservation
+
+        # TODO: if eq is a class, directly add it to the physics
         
         raise ValueError(f"Unknown equations {eq} found. Please define the physics first!")
         
@@ -56,10 +58,10 @@ class Physics:
 
         return list(global_var.keys())
 
-    def equations(self, nn_input_var, nn_output_var):
+    def pdes(self, nn_input_var, nn_output_var):
         """ a wrapper of all the equations used in the PINN
         """
         eq = []
-        for p in self.physics:
+        for p in self.equations:
             eq += p.pde(nn_input_var, nn_output_var) 
         return eq

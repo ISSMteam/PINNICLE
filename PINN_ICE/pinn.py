@@ -31,7 +31,7 @@ class PINN:
         #  deepxde data object
         self.data = dde.data.PDE(
                 self.domain.geometry,
-                self.physics.equations,
+                self.physics.pdes,
                 self.training_data,  # all the data loss will be evaluated
                 num_domain=self.param.domain.num_collocation_points, # collocation points
                 num_boundary=0,  # no need to set for data misfit, unless add calving front boundary, etc.

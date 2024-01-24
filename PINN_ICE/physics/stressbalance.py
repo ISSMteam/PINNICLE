@@ -1,8 +1,8 @@
 import deepxde as dde
-from .constants import PhysicsBase
+from . import EquationBase
 
 
-class SSA2DUniformB(PhysicsBase): #{{{
+class SSA2DUniformB(EquationBase): #{{{
     """ SSA on 2D problem with uniform B
     """
     def __init__(self, B, n=3.0):
@@ -13,8 +13,8 @@ class SSA2DUniformB(PhysicsBase): #{{{
 
         # Dict of input and output used in this model, and their component id
         # Note the ids will be reassigned after adding all physics together
-        self.input_var = {"x":0, "y":1}        
-        self.output_var = {"u":0, "v":1, "s":2, "H":3, "C":4}
+        self.local_input_var = {"x":0, "y":1}        
+        self.local_output_var = {"u":0, "v":1, "s":2, "H":3, "C":4}
 
         # default lower and upper bounds of the output in [SI] unit
         self.output_lb = {"u":-1.0e4/self.yts, "v":-1.0e4/self.yts, "s":-1.0e3, "H":10.0, "C":0.01}
@@ -37,14 +37,14 @@ class SSA2DUniformB(PhysicsBase): #{{{
             nn_output_var: global output from the nn
         """
         # get the ids
-        xid = self.input_var["x"]
-        yid = self.input_var["y"]
+        xid = self.local_input_var["x"]
+        yid = self.local_input_var["y"]
 
-        uid = self.output_var["u"]
-        vid = self.output_var["v"]
-        sid = self.output_var["s"]
-        Hid = self.output_var["H"]
-        Cid = self.output_var["C"]
+        uid = self.local_output_var["u"]
+        vid = self.local_output_var["v"]
+        sid = self.local_output_var["s"]
+        Hid = self.local_output_var["H"]
+        Cid = self.local_output_var["C"]
 
         # unpacking normalized output
         u, v, s, H, C = nn_output_var[:, uid:uid+1], nn_output_var[:, vid:vid+1], nn_output_var[:, sid:sid+1], nn_output_var[:, Hid:Hid+1], nn_output_var[:, Cid:Cid+1]
@@ -80,7 +80,7 @@ class SSA2DUniformB(PhysicsBase): #{{{
     
         return [f1, f2] #}}}
 
-class MOLHO(PhysicsBase): #{{{
+class MOLHO(EquationBase): #{{{
     """ MOLHO on 2D problem with uniform B
     """
     def __init__(self, B, n=3.0):
@@ -90,8 +90,8 @@ class MOLHO(PhysicsBase): #{{{
         self.n = n
 
         # Dict of input and output used in this model, and their component id
-        self.input_var = {"x":0, "y":1}        
-        self.output_var = {"u":0, "v":1, "u_base":2, "v_base":3, "s":4, "H":5, "C":6}
+        self.local_input_var = {"x":0, "y":1}        
+        self.local_output_var = {"u":0, "v":1, "u_base":2, "v_base":3, "s":4, "H":5, "C":6}
 
         # default lower and upper bounds of the output in [SI] unit
         self.output_lb = {"u":-1.0e4/self.yts, "v":-1.0e4/self.yts, "u_base":-1.0e4/self.yts, "v_base":-1.0e4/self.yts, "s":-1.0e3, "H":10.0, "C":0.01}
@@ -116,17 +116,17 @@ class MOLHO(PhysicsBase): #{{{
             nn_output_var: global output from the nn
         """
         # get the ids
-        xid = self.input_var["x"]
-        yid = self.input_var["y"]
+        xid = self.local_input_var["x"]
+        yid = self.local_input_var["y"]
 
         #
-        uid = self.output_var["u"]
-        vid = self.output_var["v"]
-        ubid = self.output_var["u_base"]
-        vbid = self.output_var["v_base"]
-        sid = self.output_var["s"]
-        Hid = self.output_var["H"]
-        Cid = self.output_var["C"]
+        uid = self.local_output_var["u"]
+        vid = self.local_output_var["v"]
+        ubid = self.local_output_var["u_base"]
+        vbid = self.local_output_var["v_base"]
+        sid = self.local_output_var["s"]
+        Hid = self.local_output_var["H"]
+        Cid = self.local_output_var["C"]
 
         # unpacking normalized output
         u, v, ub, vb = nn_output_var[:, uid:uid+1], nn_output_var[:, vid:vid+1], nn_output_var[:, ubid:ubid+1], nn_output_var[:, vbid:vbid+1]
