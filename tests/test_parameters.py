@@ -1,6 +1,8 @@
 import PINN_ICE as pinn
 import pytest
 
+yts = 3600*24*365.0
+
 def test_domain_parameter():
     d = pinn.parameters.DomainParameter()
     assert hasattr(d, "param_dict"), "Default attribute 'param_dict' not found"
@@ -41,6 +43,22 @@ def test_parameters():
     assert p.nn.__dict__ == nn.__dict__
     assert p.physics.__dict__ == physics.__dict__
 
-#def test_parameters_variable_match_data():
-#    with pytest.raises(Exception):
-#        d = pinn.Parameters({"datasize":{"u":100}, "output_variables":["v"], "output_size":1})
+def test_equation_parameters():
+    SSA = {}
+    SSA["input"] = ["x", "y"]
+    SSA["output"] = ["u", "v", "s", "H", "C"]
+    SSA["output_lb"] = [-1.0e4/yts, -1.0e4/yts, -1.0e3,  10.0, 0.01]
+    SSA["output_ub"] = [ 1.0e4/yts,  1.0e4/yts,  2.5e3, 2.0e3, 1.0e4]
+    SSA["data_weights"] = [1.0e-8*yts**2.0, 1.0e-8*yts**2.0, 1.0e-6, 1.0e-6, 1.0e-8]
+    p = pinn.parameters.EquationParameter(SSA)
+    assert p.input == SSA["input"]
+    assert p.output == SSA["output"]
+
+    SSA["output_lb"] = [1.0e4/yts, -1.0e4/yts]
+    with pytest.raises(Exception):
+        p = pinn.parameters.EquationParameter(SSA)
+
+    SSA["output_lb"] = [1.0e4/yts, -1.0e4/yts, -1.0e3,  10.0, 0.01]
+    SSA["output_ub"] = [ 1.0e4/yts,  1.0e4/yts,  2.5e3, 2.0e3, 1.0e4]
+    with pytest.raises(Exception):
+        p = pinn.parameters.EquationParameter(SSA)

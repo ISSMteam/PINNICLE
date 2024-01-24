@@ -163,6 +163,7 @@ class PhysicsParameter(ParameterBase):
     """
     def __init__(self, param_dict={}):
         super().__init__(param_dict)
+        self.setup_equations()
 
     def set_default(self):
         # name(s) of the equations
@@ -171,6 +172,35 @@ class PhysicsParameter(ParameterBase):
         self.scalar_variables = {}
 
     def check_consisteny(self):
+        pass
+
+    def setup_equations(self):
+        """ depending on the type of each equation parameter
+        """
+        pass
+
+
+class EquationParameter(ParameterBase):
+    """ parameter of equations
+    """
+    def __init__(self, param_dict={}):
+        super().__init__(param_dict)
+
+    def set_default(self):
+        self.input = []
+        self.output = []
+        self.output_lb = []
+        self.output_ub = []
+        self.data_weights = []
+        self.pde_weights = None
+
+    def check_consisteny(self):
+        if (len(self.output)) != (len(self.output_lb)):
+            raise ValueError("Size of 'output' does not match the size of 'output_lb'")
+        if (len(self.output)) != (len(self.output_ub)):
+            raise ValueError("Size of 'output' does not match the size of 'output_ub'")
+        if any([l>=u for l,u in zip(self.output_lb, self.output_ub)]):
+            raise ValueError("output_lb is not smaller than output_ub")
         pass
 
 
