@@ -17,6 +17,13 @@ class ParameterBase(ABC):
         # check consistency
         self.check_consisteny()
 
+    def __repr__(self):
+        """
+        display all attributes except 'param_dict'
+        """
+        return "\t" + type(self).__name__ + ": \n" + \
+                ("\n".join(["\t\t" + k + ":\t" + str(self.__dict__[k]) for k in self.__dict__ if k != "param_dict"]))+"\n"
+
     def __str__(self):
         """
         display all attributes except 'param_dict'
@@ -166,18 +173,16 @@ class PhysicsParameter(ParameterBase):
         self.setup_equations()
 
     def set_default(self):
-        # name(s) of the equations
-        self.equations = []
-        # scalar variables: name:value
-        self.scalar_variables = {}
+        # name(s) and parameters of the equations
+        self.equations = {}
 
     def check_consisteny(self):
         pass
 
     def setup_equations(self):
-        """ depending on the type of each equation parameter
+        """ translate the input dict to EquationParameter(), and save back to the values in self.equations
         """
-        pass
+        self.equations = {k:EquationParameter(self.equations[k]) for k in self.equations}
 
 
 class EquationParameter(ParameterBase):
@@ -193,6 +198,8 @@ class EquationParameter(ParameterBase):
         self.output_ub = []
         self.data_weights = []
         self.pde_weights = None
+        # scalar variables: name:value
+        self.scalar_variables = {}
 
     def check_consisteny(self):
         if (len(self.output)) != (len(self.output_lb)):
