@@ -77,3 +77,10 @@ def test_Physics_SSA_MOLHO():
     assert phy.output_lb[5] == phy2.output_lb[2]
     assert len(phy.data_weights) == 7
     assert len(phy.pde_weights) == 6
+
+def test_Physics_Exception():
+    hp = {}
+    hp["equations"] = {"Not defined":{}}
+
+    with pytest.raises(Exception):
+        phy = Physics(PhysicsParameter(hp))

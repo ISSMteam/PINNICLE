@@ -11,7 +11,7 @@ class Physics:
         self.parameters = parameters
 
         # add all physics 
-        self.equations = [self._add_equations(eq, parameters) for eq in parameters.equations] 
+        self.equations = [self._add_equations(eq) for eq in self.parameters.equations] 
 
         # update (global) input, output variable list from local_input_var and local_output_var of each equations
         self.input_var = self._update_global_variables([p.local_input_var for p in self.equations])
@@ -34,7 +34,7 @@ class Physics:
         self.residuals = list(itertools.chain.from_iterable([p.residuals for p in self.equations]))
         self.pde_weights = list(itertools.chain.from_iterable([p.pde_weights for p in self.equations]))
 
-    def _add_equations(self, eq, parameters):
+    def _add_equations(self, eq):
         """ add equations to the model
         """
         equation = None
@@ -46,7 +46,7 @@ class Physics:
 
         # TODO: if eq is a class, directly add it to the physics
         if equation is not None:
-            return equation(parameters.equations[eq])
+            return equation(self.parameters.equations[eq])
         else:
             raise ValueError(f"Unknown equations {eq} found. Please define the physics first!")
         
