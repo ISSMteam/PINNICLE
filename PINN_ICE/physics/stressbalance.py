@@ -1,15 +1,16 @@
 import deepxde as dde
 from . import EquationBase
+from ..parameters import EquationParameter
 
 
 class SSA2DUniformB(EquationBase): #{{{
     """ SSA on 2D problem with uniform B
     """
-    def __init__(self, B, n=3.0):
+    def __init__(self, param=EquationParameter()):
         super().__init__()
         # viscosity 
-        self.B = B
-        self.n = n
+        self.B = param.scalar_variables["B"]
+        self.n = 3.0
 
         # Dict of input and output used in this model, and their component id
         # Note the ids will be reassigned after adding all physics together
@@ -83,11 +84,11 @@ class SSA2DUniformB(EquationBase): #{{{
 class MOLHO(EquationBase): #{{{
     """ MOLHO on 2D problem with uniform B
     """
-    def __init__(self, B, n=3.0):
+    def __init__(self, param=EquationParameter()):
         super().__init__()
         # viscosity 
-        self.B = B
-        self.n = n
+        self.B = param.scalar_variables["B"]
+        self.n = 3.0
 
         # Dict of input and output used in this model, and their component id
         self.local_input_var = {"x":0, "y":1}        

@@ -4,7 +4,8 @@ from PINN_ICE.physics import *
 import pytest
 
 def test_update_cid():
-    ssa = SSA2DUniformB(1)
+    p = pinn.parameters.EquationParameter({"scalar_variables":{"B":1}})
+    ssa = SSA2DUniformB(p)
 
     # input id
     i_var = ["y", "x"]
@@ -24,9 +25,10 @@ def test_update_cid():
         ssa.update_id(global_output_var=g_var)
 
 def test_Physics_SSA():
+    SSA = {}
+    SSA["scalar_variables"] = {"B":1.26802073401e+08}
     hp = {}
-    hp["equations"] = ["SSA"]
-    hp["scalar_variables"] = {"B":1.26802073401e+08}
+    hp["equations"] = {"SSA":SSA}
     phy = Physics(PhysicsParameter(hp))
 
     assert phy.input_var == ['x', 'y']
@@ -38,9 +40,10 @@ def test_Physics_SSA():
     assert len(phy.pde_weights) == 2
 
 def test_Physics_MOLHO():
+    MOLHO = {}
+    MOLHO["scalar_variables"] = {"B":1.26802073401e+08}
     hp = {}
-    hp["equations"] = ["MOLHO"]
-    hp["scalar_variables"] = {"B":1.26802073401e+08}
+    hp["equations"] = {"MOLHO":MOLHO}
     phy = Physics(PhysicsParameter(hp))
 
     assert phy.input_var == ['x', 'y']
@@ -53,12 +56,15 @@ def test_Physics_MOLHO():
     assert len(phy.pde_weights) == 4
 
 def test_Physics_SSA_MOLHO():
+    SSA = {}
+    SSA["scalar_variables"] = {"B":1.26802073401e+08}
+    MOLHO = {}
+    MOLHO["scalar_variables"] = {"B":1.26802073401e+08}
     hp = {}
-    hp["equations"] = ["SSA", "MOLHO"]
-    hp["scalar_variables"] = {"B":1.26802073401e+08}
+    hp["equations"] = {"SSA":SSA, "MOLHO":MOLHO}
     phy = Physics(PhysicsParameter(hp))
 
-    hp["equations"] = ["MOLHO"]
+    hp["equations"] = {"MOLHO":MOLHO}
     phy2 = Physics(PhysicsParameter(hp))
 
     assert phy.input_var == ['x', 'y']

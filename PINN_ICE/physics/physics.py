@@ -37,15 +37,18 @@ class Physics:
     def _add_equations(self, eq, parameters):
         """ add equations to the model
         """
+        equation = None
         if eq == "SSA":
-            return stressbalance.SSA2DUniformB(parameters.scalar_variables["B"])
+            equation = stressbalance.SSA2DUniformB
         if eq == "MOLHO":
-            return stressbalance.MOLHO(parameters.scalar_variables["B"])
+            equation = stressbalance.MOLHO
         # TODO: add mass conservation
 
         # TODO: if eq is a class, directly add it to the physics
-        
-        raise ValueError(f"Unknown equations {eq} found. Please define the physics first!")
+        if equation is not None:
+            return equation(parameters.equations[eq])
+        else:
+            raise ValueError(f"Unknown equations {eq} found. Please define the physics first!")
         
     def _update_global_variables(self, local_var_list):
         """ Update global variables based on a list of local varialbes,

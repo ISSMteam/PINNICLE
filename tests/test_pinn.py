@@ -42,8 +42,9 @@ hp["shapefile"] = os.path.join(repoPath, "dataset", expFileName)
 hp["num_collocation_points"] = 9000
 
 # physics
-hp["equations"] = ["SSA"]
-hp["scalar_variables"] = {"B":1.26802073401e+08}
+SSA = {}
+SSA["scalar_variables"] = {"B":1.26802073401e+08}
+hp["equations"] = {"SSA":SSA}
 
 def test_loaddata():
     # load the data

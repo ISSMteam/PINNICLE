@@ -17,13 +17,6 @@ class ParameterBase(ABC):
         # check consistency
         self.check_consisteny()
 
-    def __repr__(self):
-        """
-        display all attributes except 'param_dict'
-        """
-        return "\t" + type(self).__name__ + ": \n" + \
-                ("\n".join(["\t\t" + k + ":\t" + str(self.__dict__[k]) for k in self.__dict__ if k != "param_dict"]))+"\n"
-
     def __str__(self):
         """
         display all attributes except 'param_dict'
@@ -209,6 +202,13 @@ class EquationParameter(ParameterBase):
         if any([l>=u for l,u in zip(self.output_lb, self.output_ub)]):
             raise ValueError("output_lb is not smaller than output_ub")
         pass
+
+    def __repr__(self):
+        """
+        display all attributes except 'param_dict'
+        """
+        return "\t\t" + type(self).__name__ + ": \n" + \
+                ("\n".join(["\t\t\t" + k + ":\t" + str(self.__dict__[k]) for k in self.__dict__ if k != "param_dict"]))+"\n"
 
 
 class TrainingParameter(ParameterBase):
