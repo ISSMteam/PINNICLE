@@ -30,6 +30,9 @@ class SSA2DUniformB(EquationBase): #{{{
         # default weights
         self.pde_weights = [1.0e-10, 1.0e-10]
 
+        # update from the input parameters
+        self.update_parameters()
+
     def pde(self, nn_input_var, nn_output_var):
         """ residual of SSA 2D PDEs
 
@@ -109,6 +112,9 @@ class MOLHO(EquationBase): #{{{
         # gauss points for integration
         self.constants = {"gauss_x":[0.5, 0.23076534494715845, 0.7692346550528415, 0.04691007703066802, 0.9530899229693319],
                 "gauss_weights":[0.5688888888888889,0.4786286704993665,0.4786286704993665,0.2369268850561891,0.2369268850561891]}
+
+        # update from the input parameters
+        self.update_parameters()
 
     def pde(self, nn_input_var, nn_output_var):
         """ residual of MOLHO 2D PDEs

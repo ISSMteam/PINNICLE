@@ -59,7 +59,24 @@ class EquationBase(ABC):
         """ update attributes of the class using EquationParameter
         """
         # input
-        pass
+        if len(self.parameters.input) > 0:
+            self.local_input_var = {k:i for i,k in enumerate(self.parameters.input)}
+        # output
+        # TODO: seperate each of the variables, add tests
+        if len(self.parameters.output) > 0:
+            for i,k in enumerate(self.parameters.output):
+                self.local_output_var[k] = i
+                self.output_lb[k] = self.parameters.output_lb[i] 
+                self.output_ub[k] = self.parameters.output_ub[i] 
+                self.data_weights[k] = self.parameters.data_weights[i]
+        # pde weights
+        if isinstance(self.parameters.pde_weights, int):
+            self.pde_weights = [self.parameter.pde_weights for r in self.residuals]
+        elif isinstance(self.parameters.pde_weights, list):
+            if len(self.parameters.pde_weights) == 1:
+                self.pde_weights = [self.parameter.pde_weights[0] for r in self.residuals]
+            else:
+                self.pde_weights = self.parameter.pde_weights
 
     @abstractmethod
     def pde(self, nn_input_var, nn_output_var):

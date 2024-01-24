@@ -84,3 +84,18 @@ def test_Physics_Exception():
 
     with pytest.raises(Exception):
         phy = Physics(PhysicsParameter(hp))
+
+def test_update_Physics_SSA():
+    SSA = {}
+    SSA["scalar_variables"] = {"B":1.26802073401e+08}
+    hp = {}
+    hp["equations"] = {"SSA":SSA}
+    phy = Physics(PhysicsParameter(hp))
+
+    assert phy.input_var == ['x', 'y']
+    SSA["input"] = ['x']
+    hp["equations"] = {"SSA":SSA}
+    phy = Physics(PhysicsParameter(hp))
+    assert phy.input_var == ['x']
+
+
