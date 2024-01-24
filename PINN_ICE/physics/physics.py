@@ -1,5 +1,5 @@
 import deepxde as dde
-from ..parameters import PhysicsParameter
+from ..parameter import PhysicsParameter
 from . import stressbalance
 import itertools
 
@@ -40,7 +40,7 @@ class Physics:
         equation = None
         if eq == "SSA":
             equation = stressbalance.SSA2DUniformB
-        if eq == "MOLHO":
+        elif eq == "MOLHO":
             equation = stressbalance.MOLHO
         # TODO: add mass conservation
 

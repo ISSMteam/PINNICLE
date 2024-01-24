@@ -1,9 +1,11 @@
 from abc import ABC, abstractmethod
+from ..parameter import EquationParameter
 
 class EquationBase(ABC):
     """ base class of all the equations
     """
-    def __init__(self):
+    def __init__(self, parameters=EquationParameter()):
+        self.parameters = parameters
         # Physical constants in [SI]
         self.rhoi   = 917.0             # ice density (kg/m^3)
         self.rhow   = 1023.0            # sea water density (kg/m^3)
@@ -52,7 +54,13 @@ class EquationBase(ABC):
             self.local_input_var = {o:global_input_var.index(o) for o in self.local_input_var}
         if global_output_var is not None:
             self.local_output_var = {o:global_output_var.index(o) for o in self.local_output_var}
-        
+
+    def update_parameters(self):
+        """ update attributes of the class using EquationParameter
+        """
+        # input
+        pass
+
     @abstractmethod
     def pde(self, nn_input_var, nn_output_var):
         """ pde function used in deepxde

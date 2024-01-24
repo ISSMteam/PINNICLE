@@ -1,6 +1,6 @@
 import deepxde as dde
 from .helper import minmax_scale, up_scale
-from ..parameters import NNParameter
+from ..parameter import NNParameter
 
 class FNN:
     def __init__(self, parameters=NNParameter()):

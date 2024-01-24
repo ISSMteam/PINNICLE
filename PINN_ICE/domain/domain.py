@@ -1,4 +1,4 @@
-from ..parameters import DomainParameter
+from ..parameter import DomainParameter
 from ..utils import is_file_ext
 import pandas as pd
 import numpy as np

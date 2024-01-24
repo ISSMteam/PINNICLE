@@ -1,5 +1,6 @@
 import PINN_ICE as pinn
 from PINN_ICE.nn.helper import minmax_scale, up_scale
+from PINN_ICE.parameter import *
 import numpy as np
 
 def test_minmax_scale():
@@ -18,11 +19,11 @@ def test_upscale():
 
 def test_new_nn():
     p = pinn.nn.FNN()
-    d = pinn.parameters.NNParameter()
+    d = NNParameter()
     assert (p.parameters.__dict__ == d.__dict__)
 
 def test_input_scale_nn():
-    d = pinn.parameters.NNParameter()
+    d = NNParameter()
     d.input_lb = 1.0
     d.input_ub = 10.0
     p = pinn.nn.FNN(d)
@@ -30,7 +31,7 @@ def test_input_scale_nn():
     assert np.all(abs(p.net._input_transform(x)) < 1.0+np.finfo(float).eps)
 
 def test_input_scale_nn():
-    d = pinn.parameters.NNParameter()
+    d = NNParameter()
     d.output_lb = 1.0
     d.output_ub = 10.0
     p = pinn.nn.FNN(d)

@@ -7,7 +7,7 @@ from .utils import save_dict_to_json, load_dict_from_json, History, plot_solutio
 from .nn import FNN
 from .physics import Physics
 from .domain import Domain
-from .parameters import Parameters
+from .parameter import Parameters
 from .modeldata import Data
 
 

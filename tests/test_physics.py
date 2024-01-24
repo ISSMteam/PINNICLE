@@ -1,10 +1,11 @@
 import PINN_ICE as pinn
 import numpy as np
 from PINN_ICE.physics import *
+from PINN_ICE.parameter import *
 import pytest
 
 def test_update_cid():
-    p = pinn.parameters.EquationParameter({"scalar_variables":{"B":1}})
+    p = EquationParameter({"scalar_variables":{"B":1}})
     ssa = SSA2DUniformB(p)
 
     # input id

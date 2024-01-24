@@ -1,10 +1,11 @@
 import PINN_ICE as pinn
+from PINN_ICE.parameter import *
 import pytest
 
 yts = 3600*24*365.0
 
 def test_domain_parameter():
-    d = pinn.parameters.DomainParameter()
+    d = DomainParameter()
     assert hasattr(d, "param_dict"), "Default attribute 'param_dict' not found"
 
     newat = {"feature_not_exist_1":1, "feature_not_exist_2": [2,3,4]}
@@ -15,11 +16,11 @@ def test_domain_parameter():
     assert d.has_keys(newat) == True
 
 def test_data_parameter():
-    d = pinn.parameters.DataParameter({"dataname":['u', 'v'], "datasize":[4000, 4000]})
+    d = DataParameter({"dataname":['u', 'v'], "datasize":[4000, 4000]})
     assert hasattr(d, "param_dict"), "Default attribute 'param_dict' not found"
 
 def test_nn_parameter():
-    d = pinn.parameters.NNParameter()
+    d = NNParameter()
     assert hasattr(d, "param_dict"), "Default attribute 'param_dict' not found"
 
     assert not d.is_input_scaling()
@@ -33,11 +34,11 @@ def test_nn_parameter():
     assert d.is_output_scaling()
 
 def test_parameters():
-    p = pinn.Parameters()
-    domain = pinn.parameters.DomainParameter()
-    data = pinn.parameters.DataParameter()
-    nn = pinn.parameters.NNParameter()
-    physics = pinn.parameters.PhysicsParameter()
+    p = Parameters()
+    domain = DomainParameter()
+    data = DataParameter()
+    nn = NNParameter()
+    physics = PhysicsParameter()
     assert p.domain.__dict__ == domain.__dict__
     assert p.data.__dict__ == data.__dict__
     assert p.nn.__dict__ == nn.__dict__
@@ -50,15 +51,15 @@ def test_equation_parameters():
     SSA["output_lb"] = [-1.0e4/yts, -1.0e4/yts, -1.0e3,  10.0, 0.01]
     SSA["output_ub"] = [ 1.0e4/yts,  1.0e4/yts,  2.5e3, 2.0e3, 1.0e4]
     SSA["data_weights"] = [1.0e-8*yts**2.0, 1.0e-8*yts**2.0, 1.0e-6, 1.0e-6, 1.0e-8]
-    p = pinn.parameters.EquationParameter(SSA)
+    p = EquationParameter(SSA)
     assert p.input == SSA["input"]
     assert p.output == SSA["output"]
 
     SSA["output_lb"] = [1.0e4/yts, -1.0e4/yts]
     with pytest.raises(Exception):
-        p = pinn.parameters.EquationParameter(SSA)
+        p = EquationParameter(SSA)
 
     SSA["output_lb"] = [1.0e4/yts, -1.0e4/yts, -1.0e3,  10.0, 0.01]
     SSA["output_ub"] = [ 1.0e4/yts,  1.0e4/yts,  2.5e3, 2.0e3, 1.0e4]
     with pytest.raises(Exception):
-        p = pinn.parameters.EquationParameter(SSA)
+        p = EquationParameter(SSA)

@@ -177,6 +177,12 @@ class PhysicsParameter(ParameterBase):
         """
         self.equations = {k:EquationParameter(self.equations[k]) for k in self.equations}
 
+    def __str__(self):
+        """
+        display all equations
+        """
+        return "\t" + type(self).__name__ + ": \n" + \
+                ("\n".join(["\t\t" + k + ":\n" + str(self.equations[k]) for k in self.equations]))+"\n"
 
 class EquationParameter(ParameterBase):
     """ parameter of equations
@@ -203,12 +209,11 @@ class EquationParameter(ParameterBase):
             raise ValueError("output_lb is not smaller than output_ub")
         pass
 
-    def __repr__(self):
+    def __str__(self):
         """
         display all attributes except 'param_dict'
         """
-        return "\t\t" + type(self).__name__ + ": \n" + \
-                ("\n".join(["\t\t\t" + k + ":\t" + str(self.__dict__[k]) for k in self.__dict__ if k != "param_dict"]))+"\n"
+        return ("\n".join(["\t\t\t" + k + ":\t" + str(self.__dict__[k]) for k in self.__dict__ if k != "param_dict"]))+"\n"
 
 
 class TrainingParameter(ParameterBase):

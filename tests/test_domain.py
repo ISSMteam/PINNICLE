@@ -11,11 +11,11 @@ def test_update_cid():
     hp = {}
     hp["shapefile"] = os.path.join(repoPath, "dataset", expFileName)
 
-    p = pinn.parameters.DomainParameter()
+    p = pinn.parameter.DomainParameter()
     # Check exceptions
     with pytest.raises(Exception):
         d = pinn.domain.Domain(p)
 
-    p2 = pinn.parameters.DomainParameter(hp)
+    p2 = pinn.parameter.DomainParameter(hp)
     d2 = pinn.domain.Domain(p2)
     assert type(d2.geometry) == dde.geometry.Polygon
