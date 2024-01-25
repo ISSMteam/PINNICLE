@@ -45,6 +45,7 @@ def test_parameters():
     assert p.nn.__dict__ == nn.__dict__
     assert p.physics.__dict__ == physics.__dict__
 
+
 def test_equation_parameters():
     SSA = {}
     SSA["input"] = ["x", "y"]
@@ -73,4 +74,12 @@ def test_equation_parameters():
     SSA["output_ub"] = [ 1.0e4/yts,  1.0e4/yts,  2.5e3, 2.0e3, 1.0e4]
     with pytest.raises(Exception):
         p = EquationParameter(SSA)
+
+    hp = {}
+    hp['equations'] = {'SSA': {}}
+    p = Parameters(hp)
+    
+    hp['equations'] = {'NOT DEFINED': {}}
+    with pytest.raises(Exception):
+        p = Parameters(hp)
 

@@ -192,7 +192,7 @@ class EquationParameter(ParameterBase):
     @classmethod
     def create(cls, equation_type,  **kwargs):
         if equation_type not in cls.subclasses:
-            raise ValueError(f"Equation type {format(message_type)} is not defined")
+            raise ValueError(f"Equation type {format(equation_type)} is not defined")
         return cls.subclasses[equation_type](**kwargs)
 
     def set_default(self):
