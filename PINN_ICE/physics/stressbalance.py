@@ -29,6 +29,7 @@ class SSAEquationParameter(EquationParameter, Constants):
 class SSA(EquationBase): #{{{
     """ SSA on 2D problem with uniform B
     """
+    _EQUATION_TYPE = 'SSA' 
     def __init__(self, parameters=SSAEquationParameter()):
         super().__init__(parameters)
 
@@ -110,6 +111,7 @@ class MOLHOEquationParameter(EquationParameter, Constants):
 class MOLHO(EquationBase): #{{{
     """ MOLHO on 2D problem with uniform B
     """
+    _EQUATION_TYPE = 'MOLHO' 
     def __init__(self, parameters=EquationParameter()):
         super().__init__(parameters)
 

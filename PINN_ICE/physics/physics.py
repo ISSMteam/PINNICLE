@@ -1,6 +1,6 @@
 import deepxde as dde
 from ..parameter import PhysicsParameter
-from . import stressbalance
+from . import EquationBase
 import itertools
 
 
@@ -11,7 +11,7 @@ class Physics:
         self.parameters = parameters
 
         # add all physics 
-        self.equations = [self._add_equations(eq) for eq in self.parameters.equations] 
+        self.equations = [EquationBase.create(eq, parameters=self.parameters.equations[eq])  for eq in self.parameters.equations] 
 
         # update (global) input, output variable list from local_input_var and local_output_var of each equations
         self.input_var = self._update_global_variables([p.local_input_var for p in self.equations])
@@ -34,22 +34,6 @@ class Physics:
         self.residuals = list(itertools.chain.from_iterable([p.residuals for p in self.equations]))
         self.pde_weights = list(itertools.chain.from_iterable([p.pde_weights for p in self.equations]))
 
-    def _add_equations(self, eq):
-        """ add equations to the model
-        """
-        equation = None
-        if eq == "SSA":
-            equation = stressbalance.SSA
-        elif eq == "MOLHO":
-            equation = stressbalance.MOLHO
-        # TODO: add mass conservation
-
-        # TODO: if eq is a class, directly add it to the physics
-        if equation is not None:
-            return equation(self.parameters.equations[eq])
-        else:
-            raise ValueError(f"Unknown equations {eq} found. Please define the physics first!")
-        
     def _update_global_variables(self, local_var_list):
         """ Update global variables based on a list of local varialbes,
             find all unqiue keys, then put in one single List

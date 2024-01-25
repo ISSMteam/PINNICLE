@@ -5,6 +5,17 @@ from . import Constants
 class EquationBase(ABC, Constants):
     """ base class of all the equations
     """
+    subclasses = {}
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        cls.subclasses[cls._EQUATION_TYPE] = cls
+
+    @classmethod
+    def create(cls, equation_type,  **kwargs):
+        if equation_type not in cls.subclasses:
+            raise ValueError(f"Equation type {format(equation_type)} is not defined")
+        return cls.subclasses[equation_type](**kwargs)
+
     def __init__(self, parameters=EquationParameter()):
         # load constants first
         Constants.__init__(self)
