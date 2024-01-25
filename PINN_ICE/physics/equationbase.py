@@ -74,9 +74,7 @@ class EquationBase(ABC):
             if len(self.parameters.data_weights) > 0:
                 self.data_weights = {k:self.parameters.data_weights[i] for i,k in enumerate(self.parameters.output)}
         # pde weights
-        if isinstance(self.parameters.pde_weights, int):
-            self.pde_weights = [self.parameter.pde_weights for r in self.residuals]
-        elif isinstance(self.parameters.pde_weights, list):
+        if isinstance(self.parameters.pde_weights, list):
             if len(self.parameters.pde_weights) == 1:
                 self.pde_weights = [self.parameters.pde_weights[0] for r in self.residuals]
             else:
