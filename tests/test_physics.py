@@ -91,11 +91,24 @@ def test_update_Physics_SSA():
     hp = {}
     hp["equations"] = {"SSA":SSA}
     phy = Physics(PhysicsParameter(hp))
-
     assert phy.input_var == ['x', 'y']
+
     SSA["input"] = ['x']
+    SSA["output"] = ['a','b','c']
+    SSA["output_lb"] =[-1.0,-1.0,-1.0]
+    SSA["output_ub"] =[1.0,1.0,1.0]
+    SSA["data_weights"] = [10.0, 1.0, 10.0]
+    SSA["pde_weights"] = [1.0e-10, 1.0e-10 ]
     hp["equations"] = {"SSA":SSA}
     phy = Physics(PhysicsParameter(hp))
     assert phy.input_var == ['x']
+    assert phy.output_var == ['a', 'b', 'c']
+    assert phy.output_lb == [-1, -1, -1]
+    assert phy.output_ub == [1, 1, 1]
+    assert phy.data_weights == [10.0, 1.0, 10.0]
+    assert phy.pde_weights == [1.0e-10, 1.0e-10]
 
-
+    SSA["pde_weights"] = 1.0e-10
+    hp["equations"] = {"SSA":SSA}
+    phy = Physics(PhysicsParameter(hp))
+    assert phy.pde_weights == [1.0e-10, 1.0e-10]

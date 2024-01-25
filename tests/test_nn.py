@@ -30,7 +30,7 @@ def test_input_scale_nn():
     x = np.linspace(d.input_lb, d.input_ub, 100)
     assert np.all(abs(p.net._input_transform(x)) < 1.0+np.finfo(float).eps)
 
-def test_input_scale_nn():
+def test_output_scale_nn():
     d = NNParameter()
     d.output_lb = 1.0
     d.output_ub = 10.0
