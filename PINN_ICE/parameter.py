@@ -18,37 +18,32 @@ class ParameterBase(ABC):
         self.check_consisteny()
 
     def __str__(self):
-        """
-        display all attributes except 'param_dict'
+        """ display all attributes except 'param_dict'
         """
         return "\t" + type(self).__name__ + ": \n" + \
                 ("\n".join(["\t\t" + k + ":\t" + str(self.__dict__[k]) for k in self.__dict__ if k != "param_dict"]))+"\n"
 
     @abstractmethod
     def set_default(self):
-        """
-        set default values
+        """ set default values
         """
         pass
 
     @abstractmethod
     def check_consisteny(self):
-        """
-        check consistency of the parameter data
+        """ check consistency of the parameter data
         """
         pass
 
     def _add_parameters(self, pdict: dict):
-        """
-        add all the keys from pdict to the class, with their values
+        """ add all the keys from pdict to the class, with their values
         """
         if isinstance(pdict, dict):
             for key, value in pdict.items():
                 setattr(self, key, value)
 
     def set_parameters(self, pdict: dict):
-        """
-        find all the keys from pdict which are avalible in the class, update the values
+        """ find all the keys from pdict which are avalible in the class, update the values
         """
         if isinstance(pdict, dict):
             for key, value in pdict.items():
@@ -57,8 +52,7 @@ class ParameterBase(ABC):
                     setattr(self, key, value)
 
     def has_keys(self, keys):
-        """
-        if all the keys are in the class, return true, otherwise return false
+        """ if all the keys are in the class, return true, otherwise return false
         """
         if isinstance(keys, dict) or isinstance(keys, list):
             return all([hasattr(self, k) for k in keys])
@@ -173,9 +167,9 @@ class PhysicsParameter(ParameterBase):
         pass
 
     def setup_equations(self):
-        """ translate the input dict to EquationParameter(), and save back to the values in self.equations
+        """ translate the input dict to subclass of EquationParameter(), and save back to the values in self.equations
         """
-        self.equations = {k:EquationParameter(self.equations[k]) for k in self.equations}
+        self.equations = {k:EquationParameter.create(k, param_dict = self.equations[k]) for k in self.equations}
 
     def __str__(self):
         """
@@ -187,16 +181,34 @@ class PhysicsParameter(ParameterBase):
 class EquationParameter(ParameterBase):
     """ parameter of equations
     """
+    subclasses = {}
     def __init__(self, param_dict={}):
         super().__init__(param_dict)
 
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        cls.subclasses[cls._EQUATION_TYPE] = cls
+
+    @classmethod
+    def create(cls, equation_type,  **kwargs):
+        if equation_type not in cls.subclasses:
+            raise ValueError(f"Equation type {format(message_type)} is not defined")
+        return cls.subclasses[equation_type](**kwargs)
+
     def set_default(self):
+        # list of input names
         self.input = []
+        # list of output names
         self.output = []
+        # lower and upper bound of output 
         self.output_lb = []
         self.output_ub = []
+        # weights of each output 
         self.data_weights = []
-        self.pde_weights = None
+        # names of residuals
+        self.residuals = [] 
+        # pde weights
+        self.pde_weights = []
         # scalar variables: name:value
         self.scalar_variables = {}
 
@@ -207,7 +219,30 @@ class EquationParameter(ParameterBase):
             raise ValueError("Size of 'output' does not match the size of 'output_ub'")
         if any([l>=u for l,u in zip(self.output_lb, self.output_ub)]):
             raise ValueError("output_lb is not smaller than output_ub")
-        pass
+        if (len(self.output)) != (len(self.data_weights)):
+            raise ValueError("Size of 'output' does not match the size of 'data_weights'")
+
+        # check the pde weights
+        if isinstance(self.pde_weights, list):
+            if len(self.pde_weights) != len(self.residuals):
+                raise ValueError("Length of pde_weights does not match the length of residuals")
+        else:
+            raise ValueError("pde_weights is not a list")
+        
+    def set_parameters(self, pdict: dict):
+        """ overwrite the default function, so that for 'scalar_parameters', only update the dict
+        """
+        if isinstance(pdict, dict):
+            for key, value in pdict.items():
+                # only update attribute the key
+                if hasattr(self, key):
+                    # only update the dictionary, not overwirte
+                    if isinstance(value, dict):
+                        old_dict = getattr(self, key)
+                        old_dict.update(value)
+                        setattr(self, key, old_dict)
+                    else:
+                        setattr(self, key, value)
 
     def __str__(self):
         """

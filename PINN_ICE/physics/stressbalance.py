@@ -1,37 +1,36 @@
 import deepxde as dde
-from . import EquationBase
+from . import EquationBase, Constants
 from ..parameter import EquationParameter
 
-
-class SSA2DUniformB(EquationBase): #{{{
-    """ SSA on 2D problem with uniform B
+class SSAEquationParameter(EquationParameter, Constants):
+    """ default parameters for SSA
     """
-    def __init__(self, parameters=EquationParameter()):
-        super().__init__(parameters)
-        # viscosity 
-        self.B = 1.26802073401e+08 # -8 degree C, cuffey 
-        self.n = 3.0
+    _EQUATION_TYPE = 'SSA' 
+    def __init__(self, param_dict={}):
+        # load necessary constants
+        Constants.__init__(self)
+        super().__init__(param_dict)
 
-        # Dict of input and output used in this model, and their component id
-        # Note the ids will be reassigned after adding all physics together
-        self.local_input_var = {"x":0, "y":1}        
-        self.local_output_var = {"u":0, "v":1, "s":2, "H":3, "C":4}
-
-        # default lower and upper bounds of the output in [SI] unit
-        self.output_lb = {"u":-1.0e4/self.yts, "v":-1.0e4/self.yts, "s":-1.0e3, "H":10.0, "C":0.01}
-        self.output_ub = {"u":1.0e4/self.yts, "v":1.0e4/self.yts, "s":2.5e3, "H":2000.0, "C":1.0e4}
-
-        # default scaling: data to 1 in [SI]
-        self.data_weights = {"u":1.0e-8*self.yts**2.0, "v":1.0e-8*self.yts**2.0, "s":1.0e-6, "H":1.0e-6, "C":1.0e-8}
-
-        # names of the residuals
+    def set_default(self):
+        self.input = ['x', 'y']
+        self.output = ['u', 'v', 's', 'H', 'C']
+        self.output_lb = [-1.0e4/self.yts, -1.0e4/self.yts, -1.0e3, 10.0, 0.01]
+        self.output_ub = [ 1.0e4/self.yts,  1.0e4/self.yts,  2.5e3, 2000.0, 1.0e4]
+        self.data_weights = [1.0e-8*self.yts**2.0, 1.0e-8*self.yts**2.0, 1.0e-6, 1.0e-6, 1.0e-8]
         self.residuals = ["fSSA1", "fSSA2"]
-
-        # default weights
         self.pde_weights = [1.0e-10, 1.0e-10]
 
-        # update from the input parameters
-        self.update_parameters()
+        # scalar variables: name:value
+        self.scalar_variables = {
+                'n': 3.0,               # exponent of Glen's flow law
+                'B':1.26802073401e+08   # -8 degree C, cuffey
+                }
+
+class SSA(EquationBase): #{{{
+    """ SSA on 2D problem with uniform B
+    """
+    def __init__(self, parameters=SSAEquationParameter()):
+        super().__init__(parameters)
 
     def pde(self, nn_input_var, nn_output_var):
         """ residual of SSA 2D PDEs
@@ -84,37 +83,39 @@ class SSA2DUniformB(EquationBase): #{{{
     
         return [f1, f2] #}}}
 
+class MOLHOEquationParameter(EquationParameter, Constants):
+    """ default parameters for MOLHO
+    """
+    _EQUATION_TYPE = 'MOLHO' 
+    def __init__(self, param_dict={}):
+        # load necessary constants
+        Constants.__init__(self)
+        super().__init__(param_dict)
+
+    def set_default(self):
+        self.input = ['x', 'y']
+        self.output = ['u', 'v', 'u_base', 'v_base', 's', 'H', 'C']
+        self.output_lb = [-1.0e4/self.yts, -1.0e4/self.yts, -1.0e4/self.yts, -1.0e4/self.yts, -1.0e3, 10.0, 0.01]
+        self.output_ub = [ 1.0e4/self.yts,  1.0e4/self.yts,  1.0e4/self.yts,  1.0e4/self.yts,  2.5e3, 2000.0, 1.0e4]
+        self.data_weights = [1.0e-8*self.yts**2.0, 1.0e-8*self.yts**2.0, 1.0e-8*self.yts**2.0, 1.0e-8*self.yts**2.0, 1.0e-6, 1.0e-6, 1.0e-8]
+        self.residuals = ["fMOLHO 1", "fMOLHO 2", "fMOLHO base 1", "fMOLHO base 2"]
+        self.pde_weights = [1.0e-10, 1.0e-10, 1.0e-10, 1.0e-10]
+
+        # scalar variables: name:value
+        self.scalar_variables = {
+                'n': 3.0,               # exponent of Glen's flow law
+                'B':1.26802073401e+08   # -8 degree C, cuffey
+                }
+
 class MOLHO(EquationBase): #{{{
     """ MOLHO on 2D problem with uniform B
     """
     def __init__(self, parameters=EquationParameter()):
         super().__init__(parameters)
-        # viscosity 
-        self.B = 1.26802073401e+08 # -8 degree C, cuffey 
-        self.n = 3.0
-
-        # Dict of input and output used in this model, and their component id
-        self.local_input_var = {"x":0, "y":1}        
-        self.local_output_var = {"u":0, "v":1, "u_base":2, "v_base":3, "s":4, "H":5, "C":6}
-
-        # default lower and upper bounds of the output in [SI] unit
-        self.output_lb = {"u":-1.0e4/self.yts, "v":-1.0e4/self.yts, "u_base":-1.0e4/self.yts, "v_base":-1.0e4/self.yts, "s":-1.0e3, "H":10.0, "C":0.01}
-        self.output_ub = {"u":1.0e4/self.yts, "v":1.0e4/self.yts, "u_base":1.0e4/self.yts, "v_base":1.0e4/self.yts, "s":2.5e3, "H":2000.0, "C":1.0e4}
-
-        # default scaling: data to 1 in [SI]
-        self.data_weights = {"u":1.0e-8*self.yts**2.0, "v":1.0e-8*self.yts**2.0, "u_base":1.0e-8*self.yts**2.0, "v_base":1.0e-8*self.yts**2.0, "s":1.0e-6, "H":1.0e-6, "C":1.0e-8}
-
-        # residual names
-        self.residuals = ["fMOLHO 1", "fMOLHO 2", "fMOLHO base 1", "fMOLHO base 2"]
-
-        self.pde_weights = [1.0e-10, 1.0e-10, 1.0e-10, 1.0e-10]
 
         # gauss points for integration
         self.constants = {"gauss_x":[0.5, 0.23076534494715845, 0.7692346550528415, 0.04691007703066802, 0.9530899229693319],
                 "gauss_weights":[0.5688888888888889,0.4786286704993665,0.4786286704993665,0.2369268850561891,0.2369268850561891]}
-
-        # update from the input parameters
-        self.update_parameters()
 
     def pde(self, nn_input_var, nn_output_var):
         """ residual of MOLHO 2D PDEs

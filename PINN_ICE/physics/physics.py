@@ -39,7 +39,7 @@ class Physics:
         """
         equation = None
         if eq == "SSA":
-            equation = stressbalance.SSA2DUniformB
+            equation = stressbalance.SSA
         elif eq == "MOLHO":
             equation = stressbalance.MOLHO
         # TODO: add mass conservation

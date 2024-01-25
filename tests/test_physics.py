@@ -4,9 +4,20 @@ from PINN_ICE.physics import *
 from PINN_ICE.parameter import *
 import pytest
 
+def test_Constants():
+    SSA = {}
+    SSA["scalar_variables"] = {"B":1.26802073401e+08}
+    hp = {}
+    hp["equations"] = {"SSA":SSA}
+    phy = Physics(PhysicsParameter(hp))
+    assert phy.equations[0].rhoi == 917.0
+    assert phy.equations[0].rhow == 1023.0
+    assert phy.equations[0].g == 9.81
+    assert phy.equations[0].yts == 3600.0*24*365
+
 def test_update_cid():
-    p = EquationParameter({"scalar_variables":{"B":1}})
-    ssa = SSA2DUniformB(p)
+    p = SSAEquationParameter({"scalar_variables":{"B":1}})
+    ssa = SSA(p)
 
     # input id
     i_var = ["y", "x"]
@@ -110,10 +121,10 @@ def test_update_Physics_SSA():
 
     SSA["pde_weights"] = [1.0]
     hp["equations"] = {"SSA":SSA}
-    phy = Physics(PhysicsParameter(hp))
-    assert phy.pde_weights == [1.0, 1.0]
+    with pytest.raises(Exception):
+        phy = Physics(PhysicsParameter(hp))
 
     SSA["pde_weights"] = 1.0
     hp["equations"] = {"SSA":SSA}
-    phy = Physics(PhysicsParameter(hp))
-    assert phy.pde_weights == [1.0e-10, 1.0e-10]
+    with pytest.raises(Exception):
+        phy = Physics(PhysicsParameter(hp))
