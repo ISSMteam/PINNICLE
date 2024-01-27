@@ -8,13 +8,13 @@ from .nn import FNN
 from .physics import Physics
 from .domain import Domain
 from .parameter import Parameters
-from .modeldata import Data
+from .modeldata import DataBase
 
 
 class PINN:
     """ a basic PINN model
     """
-    def __init__(self, params={}, training_data=Data()):
+    def __init__(self, params={}):
         # Step 1: load setup parameters
         self.param = Parameters(params)
 
@@ -26,8 +26,14 @@ class PINN:
         # Step 3: set up deepxde training data object: pde+data
         # domain of the model
         self.domain = Domain(self.param.domain)
+        # create an instance of Data
+        _training_data = DataBase.create(self.param.data.source, parameters=self.param.data)
+        # load from data file
+        _training_data.load_data()
+        # update according to the setup: data_size
+        _training_data.prepare_training_data()
         # update training data
-        self.training_data = self.update_training_data(training_data)
+        self.training_data = self.update_training_data(_training_data)
         #  deepxde data object
         self.data = dde.data.PDE(
                 self.domain.geometry,
@@ -38,13 +44,13 @@ class PINN:
                 num_test=None)
 
         # the names of the loss: the order of data follows 'output_variables'
-        self.loss_names = self.physics.residuals + [d for d in self.physics.output_var if d in training_data.sol]
+        self.loss_names = self.physics.residuals + [d for d in self.physics.output_var if d in _training_data.sol]
         # update the weights for training in the same order
-        self.param.training.loss_weights = self.physics.pde_weights + [self.physics.data_weights[i] for i,d in enumerate(self.physics.output_var) if d in training_data.sol]
+        self.param.training.loss_weights = self.physics.pde_weights + [self.physics.data_weights[i] for i,d in enumerate(self.physics.output_var) if d in _training_data.sol]
 
         # Step 4: set up neural networks
         # automate the input scaling according to the domain, this step need to be done before setting up NN
-        self._update_ub_lb_in_nn(training_data)
+        self._update_ub_lb_in_nn(_training_data)
         # define the neural network in use
         self.nn = FNN(self.param.nn)
 

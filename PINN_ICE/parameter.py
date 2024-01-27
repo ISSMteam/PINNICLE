@@ -85,13 +85,18 @@ class DataParameter(ParameterBase):
         super().__init__(param_dict)
 
     def set_default(self):
+        """ default settings
         """
-        length of each data in used, leave no data variable(sol) empty or set to None
-        """
-        self.datasize = {}
+        # file path
+        self.data_path = ""
+        # length of each data in used, leave no data variable(sol) empty or set to None
+        self.data_size = {}
+        # source of the data
+        self.source = "ISSM"
 
     def check_consisteny(self):
-        pass
+        if self.source != "ISSM":
+            raise ValueError(f"Data loader of {self.source} is not implemented")
 
 
 class NNParameter(ParameterBase):
@@ -299,7 +304,7 @@ class Parameters(ParameterBase):
     def check_consisteny(self):
         # length of training.loss_weights equals to equations+datasize
         #if (any(x not in self.nn.output_variables for x in self.data.datasize)):
-        #    raise ValueError("names in 'datasize' does not match the name in 'output_variables'")
+        # TODO:    raise ValueError("names in 'datasize' does not match the name in 'output_variables'")
         pass
 
     def update_parameters(self):

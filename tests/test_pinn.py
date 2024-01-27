@@ -8,7 +8,7 @@ dde.config.disable_xla_jit()
 
 weights = [7, 7, 5, 5, 3, 3, 5];
 
-inputFileName="Helheim_Weertman_iT080_PINN_fastflow_CF"
+inputFileName="Helheim_fastflow.mat"
 expFileName = "fastflow_CF.exp"
 
 # path for loading data and saving models
@@ -35,7 +35,7 @@ hp["num_neurons"] = 20
 hp["num_layers"] = 6
 
 # data
-hp["datasize"] = {"u":4000, "v":4000, "s":4000, "H":4000, "C":None}
+hp["data_path"] = path
 
 # domain
 hp["shapefile"] = os.path.join(repoPath, "dataset", expFileName)
@@ -46,13 +46,8 @@ SSA = {}
 SSA["scalar_variables"] = {"B":1.26802073401e+08}
 hp["equations"] = {"SSA":SSA}
 
-def test_loaddata():
-    # load the data
-    X_star, u_star, X_train, u_train, X_bc, u_bc, X_cf, n_cf, uub, ulb, B = \
-    pinn.utils.prep_2D_data(path, hp["datasize"])
-    data = pinn.modeldata.Data(X=X_train, sol=u_train)
-
 def test_compile_no_data():
+    hp["data_size"] = {}
     experiment = pinn.PINN(hp)
     experiment.compile()
     assert experiment.loss_names == ['fSSA1', 'fSSA2']
@@ -70,10 +65,8 @@ def test_save_and_load_setting(tmp_path):
 def test_train(tmp_path):
     hp["save_path"] = str(tmp_path)
     hp["is_save"] = True
-    X_star, u_star, X_train, u_train, X_bc, u_bc, X_cf, n_cf, uub, ulb, mu = \
-    pinn.utils.prep_2D_data(path, hp["datasize"])
-    data = pinn.modeldata.Data(X=X_train, sol=u_train)
-    experiment = pinn.PINN(hp, training_data=data)
+    hp["data_size"] = {"u":4000, "v":4000, "s":4000, "H":4000, "C":None}
+    experiment = pinn.PINN(hp)
     experiment.compile()
     experiment.train()
     assert experiment.loss_names == ['fSSA1', 'fSSA2', 'u', 'v', 's', 'H', 'C']
