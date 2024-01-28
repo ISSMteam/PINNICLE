@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
+.coverage
 
 # Sphinx documentation
 docs/_build/
@@ -11,3 +12,4 @@ docs/_build/
 
 # VSCode
 .vscode/
+

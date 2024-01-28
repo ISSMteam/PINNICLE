@@ -105,3 +105,4 @@ class ISSMmdData(DataBase):
                     self.X[k] = X_bc
                     self.sol[k] = self.data_dict[k][idbc].flatten()[:,None]
 
+# TODO: add plot

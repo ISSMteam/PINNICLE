@@ -23,19 +23,21 @@ class PINN:
         # assign default physic.input_var, output_var, outout_lb, and output_ub to nn
         self._update_nn_parameters()
 
-        # Step 3: set up deepxde training data object: pde+data
+        # Step 3: load all avaliable data on the given domain and set up for training data
         # domain of the model
         self.domain = Domain(self.param.domain)
         # create an instance of Data
-        _training_data = DataBase.create(self.param.data.source, parameters=self.param.data)
+        self.model_data = DataBase.create(self.param.data.source, parameters=self.param.data)
         # load from data file
-        _training_data.load_data()
+        self.model_data.load_data()
         # update according to the setup: data_size
-        _training_data.prepare_training_data()
+        self.model_data.prepare_training_data()
         # update training data
-        self.training_data = self.update_training_data(_training_data)
+        self.training_data = self.update_training_data(self.model_data)
+
+        # Step 4: set up deepxde training data object using PDE + data
         #  deepxde data object
-        self.data = dde.data.PDE(
+        self.dde_data = dde.data.PDE(
                 self.domain.geometry,
                 self.physics.pdes,
                 self.training_data,  # all the data loss will be evaluated
@@ -44,18 +46,18 @@ class PINN:
                 num_test=None)
 
         # the names of the loss: the order of data follows 'output_variables'
-        self.loss_names = self.physics.residuals + [d for d in self.physics.output_var if d in _training_data.sol]
+        self.loss_names = self.physics.residuals + [d for d in self.physics.output_var if d in self.model_data.sol]
         # update the weights for training in the same order
-        self.param.training.loss_weights = self.physics.pde_weights + [self.physics.data_weights[i] for i,d in enumerate(self.physics.output_var) if d in _training_data.sol]
+        self.param.training.loss_weights = self.physics.pde_weights + [self.physics.data_weights[i] for i,d in enumerate(self.physics.output_var) if d in self.model_data.sol]
 
-        # Step 4: set up neural networks
+        # Step 5: set up neural networks
         # automate the input scaling according to the domain, this step need to be done before setting up NN
-        self._update_ub_lb_in_nn(_training_data)
+        self._update_ub_lb_in_nn(self.model_data)
         # define the neural network in use
         self.nn = FNN(self.param.nn)
 
-        # Step 5: setup the deepxde PINN model
-        self.model = dde.Model(self.data, self.nn.net)
+        # Step 6: setup the deepxde PINN model
+        self.model = dde.Model(self.dde_data, self.nn.net)
 
     def check_path(self, path, loadOnly=False):
         """check the path, set to default, and create folder if needed

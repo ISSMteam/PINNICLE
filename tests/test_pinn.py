@@ -70,3 +70,13 @@ def test_train(tmp_path):
     experiment.compile()
     experiment.train()
     assert experiment.loss_names == ['fSSA1', 'fSSA2', 'u', 'v', 's', 'H', 'C']
+
+def test_plot(tmp_path):
+    hp["save_path"] = str(tmp_path)
+    hp["is_save"] = True
+    hp["data_size"] = {"u":4000, "v":4000, "s":4000, "H":4000, "C":None}
+    experiment = pinn.PINN(hp)
+    experiment.compile()
+    assert experiment.plot_predictions(X_ref=experiment.model_data.X_dict, sol_ref=experiment.model_data.data_dict, resolution=10) == None
+    X_ref = np.hstack((experiment.model_data.X_dict['x'].flatten()[:,None],experiment.model_data.X_dict['y'].flatten()[:,None]))
+    assert experiment.plot_predictions(X_ref=X_ref, sol_ref=experiment.model_data.data_dict, resolution=10) == None
