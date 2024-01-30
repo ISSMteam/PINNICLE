@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from ..parameter import DataParameter
+from ..physics import Constants
 import os
 import numpy as np
 import mat73
@@ -38,11 +39,12 @@ class DataBase(ABC):
         pass
 
 
-class ISSMmdData(DataBase):
+class ISSMmdData(DataBase, Constants):
     """ data loaded from model in ISSM
     """
     _DATA_TYPE = "ISSM"
     def __init__(self, parameters=DataParameter()):
+        Constants.__init__(self)
         super().__init__(parameters)
 
     def load_data(self):
@@ -57,8 +59,8 @@ class ISSMmdData(DataBase):
         self.X_dict['x'] = md['mesh']['x']
         self.X_dict['y'] = md['mesh']['y']
         # data
-        self.data_dict['u'] = md['inversion']['vx_obs']
-        self.data_dict['v'] = md['inversion']['vy_obs']
+        self.data_dict['u'] = md['inversion']['vx_obs']/self.yts
+        self.data_dict['v'] = md['inversion']['vy_obs']/self.yts
         self.data_dict['s'] = md['geometry']['surface']
         self.data_dict['H'] = md['geometry']['thickness']
         self.data_dict['C'] = md['friction']['C']
