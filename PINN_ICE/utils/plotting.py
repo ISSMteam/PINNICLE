@@ -48,13 +48,13 @@ def plot_solutions(pinn, path="", X_ref=None, sol_ref=None, cols=None, resolutio
             if isinstance(sol_ref, np.ndarray):
                 plot_data.update({k+"_ref":griddata(X_ref, sol_ref[:,i].flatten(), (X, Y), method='cubic') for i,k in enumerate(pinn.param.nn.output_variables)})
             elif isinstance(sol_ref, dict):
-                plot_data.update({k+"_ref":griddata(X_ref, sol_ref[k].flatten(), (X, Y), method='cubic') for k in pinn.param.nn.output_variables})
+                plot_data.update({k+"_ref":griddata(X_ref, sol_ref[k].flatten(), (X, Y), method='cubic') for k in pinn.param.nn.output_variables if k in sol_ref})
             else:
                 raise TypeError(f"Type of sol_ref ({type(sol_ref)}) is not supported ")
             
             vranges.update({k+"_ref":vranges[k+"_pred"] for k in pinn.param.nn.output_variables})
-            plot_data.update({k+"_diff":(plot_data[k+"_pred"] - plot_data[k+"_ref"]) for k in pinn.param.nn.output_variables})
-            vranges.update({k+"_diff":[-0.1*max(np.abs(vranges[k+"_pred"])), 0.1*max(np.abs(vranges[k+"_pred"]))] for k in pinn.param.nn.output_variables})
+            plot_data.update({k+"_diff":(plot_data[k+"_pred"] - plot_data[k+"_ref"]) for k in pinn.param.nn.output_variables if k in sol_ref})
+            vranges.update({k+"_diff":[-0.1*max(np.abs(vranges[k+"_pred"])), 0.1*max(np.abs(vranges[k+"_pred"]))] for k in pinn.param.nn.output_variables if k in sol_ref})
 
         # plot
         n = len(plot_data)
