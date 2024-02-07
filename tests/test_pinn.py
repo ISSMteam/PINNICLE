@@ -1,8 +1,9 @@
-import PINN_ICE as pinn
 import os
+import PINN_ICE as pinn
 import numpy as np
-from datetime import datetime
 import deepxde as dde
+from datetime import datetime
+from PINN_ICE.utils import data_misfit
 
 dde.config.set_default_float('float64')
 dde.config.disable_xla_jit()
@@ -71,7 +72,7 @@ def test_add_loss():
     assert type(experiment.training_data[-1]) == dde.icbc.boundary_conditions.PointSetBC
     assert len(experiment.loss_names) == 7
     assert len(experiment.param.training.loss_weights) == 7
-    assert experiment.param.training.loss_function == "MSE"
+    assert experiment.param.training.loss_function == ["MSE"]*7
 
     hp["data_size"] = {"u":4000, "v":4000, "s":4000, "H":4000, "C":None, "vel":4000}
     experiment = pinn.PINN(hp)
@@ -80,6 +81,7 @@ def test_add_loss():
     assert len(experiment.loss_names) == 8
     assert len(experiment.param.training.loss_weights) == 8
     assert len(experiment.param.training.loss_function) == 8
+    assert experiment.param.training.loss_function == ["MSE"]*7 + [data_misfit.get("VEL_LOG")]
 
 def test_save_and_load_setting(tmp_path):
     experiment = pinn.PINN(hp)
