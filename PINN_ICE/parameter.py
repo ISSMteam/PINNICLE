@@ -284,7 +284,6 @@ class TrainingParameter(ParameterBase):
         """ convert dict to class LossFunctionParameter
         """
         self.additional_loss = {k:LossFunctionParameter(self.additional_loss[k]) for k in self.additional_loss}
-        print(self.additional_loss)
 
 class LossFunctionParameter(ParameterBase):
     """ parameter of customize loss function

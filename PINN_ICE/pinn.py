@@ -3,7 +3,7 @@ import numpy as np
 import json
 import os
 
-from .utils import save_dict_to_json, load_dict_from_json, History, plot_solutions
+from .utils import save_dict_to_json, load_dict_from_json, History, plot_solutions, data_misfit
 from .nn import FNN
 from .physics import Physics
 from .domain import Domain
@@ -34,7 +34,7 @@ class PINN:
         self.model_data.prepare_training_data()
 
         # Step 4: update training data
-        self.training_data, self.loss_names, self.param.training.loss_weights = self.update_training_data(self.model_data)
+        self.training_data, self.loss_names, self.param.training.loss_weights, self.param.training.loss_function = self.update_training_data(self.model_data)
 
         # Step 5: set up deepxde training data object using PDE + data
         #  deepxde data object
@@ -171,31 +171,38 @@ class PINN:
         loss_names = self.physics.residuals + [d for d in self.physics.output_var if d in self.model_data.sol]
         # update the weights for training in the same order
         loss_weights = self.physics.pde_weights + [self.physics.data_weights[i] for i,d in enumerate(self.physics.output_var) if d in self.model_data.sol]
+    
+        # update loss functions to a list, if not
+        if not isinstance(self.param.training.loss_function, list):
+            loss_functions = [self.param.training.loss_function]*len(loss_weights)
+        else:
+            loss_functions = self.param.training.loss_function
 
         # if additional_loss is not empty
         if self.param.training.additional_loss:
-            # append to training_temp for those in the physics
-            training_temp += [dde.icbc.PointSetBC(training_data.X[d], training_data.sol[d], component=i) 
-                              for i,d in enumerate(self.param.nn.output_variables) 
-                              if d in self.param.training.additional_loss]
+            for d in self.param.training.additional_loss:
+                if (d in training_data.X):
+                    # append to training_temp for those in the physics
+                    if d in self.param.nn.output_variables:
+                        # get the index in output of nn
+                        i = self.param.nn.output_variables.index(d)
+                        # training data
+                        training_temp.append(dde.icbc.PointSetBC(training_data.X[d], training_data.sol[d], component=i))
+                    # if the variable is not part of the output from nn
+                    # currently, only implement 'vel'
+                    elif d == "vel":
+                        training_temp.append(dde.icbc.PointSetOperatorBC(training_data.X[d], training_data.sol[d], self.physics.vel_mag))
+                    else:
+                        raise ValueError(f"{d} is not found in the output_variable of the nn, and not defined")
 
-            # if the variable is not part of the output from nn
-            # currently, only implement 'vel'
-            d = "vel"
-            if (d in self.param.training.additional_loss) and (d in training_data.X):
-                training_temp += [dde.icbc.PointSetOperatorBC(training_data.X[d], training_data.sol[d], self.physics.vel_mag)]
+                    # loss name
+                    loss_names.append(self.param.training.additional_loss[d].name)
+                    # weights
+                    loss_weights.append(self.param.training.additional_loss[d].weight)
+                    # append loss functions
+                    loss_functions.append(data_misfit.get(self.param.training.additional_loss[d].function))
 
-
-#        # if has additional loss functions
-#        if self.param.training.additional_loss:
-#            # append additional_loss to loss_names and loss_weights
-#            self.loss_names += [self.param.training.additional_loss[k].name for k in self.param.training.additional_loss]
-#            # change loss_function to a list
-#            self.param.training.loss_function = []
-#            self.param.training.loss_function += [self.param.training.additional_loss[k].function for k in self.param.training.additional_loss]
-#
-
-        return training_temp, loss_names, loss_weights
+        return training_temp, loss_names, loss_weights, loss_functions
 
     def _update_nn_parameters(self):
         """ assign physic.input_var, output_var, output_lb, and output_ub to nn
