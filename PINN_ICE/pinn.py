@@ -32,10 +32,11 @@ class PINN:
         self.model_data.load_data()
         # update according to the setup: data_size
         self.model_data.prepare_training_data()
-        # update training data
-        self.training_data = self.update_training_data(self.model_data)
 
-        # Step 4: set up deepxde training data object using PDE + data
+        # Step 4: update training data
+        self.training_data, self.loss_names, self.param.training.loss_weights = self.update_training_data(self.model_data)
+
+        # Step 5: set up deepxde training data object using PDE + data
         #  deepxde data object
         self.dde_data = dde.data.PDE(
                 self.domain.geometry,
@@ -45,26 +46,13 @@ class PINN:
                 num_boundary=0,  # no need to set for data misfit, unless add calving front boundary, etc.
                 num_test=None)
 
-        # the names of the loss: the order of data follows 'output_variables'
-        self.loss_names = self.physics.residuals + [d for d in self.physics.output_var if d in self.model_data.sol]
-        # update the weights for training in the same order
-        self.param.training.loss_weights = self.physics.pde_weights + [self.physics.data_weights[i] for i,d in enumerate(self.physics.output_var) if d in self.model_data.sol]
-
-        # if has additional loss functions
-        if self.param.training.additional_loss:
-            # append additional_loss to loss_names and loss_weights
-            self.loss_names += [self.param.training.additional_loss[k].name for k in self.param.training.additional_loss]
-            # change loss_function to a list
-            self.param.training.loss_function = []
-            self.param.training.loss_function += [self.param.training.additional_loss[k].function for k in self.param.training.additional_loss]
-
-        # Step 5: set up neural networks
+        # Step 6: set up neural networks
         # automate the input scaling according to the domain, this step need to be done before setting up NN
         self._update_ub_lb_in_nn(self.model_data)
         # define the neural network in use
         self.nn = FNN(self.param.nn)
 
-        # Step 6: setup the deepxde PINN model
+        # Step 7: setup the deepxde PINN model
         self.model = dde.Model(self.dde_data, self.nn.net)
 
     def check_path(self, path, loadOnly=False):
@@ -179,6 +167,11 @@ class PINN:
         training_temp = [dde.icbc.PointSetBC(training_data.X[d], training_data.sol[d], component=i) 
                   for i,d in enumerate(self.param.nn.output_variables) if d in training_data.sol]
 
+        # the names of the loss: the order of data follows 'output_variables'
+        loss_names = self.physics.residuals + [d for d in self.physics.output_var if d in self.model_data.sol]
+        # update the weights for training in the same order
+        loss_weights = self.physics.pde_weights + [self.physics.data_weights[i] for i,d in enumerate(self.physics.output_var) if d in self.model_data.sol]
+
         # if additional_loss is not empty
         if self.param.training.additional_loss:
             # append to training_temp for those in the physics
@@ -188,11 +181,21 @@ class PINN:
 
             # if the variable is not part of the output from nn
             # currently, only implement 'vel'
-            if "vel" in self.param.training.additional_loss:
-                d = "vel"
+            d = "vel"
+            if (d in self.param.training.additional_loss) and (d in training_data.X):
                 training_temp += [dde.icbc.PointSetOperatorBC(training_data.X[d], training_data.sol[d], self.physics.vel_mag)]
 
-        return training_temp
+
+#        # if has additional loss functions
+#        if self.param.training.additional_loss:
+#            # append additional_loss to loss_names and loss_weights
+#            self.loss_names += [self.param.training.additional_loss[k].name for k in self.param.training.additional_loss]
+#            # change loss_function to a list
+#            self.param.training.loss_function = []
+#            self.param.training.loss_function += [self.param.training.additional_loss[k].function for k in self.param.training.additional_loss]
+#
+
+        return training_temp, loss_names, loss_weights
 
     def _update_nn_parameters(self):
         """ assign physic.input_var, output_var, output_lb, and output_ub to nn

@@ -3,6 +3,7 @@ import os
 import numpy as np
 from datetime import datetime
 import deepxde as dde
+
 dde.config.set_default_float('float64')
 dde.config.disable_xla_jit()
 
@@ -56,6 +57,23 @@ def test_compile_no_data():
     assert experiment.param.nn.output_ub[0]>0.0
     assert experiment.param.nn.output_lb[1]<0.0
     assert experiment.param.nn.output_ub[1]>0.0
+
+def test_add_loss():
+    # additional loss
+    vel_loss = {}
+    vel_loss['name'] = "vel log"
+    vel_loss['function'] = "VEL_LOG"
+    vel_loss['weight'] = 1.0
+    hp["additional_loss"] = {"vel":vel_loss}
+    hp["data_size"] = {"u":4000, "v":4000, "s":4000, "H":4000, "C":None}
+    experiment = pinn.PINN(hp)
+    assert len(experiment.training_data) == 5
+    assert type(experiment.training_data[-1]) == dde.icbc.boundary_conditions.PointSetBC
+
+    hp["data_size"] = {"u":4000, "v":4000, "s":4000, "H":4000, "C":None, "vel":4000}
+    experiment = pinn.PINN(hp)
+    assert len(experiment.training_data) == 6
+    assert type(experiment.training_data[-1]) == dde.icbc.boundary_conditions.PointSetOperatorBC
 
 def test_save_and_load_setting(tmp_path):
     experiment = pinn.PINN(hp)

@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 import numpy as np
+from .utils import data_misfit
 
 
 class ParameterBase(ABC):
@@ -297,8 +298,7 @@ class LossFunctionParameter(ParameterBase):
         self.weight = 1.0
 
     def check_consisteny(self):
-        pass
-
+        data_misfit.get(self.function)
 
 class Parameters(ParameterBase):
     """ parameters of the pinn, including domain, data, nn, and physics
