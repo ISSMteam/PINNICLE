@@ -91,11 +91,11 @@ def test_save_and_load_setting(tmp_path):
 def test_train(tmp_path):
     hp["save_path"] = str(tmp_path)
     hp["is_save"] = True
-    hp["data_size"] = {"u":4000, "v":4000, "s":4000, "H":4000, "C":None}
+    hp["data_size"] = {"u":4000, "v":4000, "s":4000, "H":4000, "C":None, "vel":4000}
     experiment = pinn.PINN(hp)
     experiment.compile()
     experiment.train()
-    assert experiment.loss_names == ['fSSA1', 'fSSA2', 'u', 'v', 's', 'H', 'C']
+    assert experiment.loss_names == ['fSSA1', 'fSSA2', 'u', 'v', 's', 'H', 'C', "vel log"]
 
 def test_plot(tmp_path):
     hp["save_path"] = str(tmp_path)

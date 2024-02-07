@@ -12,7 +12,7 @@ def surface_log_vel_misfit(v_true, v_pred):
     """
     epsvel=2.220446049250313e-16
     meanvel=3.170979198376458e-05 # /*1000 m/yr*/
-    return bkd.reduce_mean(bkd.square(2.0*meanvel*(tf.math.log((bkd.abs(v_pred)+epsvel)/(bkd.abs(v_true)+epsvel)))))
+    return bkd.reduce_mean(bkd.square(2.0*meanvel*(tf.math.log((tf.abs(v_pred)+epsvel)/(tf.abs(v_true)+epsvel)))))
 
 LOSS_DICT = {
         "VEL_LOG": surface_log_vel_misfit
