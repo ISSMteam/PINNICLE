@@ -26,7 +26,7 @@ hp = {}
 # General parameters
 hp["epochs"] = 10
 hp["learning_rate"] = 0.001
-hp["loss_function"] = "MSE"
+hp["loss_functions"] = "MSE"
 hp["save_path"] = modelFolder
 hp["is_save"] = False
 hp["is_plot"] = True

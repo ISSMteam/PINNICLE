@@ -27,7 +27,7 @@ hp = {}
 hp["epochs"] = 2
 hp["loss_weights"] = loss_weights
 hp["learning_rate"] = 0.001
-hp["loss_function"] = "MSE"
+hp["loss_functions"] = "MSE"
 hp["is_save"] = False
 
 # NN
@@ -72,7 +72,7 @@ def test_add_loss():
     assert type(experiment.training_data[-1]) == dde.icbc.boundary_conditions.PointSetBC
     assert len(experiment.loss_names) == 7
     assert len(experiment.param.training.loss_weights) == 7
-    assert experiment.param.training.loss_function == ["MSE"]*7
+    assert experiment.param.training.loss_functions == ["MSE"]*7
 
     hp["data_size"] = {"u":4000, "v":4000, "s":4000, "H":4000, "C":None, "vel":4000}
     experiment = pinn.PINN(hp)
@@ -80,8 +80,8 @@ def test_add_loss():
     assert type(experiment.training_data[-1]) == dde.icbc.boundary_conditions.PointSetOperatorBC
     assert len(experiment.loss_names) == 8
     assert len(experiment.param.training.loss_weights) == 8
-    assert len(experiment.param.training.loss_function) == 8
-    assert experiment.param.training.loss_function == ["MSE"]*7 + [data_misfit.get("VEL_LOG")]
+    assert len(experiment.param.training.loss_functions) == 8
+    assert experiment.param.training.loss_functions == ["MSE"]*7 + [data_misfit.get("VEL_LOG")]
 
 def test_save_and_load_setting(tmp_path):
     experiment = pinn.PINN(hp)

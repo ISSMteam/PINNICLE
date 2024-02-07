@@ -34,7 +34,7 @@ class PINN:
         self.model_data.prepare_training_data()
 
         # Step 4: update training data
-        self.training_data, self.loss_names, self.param.training.loss_weights, self.param.training.loss_function = self.update_training_data(self.model_data)
+        self.training_data, self.loss_names, self.param.training.loss_weights, self.param.training.loss_functions = self.update_training_data(self.model_data)
 
         # Step 5: set up deepxde training data object using PDE + data
         #  deepxde data object
@@ -74,7 +74,7 @@ class PINN:
             opt = self.param.training.optimizer
 
         if loss is None:
-            loss = self.param.training.loss_function
+            loss = self.param.training.loss_functions
 
         if lr is None:
             lr = self.param.training.learning_rate
@@ -173,10 +173,10 @@ class PINN:
         loss_weights = self.physics.pde_weights + [self.physics.data_weights[i] for i,d in enumerate(self.physics.output_var) if d in self.model_data.sol]
     
         # update loss functions to a list, if not
-        if not isinstance(self.param.training.loss_function, list):
-            loss_functions = [self.param.training.loss_function]*len(loss_weights)
+        if not isinstance(self.param.training.loss_functions, list):
+            loss_functions = [self.param.training.loss_functions]*len(loss_weights)
         else:
-            loss_functions = self.param.training.loss_function
+            loss_functions = self.param.training.loss_functions
 
         # if additional_loss is not empty
         if self.param.training.additional_loss:

@@ -269,7 +269,7 @@ class TrainingParameter(ParameterBase):
     def set_default(self):
         self.epochs = 0
         self.optimizer = "adam"
-        self.loss_function = "MSE"
+        self.loss_functions = "MSE"
         self.additional_loss = {} 
         self.learning_rate = 0
         self.loss_weights = []
