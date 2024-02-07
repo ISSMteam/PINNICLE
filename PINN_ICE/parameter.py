@@ -262,15 +262,39 @@ class TrainingParameter(ParameterBase):
     def __init__(self, param_dict={}):
         super().__init__(param_dict)
 
+        if self.additional_loss:
+            self.update_parameters()
+
     def set_default(self):
         self.epochs = 0
         self.optimizer = "adam"
         self.loss_function = "MSE"
+        self.additional_loss = {} 
         self.learning_rate = 0
         self.loss_weights = []
         self.save_path = ""
         self.is_save = True
         self.is_plot = False
+
+    def check_consisteny(self):
+        pass
+
+    def update_parameters(self):
+        """ convert dict to class LossFunctionParameter
+        """
+        self.additional_loss = {k:LossFunctionParameter(self.additional_loss[k]) for k in self.additional_loss}
+        print(self.additional_loss)
+
+class LossFunctionParameter(ParameterBase):
+    """ parameter of customize loss function
+    """
+    def __init__(self, param_dict={}):
+        super().__init__(param_dict)
+
+    def set_default(self):
+        self.name = ""
+        self.function = "MSE"
+        self.weight = 1.0
 
     def check_consisteny(self):
         pass

@@ -65,6 +65,7 @@ class ISSMmdData(DataBase, Constants):
         self.data_dict['H'] = md['geometry']['thickness']
         self.data_dict['C'] = md['friction']['C']
         self.data_dict['B'] = md['materials']['rheology_B']
+        self.data_dict['vel'] = np.sqrt(self.data_dict['u']**2.0+self.data_dict['v']**2.0)
         # ice mask
         self.mask_dict['icemask'] = md['mask']['ice_levelset']
         # B.C.

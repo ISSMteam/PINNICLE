@@ -1,7 +1,8 @@
+import pytest
 import PINN_ICE as pinn
 from PINN_ICE.parameter import *
-import pytest
 from PINN_ICE.physics import SSAEquationParameter
+from PINN_ICE.modeldata import surface_log_vel_misfit
 
 yts = 3600*24*365.0
 
@@ -83,3 +84,14 @@ def test_equation_parameters():
     with pytest.raises(Exception):
         p = Parameters(hp)
 
+def test_training_parameters():
+    hp =  {}
+    p = TrainingParameter(hp)
+    assert p.additional_loss == {}
+    u_loss = {}
+    u_loss['name'] = "log vel"
+    u_loss['function'] = surface_log_vel_misfit
+    u_loss['weight'] = 1.0
+    hp['additional_loss'] = {"u": u_loss}
+    p = TrainingParameter(hp)
+    assert p.additional_loss["u"].name == "log vel"

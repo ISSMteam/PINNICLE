@@ -50,6 +50,14 @@ class PINN:
         # update the weights for training in the same order
         self.param.training.loss_weights = self.physics.pde_weights + [self.physics.data_weights[i] for i,d in enumerate(self.physics.output_var) if d in self.model_data.sol]
 
+        # if has additional loss functions
+        if self.param.training.additional_loss:
+            # append additional_loss to loss_names and loss_weights
+            self.loss_names += [self.param.training.additional_loss[k].name for k in self.param.training.additional_loss]
+            # change loss_function to a list
+            self.param.training.loss_function = []
+            self.param.training.loss_function += [self.param.training.additional_loss[k].function for k in self.param.training.additional_loss]
+
         # Step 5: set up neural networks
         # automate the input scaling according to the domain, this step need to be done before setting up NN
         self._update_ub_lb_in_nn(self.model_data)
@@ -167,8 +175,24 @@ class PINN:
     def update_training_data(self, training_data):
         """ update data set used for the training, the order follows 'output_variables'
         """
-        return [dde.icbc.PointSetBC(training_data.X[d], training_data.sol[d], component=i) 
-                for i,d in enumerate(self.param.nn.output_variables) if d in training_data.sol]
+        # loop through all the PDEs, find those avaliable in the training data, add to the PointSetBC
+        training_temp = [dde.icbc.PointSetBC(training_data.X[d], training_data.sol[d], component=i) 
+                  for i,d in enumerate(self.param.nn.output_variables) if d in training_data.sol]
+
+        # if additional_loss is not empty
+        if self.param.training.additional_loss:
+            # append to training_temp for those in the physics
+            training_temp += [dde.icbc.PointSetBC(training_data.X[d], training_data.sol[d], component=i) 
+                              for i,d in enumerate(self.param.nn.output_variables) 
+                              if d in self.param.training.additional_loss]
+
+            # if the variable is not part of the output from nn
+            # currently, only implement 'vel'
+            if "vel" in self.param.training.additional_loss:
+                d = "vel"
+                training_temp += [dde.icbc.PointSetOperatorBC(training_data.X[d], training_data.sol[d], self.physics.vel_mag)]
+
+        return training_temp
 
     def _update_nn_parameters(self):
         """ assign physic.input_var, output_var, output_lb, and output_ub to nn
