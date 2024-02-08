@@ -7,7 +7,7 @@ from PINN_ICE.utils import data_misfit
 dde.config.set_default_float('float64')
 dde.config.disable_xla_jit()
 
-weights = [7, 7, 5, 5, 3, 3, 5];
+weights = [7, 7, 5, 5, 3, 3, 5]
 
 inputFileName="Helheim_fastflow.mat"
 expFileName = "fastflow_CF.exp"

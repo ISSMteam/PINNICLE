@@ -11,10 +11,10 @@ def test_domain_parameter():
 
     newat = {"feature_not_exist_1":1, "feature_not_exist_2": [2,3,4]}
     d.set_parameters(newat)
-    assert d.has_keys(newat) == False
+    assert not d.has_keys(newat)
 
     d._add_parameters(newat)
-    assert d.has_keys(newat) == True
+    assert d.has_keys(newat)
 
 def test_data_parameter():
     d = DataParameter({"dataname":['u', 'v'], "datasize":[4000, 4000]})
