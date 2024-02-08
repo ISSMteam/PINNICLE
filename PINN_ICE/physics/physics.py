@@ -1,4 +1,3 @@
-import deepxde as dde
 from ..parameter import PhysicsParameter
 from . import EquationBase
 import itertools

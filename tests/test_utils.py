@@ -1,7 +1,7 @@
 import PINN_ICE as pinn
-import os
 
-data = {"s":1, "v":[1,2,3]}
+data = {"s":1, "v":[1, 2, 3]}
+
 
 def test_save_and_load_dict(tmp_path):
     pinn.utils.save_dict_to_json(data, tmp_path, "temp.json")

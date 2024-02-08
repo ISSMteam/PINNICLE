@@ -2,7 +2,6 @@ import os
 import PINN_ICE as pinn
 import numpy as np
 import deepxde as dde
-from datetime import datetime
 from PINN_ICE.utils import data_misfit
 
 dde.config.set_default_float('float64')
@@ -103,6 +102,6 @@ def test_plot(tmp_path):
     hp["data_size"] = {"u":4000, "v":4000, "s":4000, "H":4000, "C":None}
     experiment = pinn.PINN(hp)
     experiment.compile()
-    assert experiment.plot_predictions(X_ref=experiment.model_data.X_dict, sol_ref=experiment.model_data.data_dict, resolution=10) == None
+    assert experiment.plot_predictions(X_ref=experiment.model_data.X_dict, sol_ref=experiment.model_data.data_dict, resolution=10) is None
     X_ref = np.hstack((experiment.model_data.X_dict['x'].flatten()[:,None],experiment.model_data.X_dict['y'].flatten()[:,None]))
-    assert experiment.plot_predictions(X_ref=X_ref, sol_ref=experiment.model_data.data_dict, resolution=10) == None
+    assert experiment.plot_predictions(X_ref=X_ref, sol_ref=experiment.model_data.data_dict, resolution=10) is None

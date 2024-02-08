@@ -1,7 +1,6 @@
+import os
 import deepxde as dde
 import numpy as np
-import json
-import os
 
 from .utils import save_dict_to_json, load_dict_from_json, History, plot_solutions, data_misfit
 from .nn import FNN

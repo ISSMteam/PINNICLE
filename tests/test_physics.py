@@ -1,7 +1,6 @@
 import PINN_ICE as pinn
-import numpy as np
-from PINN_ICE.physics import *
-from PINN_ICE.parameter import *
+from PINN_ICE.physics import Physics, SSAEquationParameter, SSA
+from PINN_ICE.parameter import PhysicsParameter
 import pytest
 
 def test_Constants():
@@ -94,7 +93,7 @@ def test_Physics_Exception():
     hp["equations"] = {"Not defined":{}}
 
     with pytest.raises(Exception):
-        phy = Physics(PhysicsParameter(hp))
+        Physics(PhysicsParameter(hp))
 
 def test_update_Physics_SSA():
     SSA = {}

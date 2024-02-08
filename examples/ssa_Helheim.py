@@ -1,6 +1,5 @@
 import PINN_ICE as pinn
 import os
-import numpy as np
 from datetime import datetime
 import deepxde as dde
 

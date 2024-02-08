@@ -1,6 +1,6 @@
 import pytest
 import PINN_ICE as pinn
-from PINN_ICE.parameter import *
+from PINN_ICE.parameter import DataParameter, NNParameter, DomainParameter, PhysicsParameter, Parameters, EquationParameter, TrainingParameter
 from PINN_ICE.physics import SSAEquationParameter
 
 yts = 3600*24*365.0
@@ -45,7 +45,6 @@ def test_parameters():
     assert p.nn.__dict__ == nn.__dict__
     assert p.physics.__dict__ == physics.__dict__
 
-
 def test_equation_parameters():
     SSA = {}
     SSA["input"] = ["x", "y"]
@@ -71,7 +70,7 @@ def test_equation_parameters():
         p = EquationParameter(SSA)
 
     SSA["output_lb"] = [1.0e4/yts, -1.0e4/yts, -1.0e3,  10.0, 0.01]
-    SSA["output_ub"] = [ 1.0e4/yts,  1.0e4/yts,  2.5e3, 2.0e3, 1.0e4]
+    SSA["output_ub"] = [1.0e4/yts,  1.0e4/yts,  2.5e3, 2.0e3, 1.0e4]
     with pytest.raises(Exception):
         p = EquationParameter(SSA)
 

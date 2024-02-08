@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 from ..parameter import DataParameter
 from ..physics import Constants
-import os
 import numpy as np
 import mat73
 

@@ -1,2 +1,1 @@
-import pytest
-from PINN_ICE import *
+import PINN_ICE as pinn
