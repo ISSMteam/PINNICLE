@@ -30,14 +30,14 @@ def plot_solutions(pinn, path="", X_ref=None, sol_ref=None, cols=None, resolutio
     # TODO: add 1D plot
     if pinn.domain.geometry.dim == 2:
     # generate 200x200 mesh on the domain
-        X, Y = np.meshgrid(np.linspace(pinn.param.nn.input_lb[0], pinn.param.nn.input_ub[0], resolution),
-                np.linspace(pinn.param.nn.input_lb[1], pinn.param.nn.input_ub[1], resolution))
+        X, Y = np.meshgrid(np.linspace(pinn.params.nn.input_lb[0], pinn.params.nn.input_ub[0], resolution),
+                np.linspace(pinn.params.nn.input_lb[1], pinn.params.nn.input_ub[1], resolution))
         X_nn = np.hstack((X.flatten()[:,None], Y.flatten()[:,None]))
 
         # predicted solutions
         sol_pred = pinn.model.predict(X_nn)
-        plot_data = {k+"_pred":np.reshape(sol_pred[:,i:i+1], X.shape) for i,k in enumerate(pinn.param.nn.output_variables)}
-        vranges = {k+"_pred":[pinn.param.nn.output_lb[i], pinn.param.nn.output_ub[i]] for i,k in enumerate(pinn.param.nn.output_variables)}
+        plot_data = {k+"_pred":np.reshape(sol_pred[:,i:i+1], X.shape) for i,k in enumerate(pinn.params.nn.output_variables)}
+        vranges = {k+"_pred":[pinn.params.nn.output_lb[i], pinn.params.nn.output_ub[i]] for i,k in enumerate(pinn.params.nn.output_variables)}
 
         # if ref solution is provided
         if (sol_ref is not None) and (X_ref is not None):
@@ -46,20 +46,20 @@ def plot_solutions(pinn, path="", X_ref=None, sol_ref=None, cols=None, resolutio
                 X_ref = np.hstack((X_ref['x'].flatten()[:,None],X_ref['y'].flatten()[:,None]))
 
             if isinstance(sol_ref, np.ndarray):
-                plot_data.update({k+"_ref":griddata(X_ref, sol_ref[:,i].flatten(), (X, Y), method='cubic') for i,k in enumerate(pinn.param.nn.output_variables)})
+                plot_data.update({k+"_ref":griddata(X_ref, sol_ref[:,i].flatten(), (X, Y), method='cubic') for i,k in enumerate(pinn.params.nn.output_variables)})
             elif isinstance(sol_ref, dict):
-                plot_data.update({k+"_ref":griddata(X_ref, sol_ref[k].flatten(), (X, Y), method='cubic') for k in pinn.param.nn.output_variables if k in sol_ref})
+                plot_data.update({k+"_ref":griddata(X_ref, sol_ref[k].flatten(), (X, Y), method='cubic') for k in pinn.params.nn.output_variables if k in sol_ref})
             else:
                 raise TypeError(f"Type of sol_ref ({type(sol_ref)}) is not supported ")
             
-            vranges.update({k+"_ref":vranges[k+"_pred"] for k in pinn.param.nn.output_variables})
-            plot_data.update({k+"_diff":(plot_data[k+"_pred"] - plot_data[k+"_ref"]) for k in pinn.param.nn.output_variables if k in sol_ref})
-            vranges.update({k+"_diff":[-0.1*max(np.abs(vranges[k+"_pred"])), 0.1*max(np.abs(vranges[k+"_pred"]))] for k in pinn.param.nn.output_variables if k in sol_ref})
+            vranges.update({k+"_ref":vranges[k+"_pred"] for k in pinn.params.nn.output_variables})
+            plot_data.update({k+"_diff":(plot_data[k+"_pred"] - plot_data[k+"_ref"]) for k in pinn.params.nn.output_variables if k in sol_ref})
+            vranges.update({k+"_diff":[-0.1*max(np.abs(vranges[k+"_pred"])), 0.1*max(np.abs(vranges[k+"_pred"]))] for k in pinn.params.nn.output_variables if k in sol_ref})
 
         # plot
         n = len(plot_data)
         if cols is None:
-            cols = len(pinn.param.nn.output_variables)
+            cols = len(pinn.params.nn.output_variables)
 
         fig, axs = plt.subplots(math.ceil(n/cols), cols, figsize=(16,12))
         for ax,name in zip(axs.ravel(), plot_data.keys()):
