@@ -1,8 +1,8 @@
 import PINN_ICE as pinn
-import numpy as np
 import pytest
 import deepxde as dde
 import os
+
 
 def test_update_cid():
 
@@ -14,7 +14,7 @@ def test_update_cid():
     p = pinn.parameter.DomainParameter()
     # Check exceptions
     with pytest.raises(Exception):
-        d = pinn.domain.Domain(p)
+        pinn.domain.Domain(p)
 
     p2 = pinn.parameter.DomainParameter(hp)
     d2 = pinn.domain.Domain(p2)

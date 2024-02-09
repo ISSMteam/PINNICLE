@@ -51,7 +51,7 @@ class SSA(EquationBase): #{{{
         Cid = self.local_output_var["C"]
 
         # unpacking normalized output
-        u, v, s, H, C = nn_output_var[:, uid:uid+1], nn_output_var[:, vid:vid+1], nn_output_var[:, sid:sid+1], nn_output_var[:, Hid:Hid+1], nn_output_var[:, Cid:Cid+1]
+        u, v, H, C = nn_output_var[:, uid:uid+1], nn_output_var[:, vid:vid+1], nn_output_var[:, Hid:Hid+1], nn_output_var[:, Cid:Cid+1]
     
         # spatial derivatives
         u_x = dde.grad.jacobian(nn_output_var, nn_input_var, i=uid, j=xid)
@@ -140,7 +140,7 @@ class MOLHO(EquationBase): #{{{
 
         # unpacking normalized output
         u, v, ub, vb = nn_output_var[:, uid:uid+1], nn_output_var[:, vid:vid+1], nn_output_var[:, ubid:ubid+1], nn_output_var[:, vbid:vbid+1]
-        s, H, C = nn_output_var[:, sid:sid+1], nn_output_var[:, Hid:Hid+1], nn_output_var[:, Cid:Cid+1]
+        H, C = nn_output_var[:, Hid:Hid+1], nn_output_var[:, Cid:Cid+1]
         ushear = u - ub
         vshear = v - vb
     

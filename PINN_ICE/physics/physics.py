@@ -1,11 +1,10 @@
-import deepxde as dde
 from ..parameter import PhysicsParameter
 from . import EquationBase
 import itertools
 
 
 class Physics:
-    """ Physics: 
+    """ All the physics in used as constraint in the PINN
     """
     def __init__(self, parameters=PhysicsParameter()):
         self.parameters = parameters
@@ -52,3 +51,15 @@ class Physics:
         for p in self.equations:
             eq += p.pde(nn_input_var, nn_output_var) 
         return eq
+
+    def vel_mag(self, nn_input_var, nn_output_var, X):
+        """ a wrapper for PointSetOperatorBC func call
+        Args: 
+            nn_input_var:  input tensor to the nn
+            nn_output_var: output tensor from the nn
+            X:  NumPy array of the inputs
+        """
+        uid = self.output_var.index('u')
+        vid = self.output_var.index('v')
+        vel = (nn_output_var[:,uid:uid+1]**2.0 + nn_output_var[:,vid:vid+1]**2.0) ** 0.5
+        return vel

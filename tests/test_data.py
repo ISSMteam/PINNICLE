@@ -1,5 +1,5 @@
 import os
-from PINN_ICE.modeldata import *
+from PINN_ICE.modeldata import ISSMmdData
 from PINN_ICE.parameter import DataParameter
 
 def test_ISSMmdData():

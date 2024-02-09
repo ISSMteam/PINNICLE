@@ -1,6 +1,6 @@
-import PINN_ICE as pinn
-from PINN_ICE.parameter import *
 import pytest
+import PINN_ICE as pinn
+from PINN_ICE.parameter import DataParameter, NNParameter, DomainParameter, PhysicsParameter, Parameters, EquationParameter, TrainingParameter
 from PINN_ICE.physics import SSAEquationParameter
 
 yts = 3600*24*365.0
@@ -11,10 +11,10 @@ def test_domain_parameter():
 
     newat = {"feature_not_exist_1":1, "feature_not_exist_2": [2,3,4]}
     d.set_parameters(newat)
-    assert d.has_keys(newat) == False
+    assert not d.has_keys(newat)
 
     d._add_parameters(newat)
-    assert d.has_keys(newat) == True
+    assert d.has_keys(newat)
 
 def test_data_parameter():
     d = DataParameter({"dataname":['u', 'v'], "datasize":[4000, 4000]})
@@ -45,7 +45,6 @@ def test_parameters():
     assert p.nn.__dict__ == nn.__dict__
     assert p.physics.__dict__ == physics.__dict__
 
-
 def test_equation_parameters():
     SSA = {}
     SSA["input"] = ["x", "y"]
@@ -71,7 +70,7 @@ def test_equation_parameters():
         p = EquationParameter(SSA)
 
     SSA["output_lb"] = [1.0e4/yts, -1.0e4/yts, -1.0e3,  10.0, 0.01]
-    SSA["output_ub"] = [ 1.0e4/yts,  1.0e4/yts,  2.5e3, 2.0e3, 1.0e4]
+    SSA["output_ub"] = [1.0e4/yts,  1.0e4/yts,  2.5e3, 2.0e3, 1.0e4]
     with pytest.raises(Exception):
         p = EquationParameter(SSA)
 
@@ -83,3 +82,14 @@ def test_equation_parameters():
     with pytest.raises(Exception):
         p = Parameters(hp)
 
+def test_training_parameters():
+    hp =  {}
+    p = TrainingParameter(hp)
+    assert p.additional_loss == {}
+    u_loss = {}
+    u_loss['name'] = "vel log"
+    u_loss['function'] = "VEL_LOG"
+    u_loss['weight'] = 1.0
+    hp['additional_loss'] = {"u": u_loss}
+    p = TrainingParameter(hp)
+    assert p.additional_loss["u"].name == u_loss['name']

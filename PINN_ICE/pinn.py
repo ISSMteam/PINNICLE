@@ -1,9 +1,8 @@
+import os
 import deepxde as dde
 import numpy as np
-import json
-import os
 
-from .utils import save_dict_to_json, load_dict_from_json, History, plot_solutions
+from .utils import save_dict_to_json, load_dict_from_json, History, plot_solutions, data_misfit
 from .nn import FNN
 from .physics import Physics
 from .domain import Domain
@@ -32,10 +31,11 @@ class PINN:
         self.model_data.load_data()
         # update according to the setup: data_size
         self.model_data.prepare_training_data()
-        # update training data
-        self.training_data = self.update_training_data(self.model_data)
 
-        # Step 4: set up deepxde training data object using PDE + data
+        # Step 4: update training data
+        self.training_data, self.loss_names, self.param.training.loss_weights, self.param.training.loss_functions = self.update_training_data(self.model_data)
+
+        # Step 5: set up deepxde training data object using PDE + data
         #  deepxde data object
         self.dde_data = dde.data.PDE(
                 self.domain.geometry,
@@ -45,18 +45,13 @@ class PINN:
                 num_boundary=0,  # no need to set for data misfit, unless add calving front boundary, etc.
                 num_test=None)
 
-        # the names of the loss: the order of data follows 'output_variables'
-        self.loss_names = self.physics.residuals + [d for d in self.physics.output_var if d in self.model_data.sol]
-        # update the weights for training in the same order
-        self.param.training.loss_weights = self.physics.pde_weights + [self.physics.data_weights[i] for i,d in enumerate(self.physics.output_var) if d in self.model_data.sol]
-
-        # Step 5: set up neural networks
+        # Step 6: set up neural networks
         # automate the input scaling according to the domain, this step need to be done before setting up NN
         self._update_ub_lb_in_nn(self.model_data)
         # define the neural network in use
         self.nn = FNN(self.param.nn)
 
-        # Step 6: setup the deepxde PINN model
+        # Step 7: setup the deepxde PINN model
         self.model = dde.Model(self.dde_data, self.nn.net)
 
     def check_path(self, path, loadOnly=False):
@@ -78,7 +73,7 @@ class PINN:
             opt = self.param.training.optimizer
 
         if loss is None:
-            loss = self.param.training.loss_function
+            loss = self.param.training.loss_functions
 
         if lr is None:
             lr = self.param.training.learning_rate
@@ -167,8 +162,46 @@ class PINN:
     def update_training_data(self, training_data):
         """ update data set used for the training, the order follows 'output_variables'
         """
-        return [dde.icbc.PointSetBC(training_data.X[d], training_data.sol[d], component=i) 
-                for i,d in enumerate(self.param.nn.output_variables) if d in training_data.sol]
+        # loop through all the PDEs, find those avaliable in the training data, add to the PointSetBC
+        training_temp = [dde.icbc.PointSetBC(training_data.X[d], training_data.sol[d], component=i) 
+                  for i,d in enumerate(self.param.nn.output_variables) if d in training_data.sol]
+
+        # the names of the loss: the order of data follows 'output_variables'
+        loss_names = self.physics.residuals + [d for d in self.physics.output_var if d in self.model_data.sol]
+        # update the weights for training in the same order
+        loss_weights = self.physics.pde_weights + [self.physics.data_weights[i] for i,d in enumerate(self.physics.output_var) if d in self.model_data.sol]
+    
+        # update loss functions to a list, if not
+        if not isinstance(self.param.training.loss_functions, list):
+            loss_functions = [self.param.training.loss_functions]*len(loss_weights)
+        else:
+            loss_functions = self.param.training.loss_functions
+
+        # if additional_loss is not empty
+        if self.param.training.additional_loss:
+            for d in self.param.training.additional_loss:
+                if (d in training_data.X):
+                    # append to training_temp for those in the physics
+                    if d in self.param.nn.output_variables:
+                        # get the index in output of nn
+                        i = self.param.nn.output_variables.index(d)
+                        # training data
+                        training_temp.append(dde.icbc.PointSetBC(training_data.X[d], training_data.sol[d], component=i))
+                    # if the variable is not part of the output from nn
+                    # currently, only implement 'vel'
+                    elif d == "vel":
+                        training_temp.append(dde.icbc.PointSetOperatorBC(training_data.X[d], training_data.sol[d], self.physics.vel_mag))
+                    else:
+                        raise ValueError(f"{d} is not found in the output_variable of the nn, and not defined")
+
+                    # loss name
+                    loss_names.append(self.param.training.additional_loss[d].name)
+                    # weights
+                    loss_weights.append(self.param.training.additional_loss[d].weight)
+                    # append loss functions
+                    loss_functions.append(data_misfit.get(self.param.training.additional_loss[d].function))
+
+        return training_temp, loss_names, loss_weights, loss_functions
 
     def _update_nn_parameters(self):
         """ assign physic.input_var, output_var, output_lb, and output_ub to nn
