@@ -1,8 +1,11 @@
 from abc import ABC, abstractmethod
 from ..parameter import DataParameter
 from ..physics import Constants
-import numpy as np
 import mat73
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.interpolate import griddata
+
 
 class DataBase(ABC):
     """ Base class of data
@@ -107,4 +110,46 @@ class ISSMmdData(DataBase, Constants):
                     self.X[k] = X_bc
                     self.sol[k] = self.data_dict[k][idbc].flatten()[:,None]
 
-# TODO: add plot
+    def plot(self, data_names=[], vranges={}, axs=None, resolution=200, **kwargs):
+        """ plot the ISSM data 
+        Args:
+            data_names (list): Names of the variables. if not specified, plot all variables in data_dict
+            vranges (dict): range of the data
+            axs (array of AxesSubplot): axes to plot each data, if not given, then generate a subplot according to the size of data_names
+            resolution (int): number of pixels in horizontal and vertical direction
+        return:
+            axs (array of AxesSubplot): axes of the subplots
+        """
+        if not data_names:
+            # default value of data_names
+            data_names = list(self.data_dict.keys())
+        else:
+            # compare with data_dict, find all avaliable
+            data_names = [k for k in data_names if k in self.data_dict]
+
+        ndata = len(data_names)
+        # generate axes array, if not provided
+        if axs is None:
+            fig, axs = plt.subplots(1, ndata, figsize=(16,4))
+
+        #  generate 2d Cartisian grid
+        X, Y = np.meshgrid(np.linspace(min(self.X_dict['x']), max(self.X_dict['x']), resolution),
+                np.linspace(min(self.X_dict['y']), max(self.X_dict['y']), resolution))
+
+        # get ice mask
+        icemask = self.mask_dict['icemask']
+        iice = np.asarray(icemask<0).nonzero()
+        X_ref = np.hstack((self.X_dict['x'][iice].flatten()[:,None], self.X_dict['y'][iice].flatten()[:,None]))
+        # project data_dict to the 2d grid
+        plot_data = {k:griddata(X_ref, self.data_dict[k][iice].flatten(), (X, Y), method='cubic') for k in data_names}
+
+        for i in range(min(len(axs), ndata)):
+            name = data_names[i]
+            vr = vranges.setdefault(name, [None, None])
+            im = axs[i].imshow(plot_data[name], interpolation='nearest', cmap='rainbow',
+                extent=[X.min(), X.max(), Y.min(), Y.max()],
+                vmin=vr[0], vmax=vr[1],
+                origin='lower', aspect='auto', **kwargs)
+            axs[i].set_title(name)
+
+        return axs
