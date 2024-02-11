@@ -22,6 +22,9 @@ def test_ISSMmdData():
     assert(data_loader.X['H'].shape == (4000,2))
     assert(data_loader.sol['C'].shape == (564,1))
 
+    iice = data_loader.get_ice_coordinates()
+    assert iice[0].shape == (23049,)
+
 def test_ISSMmdData_plot():
     filename = "Helheim_fastflow.mat"
     repoPath = os.path.dirname(__file__) + "/../examples/"
