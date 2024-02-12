@@ -114,7 +114,8 @@ def plot_dict_data(X_dict, data_dict, axs=None, vranges={}, resolution=200, **kw
         im_data[k] = temp
 
     #plot
-    plot_data(X, Y, im_data=im_data, axs=axs, vranges=vranges, **kwargs)
+    axs = plot_data(X, Y, im_data=im_data, axs=axs, vranges=vranges, **kwargs)
+    return axs
     
 def plot_data(X, Y, im_data, axs=None, vranges={}, **kwargs):
     """ plot all the data in im_data
