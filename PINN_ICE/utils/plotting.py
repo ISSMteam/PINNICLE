@@ -78,7 +78,7 @@ def plot_solutions(pinn, path="", X_ref=None, sol_ref=None, cols=None, resolutio
     else:
         raise ValueError("Plot is only implemented for 2D problem")
 
-def plot_data(X_dict, data_dict, vranges={}, axs=None, resolution=200, **kwargs):
+def plot_dict_data(X_dict, data_dict, vranges={}, axs=None, resolution=200, **kwargs):
     """ plot the data in data_dict, with coordinates in X_dict
     Args:
         X_dict (dict): Dict of the coordinates, with keys 'x', 'y'

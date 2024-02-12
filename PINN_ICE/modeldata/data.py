@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from ..parameter import DataParameter
 from ..physics import Constants
-from ..utils import plot_data
+from ..utils import plot_dict_data
 import mat73
 import numpy as np
 
@@ -84,7 +84,7 @@ class ISSMmdData(DataBase, Constants):
         self.mask_dict['DBC_mask'] = md['mesh']['vertexonboundary']
 
     def plot(self, data_names=[], vranges={}, axs=None, resolution=200, **kwargs):
-        """ use utils.plot_data to plot the ISSM data 
+        """ use utils.plot_dict_data to plot the ISSM data 
         Args:
             data_names (list): Names of the variables. if not specified, plot all variables in data_dict
             vranges (dict): range of the data
@@ -104,7 +104,7 @@ class ISSMmdData(DataBase, Constants):
         data_dict = {k:self.data_dict[k] for k in data_names}
 
         # call the function in utils
-        axs = plot_data(self.X_dict, data_dict, vranges=vranges, axs=axs, resolution=resolution, **kwargs)
+        axs = plot_dict_data(self.X_dict, data_dict, vranges=vranges, axs=axs, resolution=resolution, **kwargs)
 
         return axs
 
