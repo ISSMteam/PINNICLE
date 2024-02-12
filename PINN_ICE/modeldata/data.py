@@ -1,11 +1,9 @@
 from abc import ABC, abstractmethod
 from ..parameter import DataParameter
 from ..physics import Constants
+from ..utils import plot_data
 import mat73
 import numpy as np
-import matplotlib.pyplot as plt
-from scipy.interpolate import griddata
-from scipy.spatial import cKDTree as KDTree
 
 
 class DataBase(ABC):
@@ -86,7 +84,7 @@ class ISSMmdData(DataBase, Constants):
         self.mask_dict['DBC_mask'] = md['mesh']['vertexonboundary']
 
     def plot(self, data_names=[], vranges={}, axs=None, resolution=200, **kwargs):
-        """ plot the ISSM data 
+        """ use utils.plot_data to plot the ISSM data 
         Args:
             data_names (list): Names of the variables. if not specified, plot all variables in data_dict
             vranges (dict): range of the data
@@ -102,42 +100,11 @@ class ISSMmdData(DataBase, Constants):
             # compare with data_dict, find all avaliable
             data_names = [k for k in data_names if k in self.data_dict]
 
-        ndata = len(data_names)
-        # generate axes array, if not provided
-        if axs is None:
-            fig, axs = plt.subplots(1, ndata, figsize=(16,4))
+        # get the subdict of the data to plot
+        data_dict = {k:self.data_dict[k] for k in data_names}
 
-        #  generate 2d Cartisian grid
-        X, Y = np.meshgrid(np.linspace(min(self.X_dict['x']), max(self.X_dict['x']), resolution),
-                np.linspace(min(self.X_dict['y']), max(self.X_dict['y']), resolution))
-        grid_size = 2.0*(((max(self.X_dict['x']) - min(self.X_dict['x']))/resolution)**2+
-                         ((max(self.X_dict['y']) - min(self.X_dict['y']))/resolution)**2)**0.5
-
-        # combine x,y coordinates of the data
-        X_ref = np.hstack((self.X_dict['x'].flatten()[:,None], self.X_dict['y'].flatten()[:,None]))
-        # get ice mask
-        iice = self.get_ice_coordinates()
-
-        tree = KDTree(X_ref[iice])
-        dist, _ = tree.query(np.c_[X.ravel(), Y.ravel()], k=1)
-        dist = dist.reshape(X.shape)
-
-        # project data_dict to the 2d grid
-        plot_data = {}
-        for k in data_names:
-            temp = griddata(X_ref, self.data_dict[k].flatten(), (X, Y), method='cubic')
-            temp[dist > grid_size] = np.nan
-            plot_data[k] = temp
-
-        for i in range(min(len(axs), ndata)):
-            name = data_names[i]
-            vr = vranges.setdefault(name, [None, None])
-            im = axs[i].imshow(plot_data[name], interpolation='nearest', cmap='rainbow',
-                extent=[X.min(), X.max(), Y.min(), Y.max()],
-                vmin=vr[0], vmax=vr[1],
-                origin='lower', aspect='auto', **kwargs)
-            axs[i].set_title(name)
-            plt.colorbar(im, ax=axs[i], shrink=0.8)
+        # call the function in utils
+        axs = plot_data(self.X_dict, data_dict, vranges=vranges, axs=axs, resolution=resolution, **kwargs)
 
         return axs
 
