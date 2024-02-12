@@ -78,13 +78,13 @@ def plot_solutions(pinn, path="", X_ref=None, sol_ref=None, cols=None, resolutio
     else:
         raise ValueError("Plot is only implemented for 2D problem")
 
-def plot_dict_data(X_dict, data_dict, vranges={}, axs=None, resolution=200, **kwargs):
+def plot_dict_data(X_dict, data_dict, axs=None, vranges={}, resolution=200, **kwargs):
     """ plot the data in data_dict, with coordinates in X_dict
     Args:
         X_dict (dict): Dict of the coordinates, with keys 'x', 'y'
         data_dict (dict): Dict of data
-        vranges (dict): range of the data
         axs (array of AxesSubplot): axes to plot each data, if not given, then generate a subplot according to the size of data_names
+        vranges (dict): range of the data
         resolution (int): number of pixels in horizontal and vertical direction
     return:
         axs (array of AxesSubplot): axes of the subplots
@@ -92,11 +92,8 @@ def plot_dict_data(X_dict, data_dict, vranges={}, axs=None, resolution=200, **kw
     data_names = list(data_dict.keys())
     ndata = len(data_names)
     
-    # generate axes array, if not provided
-    if axs is None:
-        fig, axs = plt.subplots(1, ndata, figsize=(16,4))
-            #  generate 2d Cartisian grid
-    
+            
+    #  generate 2d Cartisian grid
     X, Y = np.meshgrid(np.linspace(min(X_dict['x']), max(X_dict['x']), resolution),
             np.linspace(min(X_dict['y']), max(X_dict['y']), resolution))
     grid_size = 2.0*(((max(X_dict['x']) - min(X_dict['x']))/resolution)**2+
@@ -110,16 +107,39 @@ def plot_dict_data(X_dict, data_dict, vranges={}, axs=None, resolution=200, **kw
     dist = dist.reshape(X.shape)
     
     # project data_dict to the 2d grid
-    plot_data = {}
+    im_data = {}
     for k in data_names:
         temp = griddata(X_ref, data_dict[k].flatten(), (X, Y), method='cubic')
         temp[dist > grid_size] = np.nan
-        plot_data[k] = temp
+        im_data[k] = temp
+
+    #plot
+    plot_data(X, Y, im_data=im_data, axs=axs, vranges=vranges, **kwargs)
     
+def plot_data(X, Y, im_data, axs=None, vranges={}, **kwargs):
+    """ plot all the data in im_data
+    Args:
+        X (np.array): x-coordinates of the 2D plot
+        Y (np.array): y-coordinates of the 2D plot
+        im_data (dict): Dict of data for the 2D plot, each element has the same size as X and Y
+        axs (array of AxesSubplot): axes to plot each data, if not given, then generate a subplot according to the size of data_names
+        vranges (dict): range of the data
+    return:
+        axs (array of AxesSubplot): axes of the subplots
+    """
+    # number of data 
+    ndata = len(im_data)
+    # data names is the keys
+    data_names = list(im_data.keys())
+    # generate axes array, if not provided
+    if axs is None:
+        fig, axs = plt.subplots(1, ndata, figsize=(16,4))
+
+    # plot
     for i in range(min(len(axs), ndata)):
         name = data_names[i]
         vr = vranges.setdefault(name, [None, None])
-        im = axs[i].imshow(plot_data[name], interpolation='nearest', cmap='rainbow',
+        im = axs[i].imshow(im_data[name], interpolation='nearest', cmap='rainbow',
             extent=[X.min(), X.max(), Y.min(), Y.max()],
             vmin=vr[0], vmax=vr[1],
             origin='lower', aspect='auto', **kwargs)
