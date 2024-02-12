@@ -5,6 +5,7 @@ import mat73
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import griddata
+from scipy.spatial import cKDTree as KDTree
 
 
 class DataBase(ABC):
@@ -109,12 +110,24 @@ class ISSMmdData(DataBase, Constants):
         #  generate 2d Cartisian grid
         X, Y = np.meshgrid(np.linspace(min(self.X_dict['x']), max(self.X_dict['x']), resolution),
                 np.linspace(min(self.X_dict['y']), max(self.X_dict['y']), resolution))
+        grid_size = 2.0*(((max(self.X_dict['x']) - min(self.X_dict['x']))/resolution)**2+
+                         ((max(self.X_dict['y']) - min(self.X_dict['y']))/resolution)**2)**0.5
 
+        # combine x,y coordinates of the data
+        X_ref = np.hstack((self.X_dict['x'].flatten()[:,None], self.X_dict['y'].flatten()[:,None]))
         # get ice mask
         iice = self.get_ice_coordinates()
-        X_ref = np.hstack((self.X_dict['x'][iice].flatten()[:,None], self.X_dict['y'][iice].flatten()[:,None]))
+
+        tree = KDTree(X_ref[iice])
+        dist, _ = tree.query(np.c_[X.ravel(), Y.ravel()], k=1)
+        dist = dist.reshape(X.shape)
+
         # project data_dict to the 2d grid
-        plot_data = {k:griddata(X_ref, self.data_dict[k][iice].flatten(), (X, Y), method='cubic') for k in data_names}
+        plot_data = {}
+        for k in data_names:
+            temp = griddata(X_ref, self.data_dict[k].flatten(), (X, Y), method='cubic')
+            temp[dist > grid_size] = np.nan
+            plot_data[k] = temp
 
         for i in range(min(len(axs), ndata)):
             name = data_names[i]
@@ -124,6 +137,7 @@ class ISSMmdData(DataBase, Constants):
                 vmin=vr[0], vmax=vr[1],
                 origin='lower', aspect='auto', **kwargs)
             axs[i].set_title(name)
+            plt.colorbar(im, ax=axs[i], shrink=0.8)
 
         return axs
 
