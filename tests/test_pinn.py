@@ -110,5 +110,5 @@ def test_plot(tmp_path):
     X, Y, im_data, axs = plot_nn(experiment, experiment.model_data.data_dict, resolution=10);
     assert X.shape == (10,10)
     assert Y.shape == (10,10)
-    assert len(im_data) == len(data_size)
+    assert len(im_data) == 5
     assert im_data['u'].shape == (10,10) 
