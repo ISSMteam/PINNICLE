@@ -78,6 +78,61 @@ def plot_solutions(pinn, path="", X_ref=None, sol_ref=None, cols=None, resolutio
     else:
         raise ValueError("Plot is only implemented for 2D problem")
 
+def plot_nn(pinn, data_names=None, X_mask=None, axs=None, vranges={}, resolution=200, **kwargs):
+    """ plot the prediction of the nerual network in pinn, according to the data_names
+    Args:
+        pinn (class PINN): The PINN model
+        data_names (list): List of data names
+        X_mask (np.array): xy-coordinates of the ice mask
+        axs (array of AxesSubplot): axes to plot each data, if not given, then generate a subplot according to the size of data_names
+        vranges (dict): range of the data
+        resolution (int): number of pixels in horizontal and vertical direction
+    return:
+        X (np.array): x-coordinates of the 2D plot
+        Y (np.array): y-coordinates of the 2D plot
+        im_data (dict): Dict of data for the 2D plot, each element has the same size as X and Y
+        axs (array of AxesSubplot): axes of the subplots
+    """
+    nn_params = pinn.params.nn
+    # if not given, use the output list in pinn
+    if not data_names:
+        data_names = nn_params.output_variables
+
+    ndata = len(data_names)
+            
+    #  generate 2d Cartisian grid
+    X, Y = np.meshgrid(np.linspace(nn_params.input_lb[0], nn_params.input_ub[0], resolution), 
+                       np.linspace(nn_params.input_lb[1], nn_params.input_ub[1], resolution))
+    X_nn = np.hstack((X.flatten()[:,None], Y.flatten()[:,None]))
+
+    grid_size = 2.0*(((nn_params.input_ub[0] - nn_params.input_lb[0])/resolution)**2+
+                     ((nn_params.input_ub[1] - nn_params.input_lb[1])/resolution)**2)**0.5
+    
+    # ice mask coordinates
+    if not X_mask:
+        iice = pinn.model_data.get_ice_coordinates()
+        X_mask = np.hstack((pinn.model_data.X_dict['x'][iice].flatten()[:,None], 
+                            pinn.model_data.X_dict['y'][iice].flatten()[:,None]))
+    tree = KDTree(X_mask)
+    dist, _ = tree.query(np.c_[X.ravel(), Y.ravel()], k=1)
+    dist = dist.reshape(X.shape)
+
+    # get the predictions
+    sol_pred = pinn.model.predict(X_nn)
+    im_data = {k: np.reshape(sol_pred[:,i:i+1], X.shape) 
+               for i,k in enumerate(nn_params.output_variables) if k in data_names}
+    if not vranges:
+        vranges = {k: [nn_params.output_lb[i], nn_params.output_ub[i]] 
+                   for i,k in enumerate(nn_params.output_variables) if k in data_names}
+
+    # set masked area to nan
+    for k in im_data:
+        im_data[k][dist > grid_size] = np.nan
+
+    #plot
+    axs = plot_data(X, Y, im_data=im_data, axs=axs, vranges=vranges, **kwargs)
+    return X, Y, im_data, axs
+
 def plot_dict_data(X_dict, data_dict, axs=None, vranges={}, resolution=200, **kwargs):
     """ plot the data in data_dict, with coordinates in X_dict
     Args:
@@ -87,6 +142,9 @@ def plot_dict_data(X_dict, data_dict, axs=None, vranges={}, resolution=200, **kw
         vranges (dict): range of the data
         resolution (int): number of pixels in horizontal and vertical direction
     return:
+        X (np.array): x-coordinates of the 2D plot
+        Y (np.array): y-coordinates of the 2D plot
+        im_data (dict): Dict of data for the 2D plot, each element has the same size as X and Y
         axs (array of AxesSubplot): axes of the subplots
     """
     data_names = list(data_dict.keys())
@@ -115,7 +173,7 @@ def plot_dict_data(X_dict, data_dict, axs=None, vranges={}, resolution=200, **kw
 
     #plot
     axs = plot_data(X, Y, im_data=im_data, axs=axs, vranges=vranges, **kwargs)
-    return axs
+    return X, Y, im_data, axs
     
 def plot_data(X, Y, im_data, axs=None, vranges={}, **kwargs):
     """ plot all the data in im_data

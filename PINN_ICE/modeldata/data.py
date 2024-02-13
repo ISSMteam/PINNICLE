@@ -91,6 +91,9 @@ class ISSMmdData(DataBase, Constants):
             axs (array of AxesSubplot): axes to plot each data, if not given, then generate a subplot according to the size of data_names
             resolution (int): number of pixels in horizontal and vertical direction
         return:
+            X (np.array): x-coordinates of the 2D plot
+            Y (np.array): y-coordinates of the 2D plot
+            im_data (dict): Dict of data for the 2D plot, each element has the same size as X and Y
             axs (array of AxesSubplot): axes of the subplots
         """
         if not data_names:
@@ -104,9 +107,9 @@ class ISSMmdData(DataBase, Constants):
         data_dict = {k:self.data_dict[k] for k in data_names}
 
         # call the function in utils
-        axs = plot_dict_data(self.X_dict, data_dict, vranges=vranges, axs=axs, resolution=resolution, **kwargs)
+        X, Y, im_data, axs = plot_dict_data(self.X_dict, data_dict, vranges=vranges, axs=axs, resolution=resolution, **kwargs)
 
-        return axs
+        return X, Y, im_data, axs
 
     def prepare_training_data(self, data_size=None):
         """ prepare data for PINNs according to the settings in datasize

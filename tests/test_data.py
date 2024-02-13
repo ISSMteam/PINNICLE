@@ -36,8 +36,13 @@ def test_ISSMmdData_plot():
     p = DataParameter(hp)
     data_loader = ISSMmdData(p)
     data_loader.load_data()
-    axs = data_loader.plot(resolution=10)
+    _, _, _, axs = data_loader.plot(resolution=10)
     assert len(axs) == len(data_loader.data_dict.keys())
     data_names = ['u','v','s']
-    axs = data_loader.plot(data_names=data_names,resolution=10)
+    X, Y, im_data, axs = data_loader.plot(data_names=data_names,resolution=10)
     assert len(axs) == len(data_names)
+    assert X.shape == (10,10)
+    assert Y.shape == (10,10)
+    assert len(im_data) == len(data_names)
+    assert im_data['u'].shape == (10,10)
+
