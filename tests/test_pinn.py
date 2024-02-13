@@ -2,7 +2,7 @@ import os
 import PINN_ICE as pinn
 import numpy as np
 import deepxde as dde
-from PINN_ICE.utils import data_misfit
+from PINN_ICE.utils import data_misfit, plot_nn
 
 dde.config.set_default_float('float64')
 dde.config.disable_xla_jit()
@@ -107,3 +107,8 @@ def test_plot(tmp_path):
     assert experiment.plot_predictions(X_ref=experiment.model_data.X_dict, sol_ref=experiment.model_data.data_dict, resolution=10) is None
     X_ref = np.hstack((experiment.model_data.X_dict['x'].flatten()[:,None],experiment.model_data.X_dict['y'].flatten()[:,None]))
     assert experiment.plot_predictions(X_ref=X_ref, sol_ref=experiment.model_data.data_dict, resolution=10) is None
+    X, Y, im_data, axs = plot_nn(experiment, experiment.model_data.data_dict, resolution=10);
+    assert X.shape == (10,10)
+    assert Y.shape == (10,10)
+    assert len(im_data) == 5
+    assert im_data['u'].shape == (10,10) 

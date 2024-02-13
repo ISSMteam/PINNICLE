@@ -1,8 +1,10 @@
 from abc import ABC, abstractmethod
 from ..parameter import DataParameter
 from ..physics import Constants
-import numpy as np
+from ..utils import plot_dict_data
 import mat73
+import numpy as np
+
 
 class DataBase(ABC):
     """ Base class of data
@@ -46,6 +48,17 @@ class ISSMmdData(DataBase, Constants):
         Constants.__init__(self)
         super().__init__(parameters)
 
+    def get_ice_coordinates(self, mask_name=""):
+        """ get the coordinates and index of ice covered region for X_dict and data_dict
+        """
+        if (not mask_name) or (mask_name not in self.mask_dict):
+            mask_name = "icemask"
+
+        # get ice mask
+        icemask = self.mask_dict[mask_name]
+        iice = np.asarray(icemask<0).nonzero()
+        return iice
+
     def load_data(self):
         """ load ISSM model from a .mat file, return a dict with the required data
         """
@@ -70,6 +83,34 @@ class ISSMmdData(DataBase, Constants):
         # B.C.
         self.mask_dict['DBC_mask'] = md['mesh']['vertexonboundary']
 
+    def plot(self, data_names=[], vranges={}, axs=None, resolution=200, **kwargs):
+        """ use utils.plot_dict_data to plot the ISSM data 
+        Args:
+            data_names (list): Names of the variables. if not specified, plot all variables in data_dict
+            vranges (dict): range of the data
+            axs (array of AxesSubplot): axes to plot each data, if not given, then generate a subplot according to the size of data_names
+            resolution (int): number of pixels in horizontal and vertical direction
+        return:
+            X (np.array): x-coordinates of the 2D plot
+            Y (np.array): y-coordinates of the 2D plot
+            im_data (dict): Dict of data for the 2D plot, each element has the same size as X and Y
+            axs (array of AxesSubplot): axes of the subplots
+        """
+        if not data_names:
+            # default value of data_names
+            data_names = list(self.data_dict.keys())
+        else:
+            # compare with data_dict, find all avaliable
+            data_names = [k for k in data_names if k in self.data_dict]
+
+        # get the subdict of the data to plot
+        data_dict = {k:self.data_dict[k] for k in data_names}
+
+        # call the function in utils
+        X, Y, im_data, axs = plot_dict_data(self.X_dict, data_dict, vranges=vranges, axs=axs, resolution=resolution, **kwargs)
+
+        return X, Y, im_data, axs
+
     def prepare_training_data(self, data_size=None):
         """ prepare data for PINNs according to the settings in datasize
         """
@@ -81,8 +122,7 @@ class ISSMmdData(DataBase, Constants):
         self.sol = {}
 
         # prepare x,y coordinates
-        icemask = self.mask_dict['icemask']
-        iice = np.asarray(icemask<0).nonzero()
+        iice = self.get_ice_coordinates()
         X_temp = np.hstack((self.X_dict['x'][iice].flatten()[:,None], self.X_dict['y'][iice].flatten()[:,None]))
         max_data_size = X_temp.shape[0]
 
@@ -107,4 +147,3 @@ class ISSMmdData(DataBase, Constants):
                     self.X[k] = X_bc
                     self.sol[k] = self.data_dict[k][idbc].flatten()[:,None]
 
-# TODO: add plot

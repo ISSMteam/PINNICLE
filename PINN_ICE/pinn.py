@@ -68,8 +68,7 @@ class PINN:
         return path
 
     def compile(self, opt=None, loss=None, lr=None, loss_weights=None):
-        """
-        compile the model  
+        """ compile the model  
         """
         # load from params
         if opt is None:
@@ -85,7 +84,7 @@ class PINN:
             loss_weights = self.params.training.loss_weights
 
         # compile the model
-        self.model.compile(opt, loss=loss, lr=0.001, loss_weights=loss_weights)
+        self.model.compile(opt, loss=loss, lr=lr, loss_weights=loss_weights)
 
     def load_model(self, path="", epochs=-1, subfolder="pinn", name="model"):
         """laod the neural network from saved model
@@ -95,6 +94,8 @@ class PINN:
 
         path = self.check_path(path, loadOnly=True)
         self.model.restore(f"{path}/{subfolder}/{name}-{epochs}.ckpt")
+        # need to recompile the model, so that model.prediction can work properly
+        self.compile()
 
     def load_setting(self, path="", filename="params.json"):
         """ load the settings from file
