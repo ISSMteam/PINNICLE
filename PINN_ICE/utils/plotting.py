@@ -34,6 +34,8 @@ def plot_solutions(pinn, path="", X_ref=None, sol_ref=None, cols=None, resolutio
         X, Y = np.meshgrid(np.linspace(pinn.params.nn.input_lb[0], pinn.params.nn.input_ub[0], resolution),
                 np.linspace(pinn.params.nn.input_lb[1], pinn.params.nn.input_ub[1], resolution))
         X_nn = np.hstack((X.flatten()[:,None], Y.flatten()[:,None]))
+        grid_size = 2.0*(((pinn.params.nn.input_ub[0] - pinn.params.nn.input_lb[0])/resolution)**2+
+                         ((pinn.params.nn.input_ub[1] - pinn.params.nn.input_lb[1])/resolution)**2)**0.5
 
         # predicted solutions
         sol_pred = pinn.model.predict(X_nn)
@@ -56,6 +58,16 @@ def plot_solutions(pinn, path="", X_ref=None, sol_ref=None, cols=None, resolutio
             vranges.update({k+"_ref":vranges[k+"_pred"] for k in pinn.params.nn.output_variables})
             plot_data.update({k+"_diff":(plot_data[k+"_pred"] - plot_data[k+"_ref"]) for k in pinn.params.nn.output_variables if k in sol_ref})
             vranges.update({k+"_diff":[-0.1*max(np.abs(vranges[k+"_pred"])), 0.1*max(np.abs(vranges[k+"_pred"]))] for k in pinn.params.nn.output_variables if k in sol_ref})
+
+        # set ice mask
+        iice = pinn.model_data.get_ice_coordinates()
+        X_mask = np.hstack((pinn.model_data.X_dict['x'][iice].flatten()[:,None],
+                            pinn.model_data.X_dict['y'][iice].flatten()[:,None]))
+        tree = KDTree(X_mask)
+        dist, _ = tree.query(np.c_[X.ravel(), Y.ravel()], k=1)
+        dist = dist.reshape(X.shape)
+        for k in plot_data:
+            plot_data[k][dist > grid_size] = np.nan
 
         # plot
         n = len(plot_data)
