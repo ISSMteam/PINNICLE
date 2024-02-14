@@ -19,8 +19,8 @@ appDataPath = os.path.join(repoPath, "DATA")
 data_path = os.path.join(appDataPath, inputFileName)
 
 # path for saving results and figures
-modelFolder = "./Models/" + outputFileName + "_" + datestr  + "/"
 outputFileName="Helheim_test"
+modelFolder = "./Models/" + outputFileName + "_" + datestr  + "/"
 
 # General parameters
 hp = {}
