@@ -93,3 +93,30 @@ def test_training_parameters():
     hp['additional_loss'] = {"u": u_loss}
     p = TrainingParameter(hp)
     assert p.additional_loss["u"].name == u_loss['name']
+
+def test_training_callbacks():
+    hp = {}
+    p = TrainingParameter(hp)
+    assert p.has_callbacks == False
+
+def test_training_callbacks_EarlyStopping():
+    hp = {}
+    hp["min_delta"] = 1
+    p = TrainingParameter(hp)
+    assert p.has_callbacks == True
+    hp = {}
+    hp["patience"] = 1
+    p = TrainingParameter(hp)
+    assert p.has_callbacks == True
+
+def test_training_callbacks_Resampler():
+    hp = {}
+    hp["period"] = 1
+    p = TrainingParameter(hp)
+    assert p.has_callbacks == True
+
+def test_training_callbacks_Checkpoint():
+    hp = {}
+    hp["checkpoint"] = True
+    p = TrainingParameter(hp)
+    assert p.has_callbacks == True
