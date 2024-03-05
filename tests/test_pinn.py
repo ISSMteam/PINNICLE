@@ -98,6 +98,13 @@ def test_train(tmp_path):
     experiment.train()
     assert experiment.loss_names == ['fSSA1', 'fSSA2', 'u', 'v', 's', 'H', 'C', "vel log"]
 
+def test_train_with_callbacks(tmp_path):
+    hp["period"] = 1
+    experiment = pinn.PINN(params=hp)
+    experiment.compile()
+    experiment.train()
+    assert experiment.loss_names == ['fSSA1', 'fSSA2', 'u', 'v', 's', 'H', 'C', "vel log"]
+
 def test_plot(tmp_path):
     hp["save_path"] = str(tmp_path)
     hp["is_save"] = True

@@ -262,27 +262,74 @@ class TrainingParameter(ParameterBase):
     def __init__(self, param_dict={}):
         super().__init__(param_dict)
 
+        # update additional loss
         if self.additional_loss:
-            self.update_parameters()
+            self.update_additional_loss()
+
+        #  add callback setttings if given any of them
+        self.has_callbacks = self.check_callbacks()
 
     def set_default(self):
+        # number of epochs
         self.epochs = 0
+        # optimization method
         self.optimizer = "adam"
+        # general loss function
         self.loss_functions = "MSE"
+        # additional loss functions, specified as a dict
         self.additional_loss = {} 
+        # learning rate
         self.learning_rate = 0
+        # list of the weights
         self.loss_weights = []
+        # setting the callbacks
+        self.has_callbacks = False
+        # dde.callbacks.EarlyStopping(min_delta=min_delta, patience=patience)
+        self.min_delta = None
+        self.patience = None
+        # dde.callbacks.PDEPointResampler(period=period)
+        self.period = None
+        # dde.callbacks.ModelCheckpoint(filepath, verbose=1, save_better_only=True)
+        self.checkpoint = False
+        # path to save the results
         self.save_path = ""
+        # if save the results and history
         self.is_save = True
+        # if plot the results and history, and save figures
         self.is_plot = False
+
+    def check_callbacks(self):
+        """ check if any of the following variable is given from setting
+        """
+        # EarlyStopping
+        if self.min_delta is not None:
+            return True
+        if self.patience is not None:
+            return True
+        # PDEPointResampler
+        if self.has_PDEPointResampler():
+            return True
+        # ModelCheckpoint
+        if self.checkpoint:
+            return True
+        return False
 
     def check_consisteny(self):
         pass
 
-    def update_parameters(self):
+    def has_PDEPointResampler(self):
+        """ check if param has the period for resampler
+        """
+        if self.period is None:
+            return False
+        else:
+            return True
+
+    def update_additional_loss(self):
         """ convert dict to class LossFunctionParameter
         """
         self.additional_loss = {k:LossFunctionParameter(self.additional_loss[k]) for k in self.additional_loss}
+        
 
 class LossFunctionParameter(ParameterBase):
     """ parameter of customize loss function
@@ -291,8 +338,12 @@ class LossFunctionParameter(ParameterBase):
         super().__init__(param_dict)
 
     def set_default(self):
+        # name of the loss term, should avoid using existing names in the system, 
+        # TODO: make sure this name is not in used
         self.name = ""
+        # loss functions
         self.function = "MSE"
+        # weight of this loss function
         self.weight = 1.0
 
     def check_consisteny(self):

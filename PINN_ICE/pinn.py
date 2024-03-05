@@ -147,9 +147,12 @@ class PINN:
         if self.params.training.is_save:
             self.save_setting()
 
+        # get callback function list
+        callbacks = self.update_callbacks()
+
         # start training
         self._loss_history, self._train_state = self.model.train(iterations=iterations,
-                display_every=10000, disregard_previous_best=True)
+                display_every=10000, disregard_previous_best=True, callbacks=callbacks)
         
         # prepare history
         self.history = History(self._loss_history, self.loss_names)
@@ -162,6 +165,23 @@ class PINN:
         # plot history and best results
         if self.params.training.is_plot: 
             self.plot_history()
+
+    def update_callbacks(self, params=None):
+        """ update callback functions for the training according to the settings in params
+        """
+        if params is None:
+            params = self.params.training
+
+        # add callbacks
+        if params.has_callbacks:
+            callbacks = []
+            # TODO: add EarlyStopping, and ModelCheckpoint
+            # resampler of the collocation points
+            if params.has_PDEPointResampler():
+                callbacks.append(dde.callbacks.PDEPointResampler(period=params.period))
+            return callbacks
+        else:
+            return None
 
     def update_training_data(self, training_data):
         """ update data set used for the training, the order follows 'output_variables'
