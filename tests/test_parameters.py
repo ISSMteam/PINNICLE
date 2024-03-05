@@ -114,6 +114,7 @@ def test_training_callbacks_Resampler():
     hp["period"] = 1
     p = TrainingParameter(hp)
     assert p.has_callbacks == True
+    assert p.has_PDEPointResampler() == True
 
 def test_training_callbacks_Checkpoint():
     hp = {}

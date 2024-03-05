@@ -301,18 +301,29 @@ class TrainingParameter(ParameterBase):
     def check_callbacks(self):
         """ check if any of the following variable is given from setting
         """
+        # EarlyStopping
         if self.min_delta is not None:
             return True
         if self.patience is not None:
             return True
-        if self.period is not None:
+        # PDEPointResampler
+        if self.has_PDEPointResampler():
             return True
+        # ModelCheckpoint
         if self.checkpoint:
             return True
         return False
 
     def check_consisteny(self):
         pass
+
+    def has_PDEPointResampler(self):
+        """ check if param has the period for resampler
+        """
+        if self.period is None:
+            return False
+        else:
+            return True
 
     def update_additional_loss(self):
         """ convert dict to class LossFunctionParameter
