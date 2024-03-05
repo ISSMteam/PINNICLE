@@ -103,10 +103,13 @@ def test_training_callbacks_EarlyStopping():
     hp = {}
     hp["min_delta"] = 1
     p = TrainingParameter(hp)
+    assert p.has_EarlyStopping() == True
+    assert p.patience == 0
     assert p.has_callbacks == True
     hp = {}
     hp["patience"] = 1
     p = TrainingParameter(hp)
+    assert p.has_EarlyStopping() == True
     assert p.has_callbacks == True
 
 def test_training_callbacks_Resampler():
