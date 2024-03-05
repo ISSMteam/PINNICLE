@@ -302,9 +302,7 @@ class TrainingParameter(ParameterBase):
         """ check if any of the following variable is given from setting
         """
         # EarlyStopping
-        if self.min_delta is not None:
-            return True
-        if self.patience is not None:
+        if self.has_EarlyStopping():
             return True
         # PDEPointResampler
         if self.has_PDEPointResampler():
@@ -312,10 +310,30 @@ class TrainingParameter(ParameterBase):
         # ModelCheckpoint
         if self.checkpoint:
             return True
+        # otherwise
         return False
 
     def check_consisteny(self):
         pass
+
+    def has_EarlyStopping(self):
+        """ check if param has the min_delta or patience for early stopping
+        """
+        has_es = False
+        if self.min_delta is not None:
+            has_es = True
+
+        if self.patience is not None:
+            has_es = True
+
+        # update the setting with partially None
+        if has_es:
+            if self.min_delta is None:
+                self.min_delta = 0
+            if self.patience is None:
+                self.patience = 0
+
+        return has_es
 
     def has_PDEPointResampler(self):
         """ check if param has the period for resampler

@@ -175,7 +175,10 @@ class PINN:
         # add callbacks
         if params.has_callbacks:
             callbacks = []
-            # TODO: add EarlyStopping, and ModelCheckpoint
+            # TODO: add ModelCheckpoint
+            # resampler of the collocation points
+            if params.has_EarlyStopping():
+                callbacks.append(dde.callbacks.EarlyStopping(min_delta=params.min_delta, patience=params.patience))
             # resampler of the collocation points
             if params.has_PDEPointResampler():
                 callbacks.append(dde.callbacks.PDEPointResampler(period=params.period))

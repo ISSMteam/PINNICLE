@@ -99,6 +99,7 @@ def test_train(tmp_path):
     assert experiment.loss_names == ['fSSA1', 'fSSA2', 'u', 'v', 's', 'H', 'C', "vel log"]
 
 def test_train_with_callbacks(tmp_path):
+    hp["min_delta"] = 1
     hp["period"] = 1
     experiment = pinn.PINN(params=hp)
     experiment.compile()
