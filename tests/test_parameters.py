@@ -124,3 +124,4 @@ def test_training_callbacks_Checkpoint():
     hp["checkpoint"] = True
     p = TrainingParameter(hp)
     assert p.has_callbacks == True
+    assert p.has_ModelCheckpoint() == True

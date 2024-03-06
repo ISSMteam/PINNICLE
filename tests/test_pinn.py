@@ -23,7 +23,7 @@ loss_weights[3] = loss_weights[3] * yts*yts
 
 hp = {}
 # General parameters
-hp["epochs"] = 2
+hp["epochs"] = 10
 hp["loss_weights"] = loss_weights
 hp["learning_rate"] = 0.001
 hp["loss_functions"] = "MSE"
@@ -32,7 +32,7 @@ hp["is_save"] = False
 # NN
 hp["activation"] = "tanh"
 hp["initializer"] = "Glorot uniform"
-hp["num_neurons"] = 20
+hp["num_neurons"] = 10
 hp["num_layers"] = 6
 
 # data
@@ -92,19 +92,30 @@ def test_save_and_load_setting(tmp_path):
 def test_train(tmp_path):
     hp["save_path"] = str(tmp_path)
     hp["is_save"] = True
-    hp["data_size"] = {"u":4000, "v":4000, "s":4000, "H":4000, "C":None, "vel":4000}
+    hp["num_collocation_points"] = 100
+    hp["data_size"] = {"u":100, "v":100, "s":100, "H":100, "C":None, "vel":100}
     experiment = pinn.PINN(params=hp)
     experiment.compile()
     experiment.train()
     assert experiment.loss_names == ['fSSA1', 'fSSA2', 'u', 'v', 's', 'H', 'C', "vel log"]
+    assert os.path.isfile(f"{tmp_path}/pinn/model-{hp['epochs']}.ckpt.index")
 
 def test_train_with_callbacks(tmp_path):
-    hp["min_delta"] = 1
-    hp["period"] = 1
+    hp["save_path"] = str(tmp_path)
+    hp["is_save"] = True
+    hp["num_collocation_points"] = 100
+    hp["data_size"] = {"u":100, "v":100, "s":100, "H":100, "C":None, "vel":100}
+    hp["min_delta"] = 1e10
+    hp["period"] = 5
+    hp["patience"] = 8
+    hp["checkpoint"] = True
     experiment = pinn.PINN(params=hp)
     experiment.compile()
     experiment.train()
     assert experiment.loss_names == ['fSSA1', 'fSSA2', 'u', 'v', 's', 'H', 'C', "vel log"]
+    assert os.path.isfile(f"{tmp_path}/pinn/model-1.ckpt.index")
+    assert os.path.isfile(f"{tmp_path}/pinn/model-9.ckpt.index")
+    assert not os.path.isfile(f"{tmp_path}/pinn/model-{hp['epochs']}.ckpt.index")
 
 def test_plot(tmp_path):
     hp["save_path"] = str(tmp_path)
