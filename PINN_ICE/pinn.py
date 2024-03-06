@@ -175,10 +175,16 @@ class PINN:
         # add callbacks
         if params.has_callbacks:
             callbacks = []
-            # TODO: add ModelCheckpoint
-            # resampler of the collocation points
+            # early stop
             if params.has_EarlyStopping():
                 callbacks.append(dde.callbacks.EarlyStopping(min_delta=params.min_delta, patience=params.patience))
+            # check points will be saved to
+            if params.has_ModelCheckpoint():
+                path = self.check_path("")
+                subfolder = "pinn"
+                name = "model"
+                cpPath = f"{path}/{subfolder}/{name}"
+                callbacks.append(dde.callbacks.ModelCheckpoint(cpPath, save_better_only=True))
             # resampler of the collocation points
             if params.has_PDEPointResampler():
                 callbacks.append(dde.callbacks.PDEPointResampler(period=params.period))

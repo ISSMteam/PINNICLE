@@ -308,7 +308,7 @@ class TrainingParameter(ParameterBase):
         if self.has_PDEPointResampler():
             return True
         # ModelCheckpoint
-        if self.checkpoint:
+        if self.has_ModelCheckpoint():
             return True
         # otherwise
         return False
@@ -334,6 +334,11 @@ class TrainingParameter(ParameterBase):
                 self.patience = 0
 
         return has_es
+
+    def has_ModelCheckpoint(self):
+        """ check if param has checkpoint=True for checkpointing
+        """
+        return self.checkpoint
 
     def has_PDEPointResampler(self):
         """ check if param has the period for resampler
