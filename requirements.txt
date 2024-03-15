@@ -1,8 +1,7 @@
 numpy
 scipy
-# tf-keras
-# tensorflow>=2.11.0
-tensorflow-probability>=0.19.0      # to use tensorflow 2
+tensorflow>=2.11.0
+tensorflow-probability==0.19.0      # to use tensorflow 2
 matplotlib
 pandas
 mat73
