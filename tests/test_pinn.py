@@ -82,6 +82,11 @@ def test_add_loss():
     assert len(experiment.params.training.loss_functions) == 8
     assert experiment.params.training.loss_functions == ["MSE"]*7 + [data_misfit.get("VEL_LOG")]
 
+    vel_loss['function'] = "MAPE"
+    hp["additional_loss"] = {"vel":vel_loss}
+    experiment = pinn.PINN(params=hp)
+    assert experiment.params.training.loss_functions == ["MSE"]*7 + [data_misfit.get("MAPE")]
+
 def test_save_and_load_setting(tmp_path):
     experiment = pinn.PINN(params=hp)
     experiment.save_setting(path=tmp_path)

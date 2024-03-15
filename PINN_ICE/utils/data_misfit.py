@@ -1,3 +1,4 @@
+import deepxde as dde
 import deepxde.backend as bkd
 from deepxde.backend import tf
 
@@ -28,9 +29,12 @@ def get(identifier):
     """
     if isinstance(identifier, (list, tuple)):
         return list(map(get, identifier))
-
     if isinstance(identifier, str):
-        return LOSS_DICT[identifier]
+        if identifier in LOSS_DICT:
+            return LOSS_DICT[identifier]
+        else:
+            return dde.losses.get(identifier)
     if callable(identifier):
         return identifier
+
     raise ValueError("Could not interpret loss function identifier:", identifier)
