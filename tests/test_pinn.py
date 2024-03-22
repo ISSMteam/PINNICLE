@@ -122,6 +122,20 @@ def test_train_with_callbacks(tmp_path):
     assert os.path.isfile(f"{tmp_path}/pinn/model-9.ckpt.index")
     assert not os.path.isfile(f"{tmp_path}/pinn/model-{hp['epochs']}.ckpt.index")
 
+def test_only_callbacks():
+    hp["num_collocation_points"] = 100
+    hp["data_size"] = {"u":100, "v":100, "s":100, "H":100, "C":None, "vel":100}
+    hp["min_delta"] = 1e10
+    hp["period"] = 5
+    hp["patience"] = 8
+    hp["checkpoint"] = True
+    experiment = pinn.PINN(params=hp)
+    experiment.compile()
+    callbacks = experiment.update_callbacks()
+    assert callbacks is not None
+    assert len(callbacks) == 3
+
+
 def test_plot(tmp_path):
     hp["save_path"] = str(tmp_path)
     hp["is_save"] = True
