@@ -19,6 +19,10 @@ def test_domain_parameter():
 def test_data_parameter():
     d = SingleDataParameter({"dataname":['u', 'v'], "datasize":[4000, 4000]})
     assert hasattr(d, "param_dict"), "Default attribute 'param_dict' not found"
+    issm = {"dataname":['u', 'v'], "datasize":[4000, 4000]}
+    d = DataParameter({"ISSM":issm})
+    assert hasattr(d, "param_dict"), "Default attribute 'param_dict' not found"
+    assert hasattr(d, "data"), "attribute 'data' not found" 
 
 def test_nn_parameter():
     d = NNParameter()
