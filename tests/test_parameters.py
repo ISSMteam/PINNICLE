@@ -1,6 +1,6 @@
 import pytest
 import PINN_ICE as pinn
-from PINN_ICE.parameter import DataParameter, NNParameter, DomainParameter, PhysicsParameter, Parameters, EquationParameter, TrainingParameter
+from PINN_ICE.parameter import DataParameter, SingleDataParameter, NNParameter, DomainParameter, PhysicsParameter, Parameters, EquationParameter, TrainingParameter
 from PINN_ICE.physics import SSAEquationParameter
 
 yts = 3600*24*365.0
@@ -17,7 +17,7 @@ def test_domain_parameter():
     assert d.has_keys(newat)
 
 def test_data_parameter():
-    d = DataParameter({"dataname":['u', 'v'], "datasize":[4000, 4000]})
+    d = SingleDataParameter({"dataname":['u', 'v'], "datasize":[4000, 4000]})
     assert hasattr(d, "param_dict"), "Default attribute 'param_dict' not found"
 
 def test_nn_parameter():
