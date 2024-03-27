@@ -7,7 +7,7 @@ from .nn import FNN
 from .physics import Physics
 from .domain import Domain
 from .parameter import Parameters
-from .modeldata import DataBase
+from .modeldata import Data
 
 
 class PINN:
@@ -29,7 +29,8 @@ class PINN:
         # domain of the model
         self.domain = Domain(self.params.domain)
         # create an instance of Data
-        self.model_data = DataBase.create(self.params.data.source, parameters=self.params.data)
+        #self.model_data = DataBase.create(self.params.data.source, parameters=self.params.data)
+        self.model_data = Data(self.params.data)
         # load from data file
         self.model_data.load_data()
         # update according to the setup: data_size

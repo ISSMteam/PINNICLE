@@ -76,10 +76,32 @@ class DomainParameter(ParameterBase):
     def check_consisteny(self):
         pass
 
-
 class DataParameter(ParameterBase):
+    """ list of all data used
     """
-    parameters of data
+    def __init__(self, param_dict={}):
+        super().__init__(param_dict)
+
+        # convert data from dict of dict to a dict of SingleDataParameter
+        if self.data:
+            self.update_data()
+
+    def check_consisteny(self):
+        pass
+
+    def set_default(self):
+        """ default parameters
+        """
+        self.data = {}
+
+    def update_data(self):
+        """ convert dict to class SingleDataParameter
+        """
+        self.data = {k:SingleDataParameter(self.data[k]) for k in self.data}
+
+
+class SingleDataParameter(ParameterBase):
+    """ parameters of a single data file
     """
     def __init__(self, param_dict={}):
         super().__init__(param_dict)
