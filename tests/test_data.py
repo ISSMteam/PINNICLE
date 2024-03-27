@@ -1,6 +1,6 @@
 import os
-from PINN_ICE.modeldata import ISSMmdData
-from PINN_ICE.parameter import DataParameter
+from PINN_ICE.modeldata import ISSMmdData, Data
+from PINN_ICE.parameter import DataParameter, SingleDataParameter
 
 def test_ISSMmdData():
     filename = "Helheim_fastflow.mat"
@@ -11,7 +11,7 @@ def test_ISSMmdData():
     hp = {}
     hp["data_path"] = path
     hp["data_size"] = {"u":4000, "v":4000, "s":4000, "H":4000, "C":None}
-    p = DataParameter(hp)
+    p = SingleDataParameter(hp)
     data_loader = ISSMmdData(p)
     data_loader.load_data()
     data_loader.prepare_training_data()
@@ -33,7 +33,7 @@ def test_ISSMmdData_plot():
 
     hp = {}
     hp["data_path"] = path
-    p = DataParameter(hp)
+    p = SingleDataParameter(hp)
     data_loader = ISSMmdData(p)
     data_loader.load_data()
     _, _, _, axs = data_loader.plot(resolution=10)
@@ -45,4 +45,27 @@ def test_ISSMmdData_plot():
     assert Y.shape == (10,10)
     assert len(im_data) == len(data_names)
     assert im_data['u'].shape == (10,10)
+
+def test_Data():
+    filename = "Helheim_fastflow.mat"
+    repoPath = os.path.dirname(__file__) + "/../examples/"
+    appDataPath = os.path.join(repoPath, "dataset")
+    path = os.path.join(appDataPath, filename)
+    
+    issm = {}
+    issm["data_path"] = path
+    issm["data_size"] = {"u":4000, "v":4000, "s":4000, "H":4000, "C":None}
+    hp = {}
+    hp['data'] = {"issm":issm}
+
+    p = DataParameter(hp)
+    data_loader = Data(p)
+    data_loader.load_data()
+    data_loader.prepare_training_data()
+
+    assert(data_loader.sol['u'].shape == (4000,1))
+    assert(data_loader.X['v'].shape == (4000,2))
+    assert(data_loader.sol['s'].shape == (4000,1))
+    assert(data_loader.X['H'].shape == (4000,2))
+    assert(data_loader.sol['C'].shape == (564,1))
 
