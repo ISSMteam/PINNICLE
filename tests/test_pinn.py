@@ -1,8 +1,8 @@
 import os
-import PINN_ICE as pinn
+import PINNICLE as pinn
 import numpy as np
 import deepxde as dde
-from PINN_ICE.utils import data_misfit, plot_nn
+from PINNICLE.utils import data_misfit, plot_nn
 
 dde.config.set_default_float('float64')
 dde.config.disable_xla_jit()

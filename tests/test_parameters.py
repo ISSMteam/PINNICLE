@@ -1,7 +1,7 @@
 import pytest
-import PINN_ICE as pinn
-from PINN_ICE.parameter import DataParameter, SingleDataParameter, NNParameter, DomainParameter, PhysicsParameter, Parameters, EquationParameter, TrainingParameter
-from PINN_ICE.physics import SSAEquationParameter
+import PINNICLE as pinn
+from PINNICLE.parameter import DataParameter, SingleDataParameter, NNParameter, DomainParameter, PhysicsParameter, Parameters, EquationParameter, TrainingParameter
+from PINNICLE.physics import SSAEquationParameter
 
 yts = 3600*24*365.0
 

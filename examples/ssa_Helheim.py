@@ -1,4 +1,4 @@
-import PINN_ICE as pinn
+import PINNICLE as pinn
 import os
 import numpy as np
 from datetime import datetime
@@ -38,8 +38,10 @@ hp["num_neurons"] = 20
 hp["num_layers"] = 6
 
 # data
-hp["data_size"] = {"u":1000, "v":1000, "s":1000, "H":1000, "C":None, "vel":1000}
-hp["data_path"] = data_path
+issm = {}
+issm["data_size"] = {"u":1000, "v":1000, "s":1000, "H":1000, "C":None, "vel":1000}
+issm["data_path"] = data_path
+hp["data"] = {"ISSM":issm}
 
 # domain
 hp["shapefile"] = os.path.join(repoPath, "DATA", expFileName)
@@ -66,3 +68,4 @@ experiment.compile()
 experiment.train()
 # show results
 experiment.plot_predictions(X_ref=experiment.model_data.X_dict, sol_ref=experiment.model_data.data_dict)
+

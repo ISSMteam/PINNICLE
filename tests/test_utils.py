@@ -1,4 +1,4 @@
-import PINN_ICE as pinn
+import PINNICLE as pinn
 import pytest
 import tensorflow as tf
 

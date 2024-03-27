@@ -1,6 +1,6 @@
-import PINN_ICE as pinn
-from PINN_ICE.physics import Physics, SSAEquationParameter, SSA
-from PINN_ICE.parameter import PhysicsParameter
+import PINNICLE as pinn
+from PINNICLE.physics import Physics, SSAEquationParameter, SSA
+from PINNICLE.parameter import PhysicsParameter
 import pytest
 
 def test_Constants():
