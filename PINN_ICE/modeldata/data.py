@@ -34,8 +34,20 @@ class DataBase(ABC):
         self.sol = None
 
     @abstractmethod
+    def get_ice_coordinates(self, mask_name=""):
+        """ get ice masks if available from the data
+        """
+        pass
+
+    @abstractmethod
     def load_data(self):
         """ load data from self.path
+        """
+        pass
+
+    @abstractmethod
+    def prepare_training_data(self):
+        """ prepare training data according to the data_size
         """
         pass
 
@@ -53,6 +65,12 @@ class Data(Constants):
         self.X = {}
         # reference solution of the output of PINN
         self.sol = {}
+
+
+    def get_ice_coordinates(self, mask_name=""):
+        """ get the coordinates of ice covered region from all the data, put them in one array
+        """
+        return np.vstack([self.data[k].get_ice_coordinates(mask_name=mask_name) for k in self.data])
 
     def load_data(self):
         """ laod all the data in self.data
@@ -88,8 +106,8 @@ class ISSMmdData(DataBase, Constants):
         Constants.__init__(self)
         super().__init__(parameters)
 
-    def get_ice_coordinates(self, mask_name=""):
-        """ get the coordinates and index of ice covered region for X_dict and data_dict
+    def get_ice_indices(self, mask_name=""):
+        """ get the indices of ice covered region for X_dict and data_dict
         """
         if (not mask_name) or (mask_name not in self.mask_dict):
             mask_name = "icemask"
@@ -98,6 +116,15 @@ class ISSMmdData(DataBase, Constants):
         icemask = self.mask_dict[mask_name]
         iice = np.asarray(icemask<0).nonzero()
         return iice
+
+    def get_ice_coordinates(self, mask_name=""):
+        """ get the coordinates of ice covered region for X_dict and data_dict
+        """
+        iice = self.get_ice_indices(mask_name=mask_name)
+        # get the coordinates
+        X_mask = np.hstack((self.X_dict['x'][iice].flatten()[:,None],
+                            self.X_dict['y'][iice].flatten()[:,None]))
+        return X_mask
 
     def load_data(self):
         """ load ISSM model from a .mat file, return a dict with the required data
@@ -162,7 +189,7 @@ class ISSMmdData(DataBase, Constants):
         self.sol = {}
 
         # prepare x,y coordinates
-        iice = self.get_ice_coordinates()
+        iice = self.get_ice_indices()
         X_temp = np.hstack((self.X_dict['x'][iice].flatten()[:,None], self.X_dict['y'][iice].flatten()[:,None]))
         max_data_size = X_temp.shape[0]
 

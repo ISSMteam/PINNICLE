@@ -36,7 +36,8 @@ hp["num_neurons"] = 10
 hp["num_layers"] = 6
 
 # data
-hp["data_path"] = path
+issm = {}
+issm["data_path"] = path
 
 # domain
 hp["shapefile"] = os.path.join(repoPath, "dataset", expFileName)
@@ -48,7 +49,8 @@ SSA["scalar_variables"] = {"B":1.26802073401e+08}
 hp["equations"] = {"SSA":SSA}
 
 def test_compile_no_data():
-    hp["data_size"] = {}
+    issm["data_size"] = {}
+    hp["data"] = {"ISSM":issm}
     experiment = pinn.PINN(params=hp)
     experiment.compile()
     assert experiment.loss_names == ['fSSA1', 'fSSA2']
@@ -65,7 +67,8 @@ def test_add_loss():
     vel_loss['function'] = "VEL_LOG"
     vel_loss['weight'] = 1.0
     hp["additional_loss"] = {"vel":vel_loss}
-    hp["data_size"] = {"u":4000, "v":4000, "s":4000, "H":4000, "C":None}
+    issm["data_size"] = {"u":4000, "v":4000, "s":4000, "H":4000, "C":None}
+    hp["data"] = {"ISSM": issm}
     experiment = pinn.PINN(params=hp)
     assert len(experiment.training_data) == 5
     assert type(experiment.training_data[-1]) == dde.icbc.boundary_conditions.PointSetBC
@@ -73,7 +76,8 @@ def test_add_loss():
     assert len(experiment.params.training.loss_weights) == 7
     assert experiment.params.training.loss_functions == ["MSE"]*7
 
-    hp["data_size"] = {"u":4000, "v":4000, "s":4000, "H":4000, "C":None, "vel":4000}
+    issm["data_size"] = {"u":4000, "v":4000, "s":4000, "H":4000, "C":None, "vel":4000}
+    hp["data"] = {"ISSM": issm}
     experiment = pinn.PINN(params=hp)
     assert len(experiment.training_data) == 6
     assert type(experiment.training_data[-1]) == dde.icbc.boundary_conditions.PointSetOperatorBC
@@ -98,7 +102,8 @@ def test_train(tmp_path):
     hp["save_path"] = str(tmp_path)
     hp["is_save"] = True
     hp["num_collocation_points"] = 100
-    hp["data_size"] = {"u":100, "v":100, "s":100, "H":100, "C":None, "vel":100}
+    issm["data_size"] = {"u":100, "v":100, "s":100, "H":100, "C":None, "vel":100}
+    hp["data"] = {"ISSM": issm}
     experiment = pinn.PINN(params=hp)
     experiment.compile()
     experiment.train()
@@ -109,7 +114,8 @@ def test_train_with_callbacks(tmp_path):
     hp["save_path"] = str(tmp_path)
     hp["is_save"] = True
     hp["num_collocation_points"] = 100
-    hp["data_size"] = {"u":100, "v":100, "s":100, "H":100, "C":None, "vel":100}
+    issm["data_size"] = {"u":100, "v":100, "s":100, "H":100, "C":None, "vel":100}
+    hp["data"] = {"ISSM": issm}
     hp["min_delta"] = 1e10
     hp["period"] = 5
     hp["patience"] = 8
@@ -124,7 +130,8 @@ def test_train_with_callbacks(tmp_path):
 
 def test_only_callbacks():
     hp["num_collocation_points"] = 100
-    hp["data_size"] = {"u":100, "v":100, "s":100, "H":100, "C":None, "vel":100}
+    issm["data_size"] = {"u":100, "v":100, "s":100, "H":100, "C":None, "vel":100}
+    hp["data"] = {"ISSM": issm}
     hp["min_delta"] = 1e10
     hp["period"] = 5
     hp["patience"] = 8
@@ -139,13 +146,19 @@ def test_only_callbacks():
 def test_plot(tmp_path):
     hp["save_path"] = str(tmp_path)
     hp["is_save"] = True
-    hp["data_size"] = {"u":4000, "v":4000, "s":4000, "H":4000, "C":None}
+    issm["data_size"] = {"u":4000, "v":4000, "s":4000, "H":4000, "C":None}
+    hp["data"] = {"ISSM": issm}
     experiment = pinn.PINN(params=hp)
     experiment.compile()
-    assert experiment.plot_predictions(X_ref=experiment.model_data.X_dict, sol_ref=experiment.model_data.data_dict, resolution=10) is None
-    X_ref = np.hstack((experiment.model_data.X_dict['x'].flatten()[:,None],experiment.model_data.X_dict['y'].flatten()[:,None]))
-    assert experiment.plot_predictions(X_ref=X_ref, sol_ref=experiment.model_data.data_dict, resolution=10) is None
-    X, Y, im_data, axs = plot_nn(experiment, experiment.model_data.data_dict, resolution=10);
+    assert experiment.plot_predictions(X_ref=experiment.model_data.data["ISSM"].X_dict, 
+                                       sol_ref=experiment.model_data.data["ISSM"].data_dict, 
+                                       resolution=10) is None
+    X_ref = np.hstack((experiment.model_data.data["ISSM"].X_dict['x'].flatten()[:,None], 
+                       experiment.model_data.data["ISSM"].X_dict['y'].flatten()[:,None]))
+    assert experiment.plot_predictions(X_ref=X_ref, 
+                                       sol_ref=experiment.model_data.data["ISSM"].data_dict, 
+                                       resolution=10) is None
+    X, Y, im_data, axs = plot_nn(experiment, experiment.model_data.data["ISSM"].data_dict, resolution=10);
     assert X.shape == (10,10)
     assert Y.shape == (10,10)
     assert len(im_data) == 5

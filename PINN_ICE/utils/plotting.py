@@ -60,9 +60,7 @@ def plot_solutions(pinn, path="", X_ref=None, sol_ref=None, cols=None, resolutio
             vranges.update({k+"_diff":[-0.1*max(np.abs(vranges[k+"_pred"])), 0.1*max(np.abs(vranges[k+"_pred"]))] for k in pinn.params.nn.output_variables if k in sol_ref})
 
         # set ice mask
-        iice = pinn.model_data.get_ice_coordinates()
-        X_mask = np.hstack((pinn.model_data.X_dict['x'][iice].flatten()[:,None],
-                            pinn.model_data.X_dict['y'][iice].flatten()[:,None]))
+        X_mask = pinn.model_data.get_ice_coordinates()
         tree = KDTree(X_mask)
         dist, _ = tree.query(np.c_[X.ravel(), Y.ravel()], k=1)
         dist = dist.reshape(X.shape)
@@ -122,9 +120,7 @@ def plot_nn(pinn, data_names=None, X_mask=None, axs=None, vranges={}, resolution
     
     # ice mask coordinates
     if not X_mask:
-        iice = pinn.model_data.get_ice_coordinates()
-        X_mask = np.hstack((pinn.model_data.X_dict['x'][iice].flatten()[:,None], 
-                            pinn.model_data.X_dict['y'][iice].flatten()[:,None]))
+        X_mask = pinn.model_data.get_ice_coordinates()
     tree = KDTree(X_mask)
     dist, _ = tree.query(np.c_[X.ravel(), Y.ravel()], k=1)
     dist = dist.reshape(X.shape)

@@ -22,8 +22,10 @@ def test_ISSMmdData():
     assert(data_loader.X['H'].shape == (4000,2))
     assert(data_loader.sol['C'].shape == (564,1))
 
-    iice = data_loader.get_ice_coordinates()
+    iice = data_loader.get_ice_indices()
     assert iice[0].shape == (23049,)
+    icoord = data_loader.get_ice_coordinates()
+    assert icoord.shape == (23049, 2)
 
 def test_ISSMmdData_plot():
     filename = "Helheim_fastflow.mat"
@@ -96,3 +98,5 @@ def test_Data_multiple():
     assert(data_loader.X['H'].shape == (4000,2))
     assert(data_loader.sol['C'].shape == (1564,1))
 
+    icoord = data_loader.get_ice_coordinates()
+    assert icoord.shape == (23049*2, 2)
