@@ -12,10 +12,10 @@ dde.config.set_random_seed(1234)
 datestr = datetime.now().strftime("%Y%m%d_%H%M%S")
 
 # data file and path
-inputFileName="Helheim_basin.mat"
+inputFileName="Helheim_fastflow.mat"
 expFileName = "Helheim_Big.exp"
 repoPath = "./"
-appDataPath = os.path.join(repoPath, "DATA")
+appDataPath = os.path.join(repoPath, "dataset")
 data_path = os.path.join(appDataPath, inputFileName)
 
 # path for saving results and figures
@@ -44,7 +44,7 @@ issm["data_path"] = data_path
 hp["data"] = {"ISSM":issm}
 
 # domain
-hp["shapefile"] = os.path.join(repoPath, "DATA", expFileName)
+hp["shapefile"] = os.path.join(repoPath, "dataset", expFileName)
 hp["num_collocation_points"] = 5000
 
 # additional loss function
@@ -67,5 +67,6 @@ experiment.compile()
 # Train
 experiment.train()
 # show results
-experiment.plot_predictions(X_ref=experiment.model_data.X_dict, sol_ref=experiment.model_data.data_dict)
+experiment.plot_predictions(X_ref=experiment.model_data.data["ISSM"].X_dict, 
+                            sol_ref=experiment.model_data.data["ISSM"].data_dict)
 
