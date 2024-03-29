@@ -99,6 +99,13 @@ class DataParameter(ParameterBase):
         """
         self.data = {k:SingleDataParameter(self.data[k]) for k in self.data}
 
+    def __str__(self):
+        """
+        display all data
+        """
+        return "\t" + type(self).__name__ + ": \n" + \
+                ("\n".join(["\t\t" + k + ":\n" + str(self.data[k]) for k in self.data]))+"\n"
+
 
 class SingleDataParameter(ParameterBase):
     """ parameters of a single data file
@@ -119,6 +126,12 @@ class SingleDataParameter(ParameterBase):
     def check_consisteny(self):
         if self.source != "ISSM":
             raise ValueError(f"Data loader of {self.source} is not implemented")
+
+    def __str__(self):
+        """
+        display all attributes except 'param_dict'
+        """
+        return ("\n".join(["\t\t\t" + k + ":\t" + str(self.__dict__[k]) for k in self.__dict__ if k != "param_dict"]))+"\n"
 
 
 class NNParameter(ParameterBase):
