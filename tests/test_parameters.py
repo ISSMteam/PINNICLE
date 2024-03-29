@@ -17,9 +17,12 @@ def test_domain_parameter():
     assert d.has_keys(newat)
 
 def test_data_parameter():
-    d = SingleDataParameter({"dataname":['u', 'v'], "datasize":[4000, 4000]})
+    issm = {"data_path":"./", "data_size":{"u":4000, "v":4000}}
+    d = SingleDataParameter(issm)
     assert hasattr(d, "param_dict"), "Default attribute 'param_dict' not found"
-    issm = {"dataname":['u', 'v'], "datasize":[4000, 4000]}
+    assert d.name_map["u"] == "u"
+    assert d.name_map["v"] == "v"
+
     d = DataParameter({"ISSM":issm})
     assert hasattr(d, "param_dict"), "Default attribute 'param_dict' not found"
     assert hasattr(d, "data"), "attribute 'data' not found" 

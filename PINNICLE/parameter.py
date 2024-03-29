@@ -143,8 +143,11 @@ class SingleDataParameter(ParameterBase):
         return ("\n".join(["\t\t\t" + k + ":\t" + str(self.__dict__[k]) for k in self.__dict__ if k != "param_dict"]))+"\n"
 
     def update(self):
-        # TODO: update name_map according to data_size
-        pass
+        """ update name_map according to data_size
+        """
+        for k in self.data_size:
+            if k not in self.name_map:
+                self.name_map[k] = k
 
 
 class NNParameter(ParameterBase):
