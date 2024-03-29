@@ -8,20 +8,17 @@ class ParameterBase(ABC):
     def __init__(self, param_dict):
         self.param_dict = param_dict
 
-        # default
+        # set default parameters 
         self.set_default()
 
-        # update parameters
+        # set parameters from param_dict if given
         self.set_parameters(self.param_dict)
 
-        # check consistency
-        self.check_consisteny()
+        # make some necessary update of the parameters after loading from param_dict
+        self.update()
 
-    def __str__(self):
-        """ display all attributes except 'param_dict'
-        """
-        return "\t" + type(self).__name__ + ": \n" + \
-                ("\n".join(["\t\t" + k + ":\t" + str(self.__dict__[k]) for k in self.__dict__ if k != "param_dict"]))+"\n"
+        # check consistency
+        self.check_consistency()
 
     @abstractmethod
     def set_default(self):
@@ -30,7 +27,7 @@ class ParameterBase(ABC):
         pass
 
     @abstractmethod
-    def check_consisteny(self):
+    def check_consistency(self):
         """ check consistency of the parameter data
         """
         pass
@@ -42,6 +39,14 @@ class ParameterBase(ABC):
             for key, value in pdict.items():
                 setattr(self, key, value)
 
+    def has_keys(self, keys):
+        """ if all the keys are in the class, return true, otherwise return false
+        """
+        if isinstance(keys, dict) or isinstance(keys, list):
+            return all([hasattr(self, k) for k in keys])
+        else:
+            return False
+
     def set_parameters(self, pdict: dict):
         """ find all the keys from pdict which are avalible in the class, update the values
         """
@@ -51,13 +56,16 @@ class ParameterBase(ABC):
                 if hasattr(self, key):
                     setattr(self, key, value)
 
-    def has_keys(self, keys):
-        """ if all the keys are in the class, return true, otherwise return false
+    def __str__(self):
+        """ display all attributes except 'param_dict'
         """
-        if isinstance(keys, dict) or isinstance(keys, list):
-            return all([hasattr(self, k) for k in keys])
-        else:
-            return False
+        return "\t" + type(self).__name__ + ": \n" + \
+                ("\n".join(["\t\t" + k + ":\t" + str(self.__dict__[k]) for k in self.__dict__ if k != "param_dict"]))+"\n"
+
+    def update(self):
+        """ after set_parameter, make some necessary update of the parameters
+        """
+        pass
 
 
 class DomainParameter(ParameterBase):
@@ -73,8 +81,9 @@ class DomainParameter(ParameterBase):
         # number of collocation points used in the domain
         self.num_collocation_points = 0
 
-    def check_consisteny(self):
+    def check_consistency(self):
         pass
+
 
 class DataParameter(ParameterBase):
     """ list of all data used
@@ -82,22 +91,13 @@ class DataParameter(ParameterBase):
     def __init__(self, param_dict={}):
         super().__init__(param_dict)
 
-        # convert data from dict of dict to a dict of SingleDataParameter
-        if self.data:
-            self.update_data()
-
-    def check_consisteny(self):
-        pass
-
     def set_default(self):
         """ default parameters
         """
         self.data = {}
 
-    def update_data(self):
-        """ convert dict to class SingleDataParameter
-        """
-        self.data = {k:SingleDataParameter(self.data[k]) for k in self.data}
+    def check_consistency(self):
+        pass
 
     def __str__(self):
         """
@@ -105,6 +105,12 @@ class DataParameter(ParameterBase):
         """
         return "\t" + type(self).__name__ + ": \n" + \
                 ("\n".join(["\t\t" + k + ":\n" + str(self.data[k]) for k in self.data]))+"\n"
+
+    def update(self):
+        """ convert dict to class SingleDataParameter
+        """
+        if self.data:
+            self.data = {k:SingleDataParameter(self.data[k]) for k in self.data}
 
 
 class SingleDataParameter(ParameterBase):
@@ -120,18 +126,25 @@ class SingleDataParameter(ParameterBase):
         self.data_path = ""
         # length of each data in used, leave no data variable(sol) empty or set to None
         self.data_size = {}
+        # name map k->v, k is the variable name in the PINN, v is the variable name in the data file
+        self.name_map = {}
         # source of the data
         self.source = "ISSM"
 
-    def check_consisteny(self):
+    def check_consistency(self):
         if self.source != "ISSM":
             raise ValueError(f"Data loader of {self.source} is not implemented")
+        # TODO: check names in data_size and name_map
 
     def __str__(self):
         """
         display all attributes except 'param_dict'
         """
         return ("\n".join(["\t\t\t" + k + ":\t" + str(self.__dict__[k]) for k in self.__dict__ if k != "param_dict"]))+"\n"
+
+    def update(self):
+        # TODO: update name_map according to data_size
+        pass
 
 
 class NNParameter(ParameterBase):
@@ -159,12 +172,7 @@ class NNParameter(ParameterBase):
         self.output_lb = None
         self.output_ub = None
 
-    def set_parameters(self, pdict: dict):
-        super().set_parameters(pdict)
-        self.input_size = len(self.input_variables)
-        self.output_size = len(self.output_variables)
-
-    def check_consisteny(self):
+    def check_consistency(self):
         # input size of nn equals to dependent in physics
         if self.input_size != len(self.input_variables):
             raise ValueError("'input_size' does not match the number of 'input_variables'")
@@ -191,6 +199,11 @@ class NNParameter(ParameterBase):
         else:
             return False
 
+    def set_parameters(self, pdict: dict):
+        super().set_parameters(pdict)
+        self.input_size = len(self.input_variables)
+        self.output_size = len(self.output_variables)
+
 
 class PhysicsParameter(ParameterBase):
     """ parameter of physics
@@ -203,7 +216,7 @@ class PhysicsParameter(ParameterBase):
         # name(s) and parameters of the equations
         self.equations = {}
 
-    def check_consisteny(self):
+    def check_consistency(self):
         pass
 
     def setup_equations(self):
@@ -217,6 +230,7 @@ class PhysicsParameter(ParameterBase):
         """
         return "\t" + type(self).__name__ + ": \n" + \
                 ("\n".join(["\t\t" + k + ":\n" + str(self.equations[k]) for k in self.equations]))+"\n"
+
 
 class EquationParameter(ParameterBase):
     """ parameter of equations
@@ -252,7 +266,7 @@ class EquationParameter(ParameterBase):
         # scalar variables: name:value
         self.scalar_variables = {}
 
-    def check_consisteny(self):
+    def check_consistency(self):
         if (len(self.output)) != (len(self.output_lb)):
             raise ValueError("Size of 'output' does not match the size of 'output_lb'")
         if (len(self.output)) != (len(self.output_ub)):
@@ -297,12 +311,6 @@ class TrainingParameter(ParameterBase):
     def __init__(self, param_dict={}):
         super().__init__(param_dict)
 
-        # update additional loss
-        if self.additional_loss:
-            self.update_additional_loss()
-
-        #  add callback setttings if given any of them
-        self.has_callbacks = self.check_callbacks()
 
     def set_default(self):
         # number of epochs
@@ -333,6 +341,9 @@ class TrainingParameter(ParameterBase):
         # if plot the results and history, and save figures
         self.is_plot = False
 
+    def check_consistency(self):
+        pass
+
     def check_callbacks(self):
         """ check if any of the following variable is given from setting
         """
@@ -347,9 +358,6 @@ class TrainingParameter(ParameterBase):
             return True
         # otherwise
         return False
-
-    def check_consisteny(self):
-        pass
 
     def has_EarlyStopping(self):
         """ check if param has the min_delta or patience for early stopping
@@ -383,11 +391,16 @@ class TrainingParameter(ParameterBase):
         else:
             return True
 
-    def update_additional_loss(self):
+    def update(self):
         """ convert dict to class LossFunctionParameter
         """
-        self.additional_loss = {k:LossFunctionParameter(self.additional_loss[k]) for k in self.additional_loss}
-        
+        # update additional loss
+        if self.additional_loss:
+            self.additional_loss = {k:LossFunctionParameter(self.additional_loss[k]) for k in self.additional_loss}
+
+        #  add callback setttings if given any of them
+        self.has_callbacks = self.check_callbacks()
+
 
 class LossFunctionParameter(ParameterBase):
     """ parameter of customize loss function
@@ -404,16 +417,15 @@ class LossFunctionParameter(ParameterBase):
         # weight of this loss function
         self.weight = 1.0
 
-    def check_consisteny(self):
+    def check_consistency(self):
         data_misfit.get(self.function)
+
 
 class Parameters(ParameterBase):
     """ parameters of the pinn, including domain, data, nn, and physics
     """
     def __init__(self, param_dict={}):
         super().__init__(param_dict)
-
-        self.update_parameters()
 
     def __str__(self):
         return "Parameters: \n" + str(self.training) + str(self.domain) + str(self.data) + str(self.nn) + str(self.physics)
@@ -432,13 +444,13 @@ class Parameters(ParameterBase):
         self.nn = NNParameter(param_dict)
         self.physics = PhysicsParameter(param_dict)
 
-    def check_consisteny(self):
+    def check_consistency(self):
         # length of training.loss_weights equals to equations+datasize
         #if (any(x not in self.nn.output_variables for x in self.data.datasize)):
         # TODO:    raise ValueError("names in 'datasize' does not match the name in 'output_variables'")
         pass
 
-    def update_parameters(self):
+    def update(self):
         """
         update parameters according to the input
         """
