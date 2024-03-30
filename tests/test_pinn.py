@@ -128,7 +128,8 @@ def test_save_and_load_setting(tmp_path):
 #    assert os.path.isfile(f"{tmp_path}/pinn/model-9.ckpt.index")
 #    assert not os.path.isfile(f"{tmp_path}/pinn/model-{hp['epochs']}.ckpt.index")
 
-def test_only_callbacks():
+def test_only_callbacks(tmp_path):
+    hp["save_path"] = str(tmp_path)
     hp["num_collocation_points"] = 100
     issm["data_size"] = {"u":100, "v":100, "s":100, "H":100, "C":None, "vel":100}
     hp["data"] = {"ISSM": issm}
