@@ -132,9 +132,8 @@ class SingleDataParameter(ParameterBase):
         self.source = "ISSM"
 
     def check_consistency(self):
-        if self.source != "ISSM":
+        if self.source not in ["ISSM", "mat"]:
             raise ValueError(f"Data loader of {self.source} is not implemented")
-        # TODO: check names in data_size and name_map
 
     def __str__(self):
         """
@@ -145,7 +144,9 @@ class SingleDataParameter(ParameterBase):
     def update(self):
         """ update name_map according to data_size
         """
+        # every variable in data_size need to be loaded from the data loader
         for k in self.data_size:
+            # names in data_size, if not given in name_map, then use the same name for key and value
             if k not in self.name_map:
                 self.name_map[k] = k
 
