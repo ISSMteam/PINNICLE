@@ -1,5 +1,5 @@
 import os
-from PINNICLE.modeldata import ISSMmdData, Data
+from PINNICLE.modeldata import ISSMmdData, MatData, Data
 from PINNICLE.parameter import DataParameter, SingleDataParameter
 
 def test_ISSMmdData():
@@ -100,3 +100,24 @@ def test_Data_multiple():
 
     icoord = data_loader.get_ice_coordinates()
     assert icoord.shape == (23049*2, 2)
+
+def test_MatData():
+    filename = "flightTracks.mat"
+    repoPath = os.path.dirname(__file__) + "/../examples/"
+    appDataPath = os.path.join(repoPath, "dataset")
+    path = os.path.join(appDataPath, filename)
+
+    hp = {}
+    hp["data_path"] = path
+    hp["data_size"] = {"thickness":100}
+    hp["source"] = "mat"
+    p = SingleDataParameter(hp)
+    data_loader = MatData(p)
+    data_loader.load_data()
+    data_loader.prepare_training_data()
+
+    assert(data_loader.sol['thickness'].shape == (100,1))
+    assert(data_loader.X['thickness'].shape == (100,2))
+
+    icoord = data_loader.get_ice_coordinates()
+    assert icoord.shape == (3192, 2)

@@ -16,13 +16,35 @@ def test_domain_parameter():
     d._add_parameters(newat)
     assert d.has_keys(newat)
 
-def test_data_parameter():
-    d = SingleDataParameter({"dataname":['u', 'v'], "datasize":[4000, 4000]})
+def test_single_data_parameter():
+    issm = {"data_path":"./", "data_size":{"u":4000, "v":None}}
+    d = SingleDataParameter(issm)
     assert hasattr(d, "param_dict"), "Default attribute 'param_dict' not found"
-    issm = {"dataname":['u', 'v'], "datasize":[4000, 4000]}
-    d = DataParameter({"ISSM":issm})
+    assert d.name_map["u"] == "u"
+    assert d.name_map["v"] == "v"
+    assert d.source == "ISSM"
+
+    mat = {"data_path":"./", "data_size":{"u":4000, "v":None}, "source":"mat"}
+    d = SingleDataParameter(mat)
+    assert d.name_map["u"] == "u"
+    assert d.name_map["v"] == "v"
+    assert d.source == "mat"
+
+    with pytest.raises(Exception):
+        unknown = {"source": "unknown"}
+        d = SingleDataParameter(unknown)
+
+def test_data_parameter():
+    hp = {}
+    issm = {"data_path":"./", "data_size":{"u":4000, "v":None}}
+    mat = {"data_path":"./", "data_size":{"u":4000, "v":None}, "source":"mat"}
+    hp["data"] = {"mymat": mat, "myISSM": issm}
+
+    d = DataParameter(hp)
     assert hasattr(d, "param_dict"), "Default attribute 'param_dict' not found"
     assert hasattr(d, "data"), "attribute 'data' not found" 
+    assert d.data["myISSM"].source == "ISSM"
+    assert d.data["mymat"].source == "mat"
 
 def test_nn_parameter():
     d = NNParameter()
@@ -129,3 +151,15 @@ def test_training_callbacks_Checkpoint():
     p = TrainingParameter(hp)
     assert p.has_callbacks == True
     assert p.has_ModelCheckpoint() == True
+
+def test_print_parameters(capsys):
+    hp = {}
+    p = Parameters(hp)
+    print(p) 
+    captured = capsys.readouterr()
+    assert "TrainingParameter" in captured.out
+    assert "DomainParameter" in captured.out
+    assert "DataParameter" in captured.out
+    assert "NNParameter" in captured.out
+    assert "PhysicsParameter" in captured.out
+

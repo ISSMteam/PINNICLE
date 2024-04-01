@@ -1,6 +1,7 @@
 import json
 import os
-
+import mat73
+import scipy.io
 
 def is_file_ext(path, ext):
     """ check if a given path is ended by ext
@@ -38,4 +39,13 @@ def load_dict_from_json(path, filename):
             data = json.load(fp)
     else:
         data = {}
+    return data
+
+def load_mat(file):
+    """ load .mat file, if the file is in MATLAB 7.3 format use mat73.loadmat, otherwise use scipy.io.loadmat()
+    """
+    try:
+        data = mat73.loadmat(file)
+    except TypeError:
+        data = scipy.io.loadmat(file)
     return data
