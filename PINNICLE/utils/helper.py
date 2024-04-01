@@ -2,6 +2,9 @@ import json
 import os
 import mat73
 import scipy.io
+from sklearn.neighbors import KDTree
+import numpy as np
+
 
 def is_file_ext(path, ext):
     """ check if a given path is ended by ext
@@ -49,3 +52,50 @@ def load_mat(file):
     except TypeError:
         data = scipy.io.loadmat(file)
     return data
+
+def down_sample_core(points, resolution=100):
+    """ downsample the given scatter points using `KDtree` with the nearest neighbors on a Cartisian grid
+    Args:
+        points (np array), 2d coordinates, from get_ice_coordinates
+        resolution (Integer): resolution of the downsample grid
+    Returns:
+        ind: indices of the downsample
+    """
+    [Xmin, Ymin] = points.min(axis=0)
+    [Xmax, Ymax] = points.max(axis=0)
+    # create Cartisian grid
+    X, Y = np.meshgrid(np.linspace(Xmin,Xmax,resolution), np.linspace(Ymin,Ymax,resolution))
+
+    kdt = KDTree(points, metric='euclidean')
+    dist, ink = kdt.query(np.c_[X.ravel(), Y.ravel()], k=1)
+
+    ind = np.unique(ink)
+    return ind
+
+def down_sample(points, data_size):
+    """ downsample points to be a size of `data_size`, the strategy is to call `down_sample_core` with at least double resolution required, 
+        then randomly choose
+    Args:
+        points (np array), 2d coordinates, from get_ice_coordinates
+        data_size (Integer): number of data points needed
+    Returns:
+        ind: indices of the downsample
+    """
+    # if data_size is larger than the number of points, use all points
+    data_size = min(points.shape[0], data_size)
+
+    # start with double resolution
+    resolution = 2*int(np.ceil(data_size**0.5))
+    ind = down_sample_core(points, resolution=resolution)
+    
+    while (resolution**2 < points.shape[0]) and (ind.shape[0]< data_size):
+        resolution *= 2
+        ind = down_sample_core(points, resolution=resolution)
+
+    if ind.shape[0] < data_size:
+        # not enough data, then just return all available data
+        return ind
+    else:
+        # randomly choose 
+        idx = np.random.choice(ind, data_size, replace=False)
+        return idx
