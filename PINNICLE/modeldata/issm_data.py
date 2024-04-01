@@ -51,6 +51,7 @@ class ISSMmdData(DataBase, Constants):
         self.data_dict['u'] = md['inversion']['vx_obs']/self.yts
         self.data_dict['v'] = md['inversion']['vy_obs']/self.yts
         self.data_dict['s'] = md['geometry']['surface']
+        self.data_dict['a'] = (md['smb']['mass_balance'] - md['balancethickness']['thickening_rate'])/self.yts
         self.data_dict['H'] = md['geometry']['thickness']
         self.data_dict['C'] = md['friction']['C']
         self.data_dict['B'] = md['materials']['rheology_B']
