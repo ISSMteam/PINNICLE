@@ -109,15 +109,16 @@ def test_MatData():
 
     hp = {}
     hp["data_path"] = path
-    hp["data_size"] = {"thickness":100}
+    hp["data_size"] = {"H":100}
+    hp["name_map"] = {"H":"thickness"}
     hp["source"] = "mat"
     p = SingleDataParameter(hp)
     data_loader = MatData(p)
     data_loader.load_data()
     data_loader.prepare_training_data()
 
-    assert(data_loader.sol['thickness'].shape == (100,1))
-    assert(data_loader.X['thickness'].shape == (100,2))
+    assert(data_loader.sol['H'].shape == (100,1))
+    assert(data_loader.X['H'].shape == (100,2))
 
     icoord = data_loader.get_ice_coordinates()
     assert icoord.shape == (3192, 2)
