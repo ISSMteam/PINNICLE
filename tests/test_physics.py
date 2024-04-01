@@ -50,6 +50,21 @@ def test_Physics_SSA():
     assert len(phy.data_weights) == 5
     assert len(phy.pde_weights) == 2
 
+def test_Physics_MC():
+    MC = {}
+    MC["scalar_variables"] = {"B":1.26802073401e+08}
+    hp = {}
+    hp["equations"] = {"MC":MC}
+    phy = Physics(PhysicsParameter(hp))
+
+    assert phy.input_var == ['x', 'y']
+    assert phy.output_var == ['u', 'v', 'a', 'H']
+    assert phy.residuals == ['fMC']
+    assert len(phy.output_lb) == 4
+    assert len(phy.output_ub) == 4
+    assert len(phy.data_weights) == 4
+    assert len(phy.pde_weights) == 1
+
 def test_Physics_MOLHO():
     MOLHO = {}
     MOLHO["scalar_variables"] = {"B":1.26802073401e+08}
