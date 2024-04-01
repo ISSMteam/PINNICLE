@@ -39,19 +39,19 @@ class DataBase(ABC):
 
     @abstractmethod
     def load_data(self):
-        """ load data from self.path
+        """ load data from `self.path`
         """
         pass
 
     @abstractmethod
     def prepare_training_data(self):
-        """ prepare training data according to the data_size
+        """ prepare training data according to the `data_size`
         """
         pass
 
 
 class Data(Constants):
-    """ class of data with all data used 
+    """ class of data with all data used
     """
     def __init__(self, parameters=DataParameter()):
         super().__init__()
@@ -64,20 +64,19 @@ class Data(Constants):
         # reference solution of the output of PINN
         self.sol = {}
 
-
     def get_ice_coordinates(self, mask_name=""):
         """ get the coordinates of ice covered region from all the data, put them in one array
         """
         return np.vstack([self.data[k].get_ice_coordinates(mask_name=mask_name) for k in self.data])
 
     def load_data(self):
-        """ laod all the data in self.data
+        """ laod all the data in `self.data`
         """
         for k in self.data:
             self.data[k].load_data()
 
     def prepare_training_data(self):
-        """ merge all X and sol in self.data to self.X and self.sol with the keys 
+        """ merge all `X` and `sol` in `self.data` to `self.X` and `self.sol` with the keys
         """
         # prepare the training data according to data_size
         for key in self.data:

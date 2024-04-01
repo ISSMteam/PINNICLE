@@ -14,8 +14,20 @@ class ISSMmdData(DataBase, Constants):
         Constants.__init__(self)
         super().__init__(parameters)
 
+    def get_ice_coordinates(self, mask_name=""):
+        """ Use `get_ice_indices` defined by each individual class,
+            get the coordinates `(x,y)` of ice covered region from `X_dict`.
+            This function is currently only called by plotting to generate
+            ice covered region.
+        """
+        iice = self.get_ice_indices(mask_name=mask_name)
+        # get the coordinates
+        X_mask = np.hstack((self.X_dict['x'][iice].flatten()[:,None],
+                            self.X_dict['y'][iice].flatten()[:,None]))
+        return X_mask
+
     def get_ice_indices(self, mask_name=""):
-        """ get the indices of ice covered region for X_dict and data_dict
+        """ get the indices of ice covered region for `X_dict` and `data_dict`
         """
         if (not mask_name) or (mask_name not in self.mask_dict):
             mask_name = "icemask"
@@ -25,17 +37,8 @@ class ISSMmdData(DataBase, Constants):
         iice = np.asarray(icemask<0).nonzero()
         return iice
 
-    def get_ice_coordinates(self, mask_name=""):
-        """ get the coordinates of ice covered region for X_dict and data_dict
-        """
-        iice = self.get_ice_indices(mask_name=mask_name)
-        # get the coordinates
-        X_mask = np.hstack((self.X_dict['x'][iice].flatten()[:,None],
-                            self.X_dict['y'][iice].flatten()[:,None]))
-        return X_mask
-
     def load_data(self):
-        """ load ISSM model from a .mat file, return a dict with the required data
+        """ load ISSM model from a `.mat` file
         """
         # Reading matlab data
         data = mat73.loadmat(self.parameters.data_path)
@@ -59,7 +62,7 @@ class ISSMmdData(DataBase, Constants):
         self.mask_dict['DBC_mask'] = md['mesh']['vertexonboundary']
 
     def plot(self, data_names=[], vranges={}, axs=None, resolution=200, **kwargs):
-        """ use utils.plot_dict_data to plot the ISSM data 
+        """ use `utils.plot_dict_data` to plot the ISSM data
         Args:
             data_names (list): Names of the variables. if not specified, plot all variables in data_dict
             vranges (dict): range of the data
@@ -87,7 +90,7 @@ class ISSMmdData(DataBase, Constants):
         return X, Y, im_data, axs
 
     def prepare_training_data(self, data_size=None):
-        """ prepare data for PINNs according to the settings in datasize
+        """ prepare data for PINNs according to the settings in `data_size`
         """
         if data_size is None:
             data_size = self.parameters.data_size
