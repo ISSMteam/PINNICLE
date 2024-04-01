@@ -1,7 +1,7 @@
 from . import DataBase
 from ..parameter import SingleDataParameter
 from ..physics import Constants
-from ..utils import plot_dict_data, load_mat
+from ..utils import plot_dict_data, load_mat, down_sample
 import numpy as np
 
 
@@ -63,8 +63,8 @@ class MatData(DataBase, Constants):
                 if data_size[k] is not None:
                     # apply ice mask
                     sol_temp = self.data_dict[k].flatten()[:,None]
-                    # randomly choose, replace=False for no repeat data
-                    idx = np.random.choice(max_data_size, min(data_size[k],max_data_size), replace=False)
+                    # random choose to a downscale sampling of the scatter data
+                    idx = down_sample(X_temp, data_size[k])
                     self.X[k] = X_temp[idx, :]
                     self.sol[k] = sol_temp[idx, :]
                 else:

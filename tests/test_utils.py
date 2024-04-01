@@ -1,7 +1,8 @@
 import pytest
 import tensorflow as tf
 import os
-from PINNICLE.utils import save_dict_to_json, load_dict_from_json, data_misfit, load_mat
+import numpy as np
+from PINNICLE.utils import save_dict_to_json, load_dict_from_json, data_misfit, load_mat, down_sample_core, down_sample
 
 data = {"s":1, "v":[1, 2, 3]}
 
@@ -39,3 +40,32 @@ def test_loadmat():
     appDataPath = os.path.join(repoPath, "dataset")
     path = os.path.join(appDataPath, filename)
     assert load_mat(path)
+
+def test_down_sample_core():
+    filename = "flightTracks.mat"
+    repoPath = os.path.dirname(__file__) + "/../examples/"
+    appDataPath = os.path.join(repoPath, "dataset")
+    path = os.path.join(appDataPath, filename)
+    data = load_mat(path)
+    points = np.hstack((data['x'].flatten()[:,None],
+                        data['y'].flatten()[:,None]))
+
+    ind = down_sample_core(points)
+    assert ind.shape == (2966,)
+
+def test_down_sample():
+    filename = "flightTracks.mat"
+    repoPath = os.path.dirname(__file__) + "/../examples/"
+    appDataPath = os.path.join(repoPath, "dataset")
+    path = os.path.join(appDataPath, filename)
+    data = load_mat(path)
+    points = np.hstack((data['x'].flatten()[:,None],
+                        data['y'].flatten()[:,None]))
+
+    sizeList = [100,200,500,2000]
+    for size in sizeList:
+        ind = down_sample(points, size)
+        assert ind.shape == (size,)
+
+    ind = down_sample(points, 4000)
+    assert ind.shape == (3129,)
