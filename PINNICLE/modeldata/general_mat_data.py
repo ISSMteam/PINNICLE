@@ -1,8 +1,7 @@
 from . import DataBase
 from ..parameter import SingleDataParameter
 from ..physics import Constants
-from ..utils import plot_dict_data
-import mat73
+from ..utils import plot_dict_data, load_mat
 import numpy as np
 
 
@@ -28,7 +27,7 @@ class MatData(DataBase, Constants):
         """ load scatter data from a `.mat` file, return a dict with the required data
         """
         # Reading matlab data
-        data = mat73.loadmat(self.parameters.data_path)
+        data = load_mat(self.parameters.data_path)
 
         # x,y coordinates
         self.X_dict['x'] = data['x']

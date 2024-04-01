@@ -1,8 +1,7 @@
 from . import DataBase
 from ..parameter import SingleDataParameter
 from ..physics import Constants
-from ..utils import plot_dict_data
-import mat73
+from ..utils import plot_dict_data, load_mat
 import numpy as np
 
 
@@ -41,7 +40,7 @@ class ISSMmdData(DataBase, Constants):
         """ load ISSM model from a `.mat` file
         """
         # Reading matlab data
-        data = mat73.loadmat(self.parameters.data_path)
+        data = load_mat(self.parameters.data_path)
         # get the model
         md = data['md']
         # create the output dict
