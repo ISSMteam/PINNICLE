@@ -1,2 +1,2 @@
-sphinx-copbutton
+sphinx-copybutton
 sphinx-rtd-theme
