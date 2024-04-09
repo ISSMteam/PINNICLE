@@ -9,7 +9,7 @@ author = 'Cheng Gong'
 
 # The short X.Y version
 #version = version("PINNICLE")
-version = 0.1
+version = '0.1'
 # The full version, including alpha/beta/rc tags
 release = version
 
