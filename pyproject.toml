@@ -1,0 +1,46 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "PINNICLE"
+dynamic = ["version"]
+description = "A library for solving ice sheet modeling problems using a unified framework with Physics Informed Neural Networks"
+readme = "README.md"
+license = {file = "LICENSE.txt"}
+authors = [
+{ name = "Cheng Gong", email = "enigne@gmail.com" },
+]
+requires-python = ">=3.9"
+keywords = [
+  "Ice sheet modeling",
+  "Numerical method",
+  "Deep learning",
+  "Physics-informed neural networks"
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: GNU Lesser General Public License v2 (LGPLv2)",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+]
+dependencies = [
+  "numpy",
+  "scipy",
+  "scikit-learn",
+  "tensorflow>=2.11.0",
+  "tensorflow-probability[tf]>=0.19.0 ",
+  "matplotlib",
+  "pandas",
+  "mat73",
+  "deepxde",
+]
+
+[project.urls]
+Homepage = "https://github.com/enigne/PINNICLE"
+Documentation = "https://pinnicle.readthedocs.io"
+"Bug Tracker" = "https://github.com/enigne/PINNICLE/issues"
+
