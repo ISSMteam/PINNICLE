@@ -1,5 +1,5 @@
 # Configuration file for the Sphinx documentation builder.
-from importlib.metadata import version
+#from importlib.metadata import version
 
 # -- Project information
 
@@ -8,7 +8,8 @@ copyright = '2024, Cheng Gong'
 author = 'Cheng Gong'
 
 # The short X.Y version
-version = version("PINNICLE")
+#version = version("PINNICLE")
+version = 0.1
 # The full version, including alpha/beta/rc tags
 release = version
 
