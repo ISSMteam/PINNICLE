@@ -266,19 +266,35 @@ def plot_similarity(pinn, feature_name, savepath, sim='mae', cmap='jet', scale=1
     axs[1].axis('off')
 
     # difference plot
-    diff = np.abs(ref_sol-pred_sol)
-    diff_val = np.round(np.mean(diff), 3)
-    title = "|"+feature_name+r"$_{ref} - $"+feature_name+r"$_{pred}$|, MAE = "+str(diff_val)
-    dmin, dmax = np.min(diff), np.max(diff)
-    levels = np.linspace(dmin*0.9, dmax*1.1, 500)
-
-    if sim == 'mse' or sim == "MSE":
-        diff = (ref_sol-pred_sol)**2
+    if sim == 'mae' or sim == 'MAE':
+        # mean absolute error
+        diff = np.abs(ref_sol-pred_sol)
         diff_val = np.round(np.mean(diff), 3)
-        title = r"$($"+feature_name+r"$_{ref} - $"+feature_name+r"$_{pred})^2$, MSE = "+str(diff_val)
+        title =  "|"+feature_name+r"$_{ref} - $"+feature_name+r"$_{pred}$|"
         dmin, dmax = np.min(diff), np.max(diff)
         levels = np.linspace(dmin*0.9, dmax*1.1, 500)
-
+    elif sim == 'mse' or sim == "MSE":
+        # mean squared error
+        diff = (ref_sol-pred_sol)**2
+        diff_val = np.round(np.mean(diff), 3)
+        title = r"$($"+feature_name+r"$_{ref} - $"+feature_name+r"$_{pred})^2$"
+        dmin, dmax = np.min(diff), np.max(diff)
+        levels = np.linspace(dmin*0.9, dmax*1.1, 500)
+    elif sim = 'rmse' or sim == 'RMSE':
+        # root mean squared error
+        d_squared = (ref_sol - pred_sol)**2
+        diff = np.sqrt(d_squared)
+        diff_val = np.round(np.sqrt(np.mean(d_squared)), 3)
+        title = r"$(($"+feature_name+r"$_{ref} - $"+feature_name+r"$_{pred})^2)^{1/2}$"
+        dmin, dmax = np.min(diff), np.max(diff)
+        levels = np.linspace(dmin*0.9, dmax*1.1, 500)
+    elif sim == 'simple' or sim == "SIMPLE":
+        # simple difference 
+        diff = ref_sol - pred_sol
+        diff_val = np.round(np.mean(diff), 3)
+        title = feature_name+r"$_{ref} - $"+feature_name+r"$_{pred}$"
+        dmin, dmax = np.min(diff), np.max(diff)
+        levels = np.linspace(dmin*0.9, dmax*1.1, 500)
 
     ax = axs[2].tricontourf(meshx, meshy, diff, levels=levels, cmap='RdBu', norm=clr.CenteredNorm())
     cb = plt.colorbar(ax, ax=axs[2])
@@ -286,6 +302,7 @@ def plot_similarity(pinn, feature_name, savepath, sim='mae', cmap='jet', scale=1
     axs[2].set_title(title, fontsize=14)
     axs[2].axis('off')
 
+    plt.text(0.705, 0, str(sim)+' = '+str(diff_val), fontsize=14, transform=plt.gcf().transFigure)
     plt.savefig(savepath)
 
 
