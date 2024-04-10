@@ -1,8 +1,8 @@
 pinnicle
-=======
+========
 
 pinnicle.domain module
-------------------------
+----------------------
 
 .. automodule:: pinnicle.domain
    :members:
@@ -10,7 +10,7 @@ pinnicle.domain module
    :show-inheritance:
 
 pinnicle.modeldata module
----------------------
+-------------------------
 
 .. automodule:: pinnicle.modeldata
    :members:
@@ -18,7 +18,7 @@ pinnicle.modeldata module
    :show-inheritance:
 
 pinnicle.nn module
----------------------
+------------------
 
 .. automodule:: pinnicle.nn
    :members:
@@ -26,7 +26,7 @@ pinnicle.nn module
    :show-inheritance:
 
 pinnicle.physics module
-----------------------
+-----------------------
 
 .. automodule:: pinnicle.physics
    :members:
@@ -34,7 +34,7 @@ pinnicle.physics module
    :show-inheritance:
 
 pinnicle.utils module
---------------------
+---------------------
 
 .. automodule:: pinnicle.utils
    :members:
