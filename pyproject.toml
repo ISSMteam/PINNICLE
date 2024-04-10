@@ -1,6 +1,6 @@
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = ["setuptools>=65", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "PINNICLE"
@@ -44,3 +44,6 @@ Homepage = "https://github.com/enigne/PINNICLE"
 Documentation = "https://pinnicle.readthedocs.io"
 "Bug Tracker" = "https://github.com/enigne/PINNICLE/issues"
 
+[tool.setuptools.packages.find]
+where = ["."]
+exclude = ["DATA", "Models", "docs*", "examples*"]
