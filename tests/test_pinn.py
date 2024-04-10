@@ -173,3 +173,8 @@ def test_similarity(tmp_path):
     experiment = pinn.PINN(params=hp)
     experiment.compile()
     assert plot_similarity(experiment, feature_name="u", savepath=tmp_path) is None
+    assert plot_similarity(experiment, sim="mae", feature_name="u", savepath=tmp_path) is None
+    assert plot_similarity(experiment, sim="mse", feature_name="u", savepath=tmp_path) is None
+    assert plot_similarity(experiment, sim="rmse", feature_name="u", savepath=tmp_path) is None
+    assert plot_similarity(experiment, sim="SIMPLE", feature_name="u", savepath=tmp_path) is None
+    assert plot_similarity(experiment, sim="", feature_name="u", savepath=tmp_path) is None
