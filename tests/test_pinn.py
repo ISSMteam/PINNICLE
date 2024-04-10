@@ -172,9 +172,23 @@ def test_similarity(tmp_path):
     hp["data"] = {"ISSM": issm}
     experiment = pinn.PINN(params=hp)
     experiment.compile()
-    assert plot_similarity(experiment, feature_name="u", savepath=tmp_path) is None
-    assert plot_similarity(experiment, sim="mae", feature_name="u", savepath=tmp_path) is None
-    assert plot_similarity(experiment, sim="mse", feature_name="u", savepath=tmp_path) is None
-    assert plot_similarity(experiment, sim="rmse", feature_name="u", savepath=tmp_path) is None
-    assert plot_similarity(experiment, sim="SIMPLE", feature_name="u", savepath=tmp_path) is None
-    assert plot_similarity(experiment, sim="", feature_name="u", savepath=tmp_path) is None
+    # plot_similarity(pinn, feature_name, savepath, sim='MAE', cmap='jet', scale=1, cols=[0, 1, 2])
+    # default
+    assert plot_similarity(experiment, feature_name='s', savepath=tmp_path) is None
+    # similarity conditions tested
+    assert plot_similarity(experiment, sim="mae", feature_name="s", savepath=tmp_path) is None
+    assert plot_similarity(experiment, sim="Mse", feature_name="s", savepath=tmp_path) is None
+    assert plot_similarity(experiment, sim="rmse", feature_name="s", savepath=tmp_path) is None
+    assert plot_similarity(experiment, sim="SIMPLE", feature_name="s", savepath=tmp_path) is None
+    assert plot_similarity(experiment, sim="", feature_name="s", savepath=tmp_path) is None
+    # scale
+    assert plot_similarity(experiment, feature_name='u', savepath=tmp_path, scale=3600.0*24*365) is None
+    # cmap
+    assert plot_similarity(experiment, feature_name='s', savepath=tmp_path, cmap='rainbow') is None
+    # columns
+    assert plot_similarity(experiment, feature_name='s', savepath=tmp_path, cols=[0]) is None
+    assert plot_similarity(experiment, feature_name='s', savepath=tmp_path, cols=[1]) is None
+    assert plot_similarity(experiment, feature_name='s', savepath=tmp_path, cols=[2]) is None
+    assert plot_similarity(experiment, feature_name='s', savepath=tmp_path, cols=[0, 1]) is None
+    assert plot_similarity(experiment, feature_name='s', savepath=tmp_path, cols=[2, 1]) is None
+    assert plot_similarity(experiment, feature_name='s', savepath=tmp_path, cols=[1, 2]) is None
