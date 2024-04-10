@@ -54,6 +54,7 @@ class Physics:
 
     def vel_mag(self, nn_input_var, nn_output_var, X):
         """ a wrapper for PointSetOperatorBC func call
+
         Args: 
             nn_input_var:  input tensor to the nn
             nn_output_var: output tensor from the nn

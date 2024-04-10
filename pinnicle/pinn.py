@@ -112,6 +112,7 @@ class PINN:
 
     def plot_predictions(self, path="", **kwargs):
         """ plot model predictions
+
         Args:
             path (Path, str): Path to save the figures
             X_ref (dict): Coordinates of the reference solutions, if None, then just plot the predicted solutions

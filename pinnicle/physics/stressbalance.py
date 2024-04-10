@@ -121,6 +121,7 @@ class MOLHO(EquationBase): #{{{
 
     def pde(self, nn_input_var, nn_output_var):
         """ residual of MOLHO 2D PDEs
+
         Args:
             nn_input_var: global input to the nn
             nn_output_var: global output from the nn

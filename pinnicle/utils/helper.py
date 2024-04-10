@@ -16,6 +16,7 @@ def is_file_ext(path, ext):
 
 def save_dict_to_json(data, path, filename):
     """ Save the dict to the path as a .json file
+
     Args:
         data (dict): Dictionary data to save
         path (Path, str): Path to save
@@ -28,6 +29,7 @@ def save_dict_to_json(data, path, filename):
 
 def load_dict_from_json(path, filename):
     """ Load a dict data from a .json file 
+
     Args:
         path (Path, str): Path to load
         filename (str): name to load, attach '.json' if needed
@@ -55,6 +57,7 @@ def load_mat(file):
 
 def down_sample_core(points, resolution=100):
     """ downsample the given scatter points using `KDtree` with the nearest neighbors on a Cartisian grid
+
     Args:
         points (np array), 2d coordinates, from get_ice_coordinates
         resolution (Integer): resolution of the downsample grid
@@ -73,8 +76,8 @@ def down_sample_core(points, resolution=100):
     return ind
 
 def down_sample(points, data_size):
-    """ downsample points to be a size of `data_size`, the strategy is to call `down_sample_core` with at least double resolution required, 
-        then randomly choose
+    """ downsample points to be a size of `data_size`, the strategy is to call `down_sample_core` with at least double resolution required, then randomly choose
+
     Args:
         points (np array), 2d coordinates, from get_ice_coordinates
         data_size (Integer): number of data points needed

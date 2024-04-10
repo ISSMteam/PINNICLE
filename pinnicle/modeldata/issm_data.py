@@ -65,6 +65,7 @@ class ISSMmdData(DataBase, Constants):
 
     def plot(self, data_names=[], vranges={}, axs=None, resolution=200, **kwargs):
         """ use `utils.plot_dict_data` to plot the ISSM data
+
         Args:
             data_names (list): Names of the variables. if not specified, plot all variables in data_dict
             vranges (dict): range of the data

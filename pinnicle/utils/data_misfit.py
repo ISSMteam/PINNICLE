@@ -4,12 +4,7 @@ from deepxde.backend import tf
 
 
 def surface_log_vel_misfit(v_true, v_pred):
-    """Compute SurfaceLogVelMisfit:
-    This function can only work with tensorflow backend for now, since we use tf.math.log()
-            [        vel + eps     ] 2
-       J =  | log ( -----------  ) |
-            [       vel   + eps    ]
-                       obs
+    """Compute SurfaceLogVelMisfit: This function can only work with tensorflow backend for now, since we use tf.math.log()
     """
     epsvel=2.220446049250313e-16
     return bkd.reduce_mean(bkd.square((tf.math.log((tf.abs(v_pred)+epsvel)/(tf.abs(v_true)+epsvel)))))
