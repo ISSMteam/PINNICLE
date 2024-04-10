@@ -1,4 +1,4 @@
-import PINNICLE as pinn
+import pinnicle as pinn
 import pytest
 import deepxde as dde
 import os

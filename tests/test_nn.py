@@ -1,6 +1,6 @@
-import PINNICLE as pinn
-from PINNICLE.nn.helper import minmax_scale, up_scale
-from PINNICLE.parameter import NNParameter
+import pinnicle as pinn
+from pinnicle.nn.helper import minmax_scale, up_scale
+from pinnicle.parameter import NNParameter
 import numpy as np
 
 def test_minmax_scale():

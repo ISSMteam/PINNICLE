@@ -1,7 +1,7 @@
 PINNICLE
 ===================================
 
-`PINNICLE<https://github.com/enigne/PINNICLE>` is a Python library for solving ice sheet modeling problems using a unified framework with Physics Informed Neural Networks
+`PINNICLE <https://github.com/enigne/PINNICLE>`_ is a Python library for solving ice sheet modeling problems using a unified framework with Physics Informed Neural Networks
 
 
 Check out the :doc:`usage` section for further information, including

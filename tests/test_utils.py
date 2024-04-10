@@ -2,7 +2,7 @@ import pytest
 import tensorflow as tf
 import os
 import numpy as np
-from PINNICLE.utils import save_dict_to_json, load_dict_from_json, data_misfit, load_mat, down_sample_core, down_sample
+from pinnicle.utils import save_dict_to_json, load_dict_from_json, data_misfit, load_mat, down_sample_core, down_sample
 
 data = {"s":1, "v":[1, 2, 3]}
 
