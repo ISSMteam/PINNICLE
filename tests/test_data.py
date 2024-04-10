@@ -1,6 +1,6 @@
 import os
-from PINNICLE.modeldata import ISSMmdData, MatData, Data
-from PINNICLE.parameter import DataParameter, SingleDataParameter
+from pinnicle.modeldata import ISSMmdData, MatData, Data
+from pinnicle.parameter import DataParameter, SingleDataParameter
 
 def test_ISSMmdData():
     filename = "Helheim_fastflow.mat"

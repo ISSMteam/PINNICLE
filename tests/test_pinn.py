@@ -1,8 +1,8 @@
 import os
-import PINNICLE as pinn
+import pinnicle as pinn
 import numpy as np
 import deepxde as dde
-from PINNICLE.utils import data_misfit, plot_nn, plot_similarity
+from pinnicle.utils import data_misfit, plot_nn, plot_similarity
 
 dde.config.set_default_float('float64')
 dde.config.disable_xla_jit()

@@ -1,1 +1,1 @@
-import PINNICLE as pinn
+import pinnicle as pinn

@@ -20,6 +20,7 @@ def cmap_Rignot():
 
 def plot_solutions(pinn, path="", X_ref=None, sol_ref=None, cols=None, resolution=200, **kwargs):
     """ plot model predictions
+
     Args:
         path (Path, str): Path to save the figures
         X_ref (dict): Coordinates of the reference solutions, if None, then just plot the predicted solutions
@@ -91,6 +92,7 @@ def plot_solutions(pinn, path="", X_ref=None, sol_ref=None, cols=None, resolutio
 
 def plot_nn(pinn, data_names=None, X_mask=None, axs=None, vranges={}, resolution=200, **kwargs):
     """ plot the prediction of the nerual network in pinn, according to the data_names
+
     Args:
         pinn (class PINN): The PINN model
         data_names (list): List of data names
@@ -144,6 +146,7 @@ def plot_nn(pinn, data_names=None, X_mask=None, axs=None, vranges={}, resolution
 
 def plot_dict_data(X_dict, data_dict, axs=None, vranges={}, resolution=200, **kwargs):
     """ plot the data in data_dict, with coordinates in X_dict
+
     Args:
         X_dict (dict): Dict of the coordinates, with keys 'x', 'y'
         data_dict (dict): Dict of data
@@ -186,6 +189,7 @@ def plot_dict_data(X_dict, data_dict, axs=None, vranges={}, resolution=200, **kw
     
 def plot_data(X, Y, im_data, axs=None, vranges={}, **kwargs):
     """ plot all the data in im_data
+
     Args:
         X (np.array): x-coordinates of the 2D plot
         Y (np.array): y-coordinates of the 2D plot
