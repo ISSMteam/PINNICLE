@@ -274,12 +274,39 @@ def plot_similarity(pinn, feature_name, savepath, sim='MAE', cmap='jet', scale=1
 
     # difference / similarity
     if 2 in cols:
-        if sim == 'MAE':
+        if sim.upper() == 'MAE':
             diff = np.abs(ref_sol-pred_sol)
             diff_val = np.round(np.mean(diff), 2)
             title = r"|"+feature_name+r"$_{ref} - $"+feature_name+r"$_{pred}$|, MAE="+str(diff_val)
             dmin, dmax = np.min(diff), np.max(diff)
             levels = np.linspace(dmin*0.9, dmax*1.1, 500)
+        elif sim.upper() == 'MSE':
+            diff = (ref_sol-pred_sol)**2
+            diff_val = np.round(np.mean(diff), 2)
+            title = r"$($"+feature_name+r"$_{ref} - $"+feature_name+r"$_{pred})^2$, MSE="+str(diff_val)
+            dmin, dmax = np.min(diff), np.max(diff)
+            levels = np.linspace(dmin*0.9, dmax*1.1, 500)
+        elif sim.upper() == 'RMSE':
+            diff = (ref_sol-pred_sol)**2
+            diff_val = np.round(np.sqrt(np.mean(diff)), 2)
+            diff = np.sqrt(diff)
+            title = r"$(($"+feature_name+r"$_{ref} - $"+feature_name+r"$_{pred})^2)^{1/2}$, RMSE="+str(diff_val)
+            dmin, dmax = np.min(diff), np.max(diff)
+            levels = np.linspace(dmin*0.9, dmax*1.1, 500)
+        elif sim.upper() == 'SIMPLE':
+            diff = ref_sol-pred_sol
+            diff_val = np.round(np.mean(diff), 2)
+            title = feature_name+r"$_{ref} - $"+feature_name+r"$_{pred}$, AVG. DIFF="+str(diff_val)
+            dmin, dmax = np.min(diff), np.max(diff)
+            levels = np.linspace(dmin*0.9, dmax*1.1, 500)
+        else:
+            print('Default similarity MAE implemented.')
+            diff = np.abs(ref_sol-pred_sol)
+            diff_val = np.round(np.mean(diff), 2)
+            title = r"|"+feature_name+r"$_{ref} - $"+feature_name+r"$_{pred}$|, MAE="+str(diff_val)
+            dmin, dmax = np.min(diff), np.max(diff)
+            levels = np.linspace(dmin*0.9, dmax*1.1, 500)
+
         ax = axs[c].tricontourf(meshx, meshy, np.squeeze(diff), levels=levels, cmap='RdBu', norm=colors.CenteredNorm())
         cb = plt.colorbar(ax, ax=axs[c])
         cb.ax.tick_params(labelsize=14)
