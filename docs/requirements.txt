@@ -1,21 +1,12 @@
 numpy
 scipy
 scikit-learn
+tensorflow>=2.11.0
+tensorflow-probability[tf]>=0.19.0      # to use tensorflow 2
 matplotlib
 pandas
 mat73
 deepxde
-
-# TensorFlow 1.x
-tensorflow>=2.7.0
-# TensorFlow 2.x
-tensorflow-probability>=0.10.0
-# PyTorch
-torch<2.0.0    # build fails on RTD with torch 2.0.0
-# PaddlePaddle
-paddlepaddle==2.6.0
-# JAX
-jax
 
 sphinx-copybutton
 sphinx-rtd-theme
