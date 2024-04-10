@@ -2,7 +2,7 @@ import os
 import PINNICLE as pinn
 import numpy as np
 import deepxde as dde
-from PINNICLE.utils import data_misfit, plot_nn
+from PINNICLE.utils import data_misfit, plot_nn, plot_similarity
 
 dde.config.set_default_float('float64')
 dde.config.disable_xla_jit()
@@ -164,3 +164,12 @@ def test_plot(tmp_path):
     assert Y.shape == (10,10)
     assert len(im_data) == 5
     assert im_data['u'].shape == (10,10) 
+
+def test_similarity(tmp_path):
+    hp["save_path"] = str(tmp_path)
+    hp["is_save"] = True
+    issm["data_size"] = {"u":4000, "v":4000, "s":4000, "H":4000, "C":None}
+    hp["data"] = {"ISSM": issm}
+    experiment = pinn.PINN(params=hp)
+    experiment.compile()
+    assert plot_similarity(experiment, feature_name="u", savepath=tmp_path) is None

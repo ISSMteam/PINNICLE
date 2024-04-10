@@ -1,7 +1,7 @@
 import numpy as np
 import math
 import matplotlib.pyplot as plt
-import matplotlib.colors as clr
+import matplotlib.colors as colors
 import matplotlib as mpl
 from matplotlib.colors import ListedColormap
 from scipy.interpolate import griddata
@@ -216,14 +216,15 @@ def plot_data(X, Y, im_data, axs=None, vranges={}, **kwargs):
     
     return axs
 
-def plot_similarity(pinn, feature_name, savepath, sim='mae', cmap='jet', scale=1):
+def plot_similarity(pinn, feature_name, savepath, sim='MAE', cmap='jet', scale=1, cols=[0, 1, 2]):
     """
-    plotting the feature prediction, compared to the reference solution
-    with error/difference. Default MAE. 
+    plotting the similarity between reference and predicted 
+    solutions, mae default
     """
-    fig, axs = plt.subplots(1, 3, figsize=(15, 4))
+    # initialize figure, default all 3 columns
+    fig, axs = plt.subplots(1, len(cols), figsize=(5*len(cols), 4))
 
-    # input and output
+    # inputs and outputs of NN
     input_names = pinn.nn.parameters.input_variables
     output_names = pinn.nn.parameters.output_variables
 
@@ -247,66 +248,43 @@ def plot_similarity(pinn, feature_name, savepath, sim='mae', cmap='jet', scale=1
     # grab feature
     fid = output_names.index(feature_name)
     ref_sol = np.squeeze(sol[:, fid:fid+1]*scale)
-    pred_sol = np.squeeze(sol[:, fid:fid+1]*scale)
+    pred_sol = np.squeeze(pred[:, fid:fid+1]*scale)
     [cmin, cmax] = [np.min(np.append(ref_sol, pred_sol)), np.max(np.append(ref_sol, pred_sol))]
     levels = np.linspace(cmin*0.9, cmax*1.1, 500)
 
-    # reference plot
-    ax = axs[0].tricontourf(meshx, meshy, ref_sol, levels=levels, cmap=cmap)
-    cb = plt.colorbar(ax, ax=axs[0])
-    cb.ax.tick_params(labelsize=14)
-    axs[0].set_title(feature_name+r'$_{ref}$', fontsize=14)
-    axs[0].axis('off')
+    # plotting 
+    # reference solution
+    c = 0 # column number initialize
+    if 0 in cols:
+        ax = axs[c].tricontourf(meshx, meshy, ref_sol, levels=levels, cmap=cmap)
+        cb = plt.colorbar(ax, ax=axs[c])
+        cb.ax.tick_params(labelsize=14)
+        axs[c].set_title(feature_name+r"$_{ref}$", fontsize=14)
+        axs[c].axis('off')
+        c += 1
 
-    # prediction plot
-    ax = axs[1].tricontourf(meshx, meshy, pred_sol, levels=levels, cmap=cmap)
-    cb = plt.colorbar(ax, ax=axs[1])
-    cb.ax.tick_params(labelsize=14)
-    axs[1].set_title(feature_name+r'$_{pred}$', fontsize=14)
-    axs[1].axis('off')
+    # predicted solution
+    if 1 in cols:
+        ax = axs[c].tricontourf(meshx, meshy, pred_sol, levels=levels, cmap=cmap)
+        cb = plt.colorbar(ax, ax=axs[c])
+        cb.ax.tick_params(labelsize=14)
+        axs[c].set_title(feature_name+r"$_{pred}$", fontsize=14)
+        axs[c].axis('off')
+        c += 1
 
-    # difference plot
-    if sim == 'mae' or sim == 'MAE':
-        # mean absolute error
-        diff = np.abs(ref_sol-pred_sol)
-        diff_val = np.round(np.mean(diff), 3)
-        title =  "|"+feature_name+r"$_{ref} - $"+feature_name+r"$_{pred}$|"
-        dmin, dmax = np.min(diff), np.max(diff)
-        levels = np.linspace(dmin*0.9, dmax*1.1, 500)
-    elif sim == 'mse' or sim == "MSE":
-        # mean squared error
-        diff = (ref_sol-pred_sol)**2
-        diff_val = np.round(np.mean(diff), 3)
-        title = r"$($"+feature_name+r"$_{ref} - $"+feature_name+r"$_{pred})^2$"
-        dmin, dmax = np.min(diff), np.max(diff)
-        levels = np.linspace(dmin*0.9, dmax*1.1, 500)
-    elif sim = 'rmse' or sim == 'RMSE':
-        # root mean squared error
-        d_squared = (ref_sol - pred_sol)**2
-        diff = np.sqrt(d_squared)
-        diff_val = np.round(np.sqrt(np.mean(d_squared)), 3)
-        title = r"$(($"+feature_name+r"$_{ref} - $"+feature_name+r"$_{pred})^2)^{1/2}$"
-        dmin, dmax = np.min(diff), np.max(diff)
-        levels = np.linspace(dmin*0.9, dmax*1.1, 500)
-    elif sim == 'simple' or sim == "SIMPLE":
-        # simple difference 
-        diff = ref_sol - pred_sol
-        diff_val = np.round(np.mean(diff), 3)
-        title = feature_name+r"$_{ref} - $"+feature_name+r"$_{pred}$"
-        dmin, dmax = np.min(diff), np.max(diff)
-        levels = np.linspace(dmin*0.9, dmax*1.1, 500)
+    # difference / similarity
+    if 2 in cols:
+        if sim == 'MAE':
+            diff = np.abs(ref_sol-pred_sol)
+            diff_val = np.round(np.mean(diff), 2)
+            title = r"|"+feature_name+r"$_{ref} - $"+feature_name+r"$_{pred}$|, MAE="+str(diff_val)
+            dmin, dmax = np.min(diff), np.max(diff)
+            levels = np.linspace(dmin*0.9, dmax*1.1, 500)
+        ax = axs[c].tricontourf(meshx, meshy, np.squeeze(diff), levels=levels, cmap='RdBu', norm=colors.CenteredNorm())
+        cb = plt.colorbar(ax, ax=axs[c])
+        cb.ax.tick_params(labelsize=14)
+        axs[c].set_title(title, fontsize=14)
+        axs[c].axis('off')
 
-    ax = axs[2].tricontourf(meshx, meshy, diff, levels=levels, cmap='RdBu', norm=clr.CenteredNorm())
-    cb = plt.colorbar(ax, ax=axs[2])
-    cb.ax.tick_params(labelsize=14)
-    axs[2].set_title(title, fontsize=14)
-    axs[2].axis('off')
-
-    plt.text(0.705, 0, str(sim)+' = '+str(diff_val), fontsize=14, transform=plt.gcf().transFigure)
+    # save figure to path as defined
     plt.savefig(savepath)
-
-
-
-
-
-
