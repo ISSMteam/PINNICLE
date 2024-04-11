@@ -220,10 +220,24 @@ def plot_data(X, Y, im_data, axs=None, vranges={}, **kwargs):
     
     return axs
 
-def plot_similarity(pinn, feature_name, savepath, sim='MAE', cmap='jet', scale=1, cols=[0, 1, 2]):
+def plot_similarity(pinn, feature_name, sim='MAE', cmap='jet', scale=1, cols=[0, 1, 2]):
     """
     plotting the similarity between reference and predicted 
     solutions, mae default
+
+    Parameters
+    ----------
+    sim options: 'MAE', 'MSE', 'RMSE', 'SIMPLE' (upper or lowercase work)
+
+    scale : the factor by which the predicted solution must be multiplied by. 
+    e.g., to convert velocity from m/s to m/year, scale = 3600*24*365 (year to seconds)
+
+    col 0 = reference solution
+    col 1 = predicted solution
+    col 2 = similarity
+
+    e.g. to plot only reference and predicted solution: 
+    plot_similarity(pinn, feature_name, savepath, cols=[0, 1])
     """
     # initialize figure, default all 3 columns
     fig, axs = plt.subplots(1, len(cols), figsize=(5*len(cols), 4))
@@ -259,24 +273,38 @@ def plot_similarity(pinn, feature_name, savepath, sim='MAE', cmap='jet', scale=1
     # plotting 
     # reference solution
     c = 0 # column number initialize
-    if 0 in cols:
-        ax = axs[c].tricontourf(meshx, meshy, ref_sol, levels=levels, cmap=cmap)
-        cb = plt.colorbar(ax, ax=axs[c])
+    if (len(cols)==1) and (0 in cols):
+        ax = axs.tricontourf(meshx, meshy, ref_sol, levels=levels, cmap=cmap)
+        cb = plt.colorbar(ax, ax=axs)
         cb.ax.tick_params(labelsize=14)
-        axs[c].set_title(feature_name+r"$_{ref}$", fontsize=14)
-        axs[c].axis('off')
-        c += 1
+        axs.set_title(feature_name+r"$_{ref}$", fontsize=14)
+        axs.axis('off')
+    else:
+        if 0 in cols:
+            ax = axs[c].tricontourf(meshx, meshy, ref_sol, levels=levels, cmap=cmap)
+            cb = plt.colorbar(ax, ax=axs[c])
+            cb.ax.tick_params(labelsize=14)
+            axs[c].set_title(feature_name+r"$_{ref}$", fontsize=14)
+            axs[c].axis('off')
+            c += 1
 
     # predicted solution
-    if 1 in cols:
-        ax = axs[c].tricontourf(meshx, meshy, pred_sol, levels=levels, cmap=cmap)
-        cb = plt.colorbar(ax, ax=axs[c])
+    if (len(cols)==1) and (1 in cols):
+        ax = axs.tricontourf(meshx, meshy, pred_sol, levels=levels, cmap=cmap)
+        cb = plt.colorbar(ax, ax=axs)
         cb.ax.tick_params(labelsize=14)
-        axs[c].set_title(feature_name+r"$_{pred}$", fontsize=14)
-        axs[c].axis('off')
-        c += 1
+        axs.set_title(feature_name+r"$_{pred}$", fontsize=14)
+        axs.axis('off')
+    else:
+        if 1 in cols:
+            ax = axs[c].tricontourf(meshx, meshy, pred_sol, levels=levels, cmap=cmap)
+            cb = plt.colorbar(ax, ax=axs[c])
+            cb.ax.tick_params(labelsize=14)
+            axs[c].set_title(feature_name+r"$_{pred}$", fontsize=14)
+            axs[c].axis('off')
+            c += 1
 
-    # difference / similarity
+    # difference / similarity 
     if 2 in cols:
         if sim.upper() == 'MAE':
             diff = np.abs(ref_sol-pred_sol)
@@ -311,11 +339,18 @@ def plot_similarity(pinn, feature_name, savepath, sim='MAE', cmap='jet', scale=1
             dmin, dmax = np.min(diff), np.max(diff)
             levels = np.linspace(dmin*0.9, dmax*1.1, 500)
 
-        ax = axs[c].tricontourf(meshx, meshy, np.squeeze(diff), levels=levels, cmap='RdBu', norm=colors.CenteredNorm())
-        cb = plt.colorbar(ax, ax=axs[c])
-        cb.ax.tick_params(labelsize=14)
-        axs[c].set_title(title, fontsize=14)
-        axs[c].axis('off')
+        if len(cols)==1:
+            ax = axs.tricontourf(meshx, meshy, np.squeeze(diff), levels=levels, cmap='RdBu', norm=colors.CenteredNorm())
+            cb = plt.colorbar(ax, ax=axs)
+            cb.ax.tick_params(labelsize=14)
+            axs.set_title(title, fontsize=14)
+            axs.axis('off')
+        else:
+            ax = axs[c].tricontourf(meshx, meshy, np.squeeze(diff), levels=levels, cmap='RdBu', norm=colors.CenteredNorm())
+            cb = plt.colorbar(ax, ax=axs[c])
+            cb.ax.tick_params(labelsize=14)
+            axs[c].set_title(title, fontsize=14)
+            axs[c].axis('off')
 
     # save figure to path as defined
-    plt.savefig(savepath)
+    return fig, axs
