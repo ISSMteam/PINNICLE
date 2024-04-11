@@ -216,7 +216,7 @@ def plot_data(X, Y, im_data, axs=None, vranges={}, **kwargs):
     
     return axs
 
-def plot_similarity(pinn, feature_name, savepath, sim='MAE', cmap='jet', scale=1, cols=[0, 1, 2]):
+def plot_similarity(pinn, feature_name, sim='MAE', cmap='jet', scale=1, cols=[0, 1, 2]):
     """
     plotting the similarity between reference and predicted 
     solutions, mae default
@@ -349,4 +349,4 @@ def plot_similarity(pinn, feature_name, savepath, sim='MAE', cmap='jet', scale=1
             axs[c].axis('off')
 
     # save figure to path as defined
-    plt.savefig(savepath)
+    return fig, axs

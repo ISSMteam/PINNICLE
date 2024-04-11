@@ -172,23 +172,39 @@ def test_similarity(tmp_path):
     hp["data"] = {"ISSM": issm}
     experiment = pinn.PINN(params=hp)
     experiment.compile()
-    # plot_similarity(pinn, feature_name, savepath, sim='MAE', cmap='jet', scale=1, cols=[0, 1, 2])
+    # plot_similarity(pinn, feature_name, sim='MAE', cmap='jet', scale=1, cols=[0, 1, 2])
     # default
-    assert plot_similarity(experiment, feature_name='s', savepath=tmp_path) is None
+    fig, axs = plot_similarity(experiment, feature_name='s')
+    assert (fig is not None) and (np.size(axs) == 3)
     # similarity conditions tested
-    assert plot_similarity(experiment, sim="mae", feature_name="s", savepath=tmp_path) is None
-    assert plot_similarity(experiment, sim="Mse", feature_name="s", savepath=tmp_path) is None
-    assert plot_similarity(experiment, sim="rmse", feature_name="s", savepath=tmp_path) is None
-    assert plot_similarity(experiment, sim="SIMPLE", feature_name="s", savepath=tmp_path) is None
-    assert plot_similarity(experiment, sim="", feature_name="s", savepath=tmp_path) is None
+    fig, axs = plot_similarity(experiment, feature_name="s", sim="mae")
+    assert (fig is not None) and (np.size(axs) == 3) 
+    fig, axs = plot_similarity(experiment, feature_name="s", sim="Mse")
+    assert (fig is not None) and (np.size(axs) == 3) 
+    fig, axs = plot_similarity(experiment, feature_name="s", sim="rmse")
+    assert (fig is not None) and (np.size(axs) == 3) 
+    fig, axs = plot_similarity(experiment, feature_name="s", sim="SIMPLE")
+    assert (fig is not None) and (np.size(axs) == 3) 
+    fig, axs = plot_similarity(experiment, feature_name="s", sim="")
+    assert (fig is not None) and (np.size(axs) == 3) 
     # scale
-    assert plot_similarity(experiment, feature_name='u', savepath=tmp_path, scale=3600.0*24*365) is None
-    # cmap
-    assert plot_similarity(experiment, feature_name='s', savepath=tmp_path, cmap='rainbow') is None
+    fig, axs = plot_similarity(experiment, feature_name='u', scale=3600.0*24*365)
+    assert (fig is not None) and (np.size(axs) == 3)
+    # color map
+    fig, axs = plot_similarity(experiment, feature_name='s', cmap='rainbow')
+    assert (fig is not None) and (np.size(axs) == 3)
     # columns
-    assert plot_similarity(experiment, feature_name='s', savepath=tmp_path, cols=[0]) is None
-    assert plot_similarity(experiment, feature_name='s', savepath=tmp_path, cols=[1]) is None
-    assert plot_similarity(experiment, feature_name='s', savepath=tmp_path, cols=[2]) is None
-    assert plot_similarity(experiment, feature_name='s', savepath=tmp_path, cols=[0, 1]) is None
-    assert plot_similarity(experiment, feature_name='s', savepath=tmp_path, cols=[2, 1]) is None
-    assert plot_similarity(experiment, feature_name='s', savepath=tmp_path, cols=[1, 2]) is None
+    fig, axs = plot_similarity(experiment, feature_name='s', cols=[0])
+    assert (fig is not None) and (np.size(axs) == 1)
+    fig, axs = plot_similarity(experiment, feature_name='s', cols=[1])
+    assert (fig is not None) and (np.size(axs) == 1)
+    fig, axs = plot_similarity(experiment, feature_name='s', cols=[2])
+    assert (fig is not None) and (np.size(axs) == 1)
+    fig, axs = plot_similarity(experiment, feature_name='s', cols=[0, 1])
+    assert (fig is not None) and (np.size(axs) == 2)
+    fig, axs = plot_similarity(experiment, feature_name='s', cols=[2, 1])
+    assert (fig is not None) and (np.size(axs) == 2)
+    fig, axs = plot_similarity(experiment, feature_name='s', cols=[0, 1, 2])
+    assert (fig is not None) and (np.size(axs) == 3)
+    fig, axs = plot_similarity(experiment, feature_name='s', cols=[0, 2, 1])
+    assert (fig is not None) and (np.size(axs) == 3)
