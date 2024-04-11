@@ -167,14 +167,22 @@ def test_plot(tmp_path):
 
 def test_similarity(tmp_path):
     hp["save_path"] = str(tmp_path)
-    hp["is_save"] = True
-    issm["data_size"] = {"u":4000, "v":4000, "s":4000, "H":4000, "C":None}
+    hp["is_save"] = False
+    issm["data_size"] = {"u":100, "v":100, "s":100, "H":100, "C":None}
     hp["data"] = {"ISSM": issm}
     experiment = pinn.PINN(params=hp)
     experiment.compile()
-    assert plot_similarity(experiment, feature_name="u", savepath=tmp_path) is None
-    assert plot_similarity(experiment, sim="mae", feature_name="u", savepath=tmp_path) is None
-    assert plot_similarity(experiment, sim="mse", feature_name="u", savepath=tmp_path) is None
-    assert plot_similarity(experiment, sim="rmse", feature_name="u", savepath=tmp_path) is None
-    assert plot_similarity(experiment, sim="SIMPLE", feature_name="u", savepath=tmp_path) is None
-    assert plot_similarity(experiment, sim="", feature_name="u", savepath=tmp_path) is None
+    # plot_similarity(pinn, feature_name, sim='MAE', cmap='jet', scale=1, cols=[0, 1, 2])
+    # default
+    fig, axs = plot_similarity(experiment, feature_name='s')
+    assert (fig is not None) and (np.size(axs) == 3)
+    fig, axs = plot_similarity(experiment, feature_name='H', cols=[0])
+    assert (fig is not None) and (np.size(axs) == 1)
+    fig, axs = plot_similarity(experiment, feature_name="u", sim="mae", cols=[2])
+    assert (fig is not None) and (np.size(axs) == 1) 
+    fig, axs = plot_similarity(experiment, feature_name="v", sim="Mse", cols=[2, 1])
+    assert (fig is not None) and (np.size(axs) == 2) 
+    fig, axs = plot_similarity(experiment, feature_name="C", sim="rmse", cols=[0, 2, 1])
+    assert (fig is not None) and (np.size(axs) == 3) 
+    fig, axs = plot_similarity(experiment, feature_name="H", sim="SIMPLE")
+    assert (fig is not None) and (np.size(axs) == 3) 

@@ -220,13 +220,32 @@ def plot_data(X, Y, im_data, axs=None, vranges={}, **kwargs):
     
     return axs
 
-def plot_similarity(pinn, feature_name, savepath, sim='MAE', cmap='jet', scale=1, cols=[0, 1, 2]):
+def plot_similarity(pinn, feature_name, sim='MAE', cmap='jet', scale=1, cols=[0, 1, 2]):
     """
     plotting the similarity between reference and predicted 
     solutions, mae default
+
+    Parameters
+    ----------
+    sim options: 'MAE', 'MSE', 'RMSE', 'SIMPLE' (upper or lowercase work)
+
+    scale : the factor by which the predicted solution must be multiplied by. 
+    e.g., to convert velocity from m/s to m/year, scale = 3600*24*365 (year to seconds)
+
+    col 0 = reference solution
+    col 1 = predicted solution
+    col 2 = similarity
+
+    e.g. to plot only reference and predicted solution: 
+    plot_similarity(pinn, feature_name, savepath, cols=[0, 1])
     """
     # initialize figure, default all 3 columns
-    fig, axs = plt.subplots(1, len(cols), figsize=(5*len(cols), 4))
+    if len(cols) == 1:
+        # subplots returns a single Axes if only 1 figure, but we need array later
+        fig, ax_single = plt.subplots(1, len(cols), figsize=(5*len(cols), 4))
+        axs = [ax_single]
+    else:
+        fig, axs = plt.subplots(1, len(cols), figsize=(5*len(cols), 4))
 
     # inputs and outputs of NN
     input_names = pinn.nn.parameters.input_variables
@@ -255,67 +274,47 @@ def plot_similarity(pinn, feature_name, savepath, sim='MAE', cmap='jet', scale=1
     pred_sol = np.squeeze(pred[:, fid:fid+1]*scale)
     [cmin, cmax] = [np.min(np.append(ref_sol, pred_sol)), np.max(np.append(ref_sol, pred_sol))]
     levels = np.linspace(cmin*0.9, cmax*1.1, 500)
+    data_list = [ref_sol, pred_sol]
+    title_list = [ feature_name + r"$_{ref}$", feature_name + r"$_{pred}$"]
 
     # plotting 
-    # reference solution
-    c = 0 # column number initialize
-    if 0 in cols:
-        ax = axs[c].tricontourf(meshx, meshy, ref_sol, levels=levels, cmap=cmap)
-        cb = plt.colorbar(ax, ax=axs[c])
-        cb.ax.tick_params(labelsize=14)
-        axs[c].set_title(feature_name+r"$_{ref}$", fontsize=14)
-        axs[c].axis('off')
-        c += 1
-
-    # predicted solution
-    if 1 in cols:
-        ax = axs[c].tricontourf(meshx, meshy, pred_sol, levels=levels, cmap=cmap)
-        cb = plt.colorbar(ax, ax=axs[c])
-        cb.ax.tick_params(labelsize=14)
-        axs[c].set_title(feature_name+r"$_{pred}$", fontsize=14)
-        axs[c].axis('off')
-        c += 1
-
-    # difference / similarity
-    if 2 in cols:
-        if sim.upper() == 'MAE':
-            diff = np.abs(ref_sol-pred_sol)
-            diff_val = np.round(np.mean(diff), 2)
-            title = r"|"+feature_name+r"$_{ref} - $"+feature_name+r"$_{pred}$|, MAE="+str(diff_val)
-            dmin, dmax = np.min(diff), np.max(diff)
-            levels = np.linspace(dmin*0.9, dmax*1.1, 500)
-        elif sim.upper() == 'MSE':
-            diff = (ref_sol-pred_sol)**2
-            diff_val = np.round(np.mean(diff), 2)
-            title = r"$($"+feature_name+r"$_{ref} - $"+feature_name+r"$_{pred})^2$, MSE="+str(diff_val)
-            dmin, dmax = np.min(diff), np.max(diff)
-            levels = np.linspace(dmin*0.9, dmax*1.1, 500)
-        elif sim.upper() == 'RMSE':
-            diff = (ref_sol-pred_sol)**2
-            diff_val = np.round(np.sqrt(np.mean(diff)), 2)
-            diff = np.sqrt(diff)
-            title = r"$(($"+feature_name+r"$_{ref} - $"+feature_name+r"$_{pred})^2)^{1/2}$, RMSE="+str(diff_val)
-            dmin, dmax = np.min(diff), np.max(diff)
-            levels = np.linspace(dmin*0.9, dmax*1.1, 500)
-        elif sim.upper() == 'SIMPLE':
-            diff = ref_sol-pred_sol
-            diff_val = np.round(np.mean(diff), 2)
-            title = feature_name+r"$_{ref} - $"+feature_name+r"$_{pred}$, AVG. DIFF="+str(diff_val)
-            dmin, dmax = np.min(diff), np.max(diff)
-            levels = np.linspace(dmin*0.9, dmax*1.1, 500)
+    for c, col in enumerate(cols):
+        if col == 2:
+            if sim.upper() == 'MAE':
+                diff = np.abs(ref_sol-pred_sol)
+                diff_val = np.round(np.mean(diff), 2)
+                title = r"|"+feature_name+r"$_{ref} - $"+feature_name+r"$_{pred}$|, MAE="+str(diff_val)
+            elif sim.upper() == 'MSE':
+                diff = (ref_sol-pred_sol)**2
+                diff_val = np.round(np.mean(diff), 2)
+                title = r"$($"+feature_name+r"$_{ref} - $"+feature_name+r"$_{pred})^2$, MSE="+str(diff_val)
+            elif sim.upper() == 'RMSE':
+                diff = (ref_sol-pred_sol)**2
+                diff_val = np.round(np.sqrt(np.mean(diff)), 2)
+                diff = np.sqrt(diff)
+                title = r"$(($"+feature_name+r"$_{ref} - $"+feature_name+r"$_{pred})^2)^{1/2}$, RMSE="+str(diff_val)
+            elif sim.upper() == 'SIMPLE':
+                diff = ref_sol-pred_sol
+                diff_val = np.round(np.mean(diff), 2)
+                title = feature_name+r"$_{ref} - $"+feature_name+r"$_{pred}$, AVG. DIFF="+str(diff_val)
+            else:
+                print('Default similarity MAE implemented.')
+                diff = np.abs(ref_sol-pred_sol)
+                diff_val = np.round(np.mean(diff), 2)
+                title = r"|"+feature_name+r"$_{ref} - $"+feature_name+r"$_{pred}$|, MAE="+str(diff_val)
+            
+            levels = np.linspace(np.min(diff)*0.9, np.max(diff)*1.1, 500)
+            data = np.squeeze(diff)
+            ax = axs[c].tricontourf(meshx, meshy, data, levels=levels, cmap='RdBu', norm=colors.CenteredNorm())
         else:
-            print('Default similarity MAE implemented.')
-            diff = np.abs(ref_sol-pred_sol)
-            diff_val = np.round(np.mean(diff), 2)
-            title = r"|"+feature_name+r"$_{ref} - $"+feature_name+r"$_{pred}$|, MAE="+str(diff_val)
-            dmin, dmax = np.min(diff), np.max(diff)
-            levels = np.linspace(dmin*0.9, dmax*1.1, 500)
+            ax = axs[c].tricontourf(meshx, meshy, data_list[col], levels=levels, cmap=cmap)
+            title = title_list[col]
 
-        ax = axs[c].tricontourf(meshx, meshy, np.squeeze(diff), levels=levels, cmap='RdBu', norm=colors.CenteredNorm())
+        # common settings
+        axs[c].set_title(title, fontsize=14)
         cb = plt.colorbar(ax, ax=axs[c])
         cb.ax.tick_params(labelsize=14)
-        axs[c].set_title(title, fontsize=14)
         axs[c].axis('off')
 
     # save figure to path as defined
-    plt.savefig(savepath)
+    return fig, axs
