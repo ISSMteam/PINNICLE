@@ -1,0 +1,49 @@
+Import packages (PINNICLE, os, numpy, datetime, and deepxe)
+Set configurations for deepxde(dde): default float (‘float64’), disable xla_jit, set random seed (1234)
+Create experiments: create variable “datestr” and set it as datetime.now().strftime(“%Y%m%d_%H%M%S”)
+Create date file and path: 
+Create the “inputFileName” varible and set it as “Upernavik.mat”
+Create the “expFileName” variable and set it as “Upernavik.exp”
+Create “repoPath” variable and set it as “./”
+Create “appDataPath” variable and set the path “os.path.join(repoPath, “dataset”)
+Create “data_path” variable and set the path “os.path.join(appDataPath, inputFileName)”
+Create a path for saving results and figures
+Create “outputFileName” variable and set this as “Upernavik_test”
+Create the variable for folder “modelFolder” and set the folder “./Models/” + outputFileName + “ “ + datestr + “/””
+Set the general parameters
+Create hyperparameters variable, “hp” and set this as { }
+Set “hp[“epochs”] = 1000”
+Set “hp[“learning_rate”] = 0.001”
+Set “hp[“save_path”] = modelFolder”
+Set “hp[“is_save”] = False”
+Set “hp[“is_plot”] = True”
+Set Neural Networks
+Set “hp[“activation”] = “tanh””
+Set “hp[“initializer”] = “Glorot uniform””
+Set the number of neurons: “hp[“num_neurons”] = 20”
+Set the number of layers” “hp[“num_layers”] = 6”
+Set the Data 
+Set issm, “issm = { }”
+Set the data size for each of the issm data variables, “issm[“data_size”] = {“u”:1000, “v”:1000, “s”:1000, “H”:1000, “C”:None, “vel”:1000}”
+Set the data path, “issm[“data_path”] = data_path”
+Set “hp[“data”] = {“ISSM”:issm}”
+Create the domain
+Set the shapefile path, “hp[“shapefile”] = os.path.join(repoPath, “dataset”, expFileName)”
+Set the collocation points, “hp[“num_collocation_points”] = 5000”
+Set the additional loss function
+Create the variable for velocity loss function: “vel_loss = { }”
+Set “vel_loss[‘name’] = “vel log””
+Set “vel_loss[‘function’] = “VEL_LOG””
+Set “vel_loss[‘weight’] = 1.0e-5”
+Set “hp[“additional_loss”] = {“vel”:vel_loss}”
+Add the physics components
+Create the variable for SSA, “SSA = { }”
+Set “SSA[“scalar_variables”] = {“B”:1.26802073401e+08}”
+Create the experiment
+Create the experiment variable and set it, “experiment = pinn.PINN(hp)”
+Print out the experiment parameters, “print(experiment.params)”
+Compile the experiment, “experiement.compile( )”
+Train the experiment
+“experiment.train( )”
+Show the results
+“experiment.plot_predictions(X_ref=experiments.model_data.data[“ISSM”].X_dict, sol_ref=experiment.model_data.data[“ISSM”].data_dict)”
