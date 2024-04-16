@@ -14,6 +14,7 @@ A Python library for solving ice sheet modeling problems using a unified framewo
    This project is under active development.
 
 ---
+
 **Documentation**: [pinnicle.readthedocs.io](https://pinnicle.readthedocs.io)
 
 ![](docs/images/pinn.png)
@@ -33,7 +34,7 @@ A Python library for solving ice sheet modeling problems using a unified framewo
 
 ## Data format
 
-- `ISSM <https://issm.jpl.nasa.gov>`_ ``model()`` type, directly saved from ISSM by ``saveasstruct(md, filename)``
+- [ISSM](https://issm.jpl.nasa.gov) `model()` type, directly saved from ISSM by `saveasstruct(md, filename)`
 - Scattered data
 
 
