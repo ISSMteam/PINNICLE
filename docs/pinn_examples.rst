@@ -19,10 +19,10 @@ Mass Balance
 
    examples/pinn.mc
 
-Time-dependent PDEs
+Coupling
 -------------------
 
 .. toctree::
    :maxdepth: 1
 
-   examples/pinn.transient
+   examples/pinn.mcssa

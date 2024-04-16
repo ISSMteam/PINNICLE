@@ -9,7 +9,7 @@ PINNICLE
    This project is under active development.
 
 
-   .. image:: images/pinn.png
+.. image:: images/pinn.png
 
 
 Physics
@@ -29,7 +29,7 @@ Physics
 Data format
 -----------
 
-- `ISSM<https://issm.jpl.nasa.gov>`_ ``model()`` type, directly saved from ISSM by ``saveasstruct(md, filename)``
+- `ISSM <https://issm.jpl.nasa.gov>`_ ``model()`` type, directly saved from ISSM by ``saveasstruct(md, filename)``
 - Scattered data 
 
 

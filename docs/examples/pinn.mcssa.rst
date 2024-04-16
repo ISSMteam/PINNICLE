@@ -1,6 +1,9 @@
 A simple PINN example to infer the basal friction coefficent
 ============================================================
 
+.. note::
+   This document need to be updated!!
+
 Problem setup
 -------------
 

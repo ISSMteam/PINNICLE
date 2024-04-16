@@ -34,7 +34,7 @@ In the future, PINNICLE will support the following backends:
 Working with different backends
 -------------------------------
 
-PINNICLE uses `DeepXDE<https://github.com/lululxvi/deepxde>`_ to support different backends. To choose the backend, use the following options as in DeepXDE
+PINNICLE uses `DeepXDE <https://github.com/lululxvi/deepxde>`_ to support different backends. To choose the backend, use the following options as in DeepXDE
 
 * Use the ``DDE_BACKEND`` environment variable:
 
