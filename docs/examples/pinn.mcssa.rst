@@ -1,16 +1,15 @@
 A simple PINN example to infer the basal friction coefficent
 ============================================================
 
-.. note::
-   This document need to be updated!!
-
 Problem setup
 -------------
 
 We use  Shelfy Stream Approximation (SSA): 
 
 .. math:: \nabla\cdot\boldsymbol{\sigma}_{SSA}+\boldsymbol{\tau}_b=\rho_i g H \nabla s, \quad \text{in } \Omega
-where ``\boldsymbol{\tau}_b`` is the basal shear stress, determined by a friction law
+
+where `\boldsymbol{\tau}_b` is the basal shear stress, determined by a friction law
+
 .. math:: \boldsymbol{\tau}_b = -C^2|\boldsymbol{u}|^{m-1}\boldsymbol{u}
 
 with the a calving front boundary condition
@@ -26,6 +25,7 @@ This description goes through the implementation of a PINN solver for inverting 
 First, import the necessary modules:
 
 .. code-block:: python
+
    import pinnicle as pinn
    import numpy as np
    import deepxde as dde
@@ -34,6 +34,7 @@ First, import the necessary modules:
 We setup some configurations in DeepXDE:
 
 .. code-block:: python
+
    dde.config.set_default_float('float64')
    dde.config.disable_xla_jit()
    dde.config.set_random_seed(1234)
@@ -42,6 +43,7 @@ We setup some configurations in DeepXDE:
 The whole setup of the PINNICLE is stored in a ``dict`` with specific names. We begin with the general parameters:
 
 .. code-block:: python
+
    hp = {}
    hp["epochs"] = 1000
    hp["learning_rate"] = 0.001
@@ -54,27 +56,34 @@ The whole setup of the PINNICLE is stored in a ``dict`` with specific names. We 
 Next, we set the nerual network architecture:
 
 .. code-block:: python
+
    hp["activation"] = "tanh"
    hp["initializer"] = "Glorot uniform"
    hp["num_neurons"] = 20
    hp["num_layers"] = 6
 
+
 Then, we define the domain of the computation:
 
 .. code-block:: python
+
    hp["shapefile"] = "./dataset/Helheim_Big.exp"
    hp["num_collocation_points"] = 5000
+
 
 We add physics, SSA, to the PINN by:
 
 .. code-block:: python
+
    SSA = {}
    SSA["scalar_variables"] = {"B":1.26802073401e+08}
    hp["equations"] = {"SSA":SSA}
 
-There are several default setting in ``pinnicle.physics.stressbalance.SSAEquationParameter``, such as:
+
+There are several default setting in `SSAEquationParameter <https://pinnicle.readthedocs.io/en/add_example/_modules/pinnicle/physics/stressbalance.html#SSAEquationParameter.set_default>`_ such as:
 
 .. code-block:: python
+
     def set_default(self):
         self.input = ['x', 'y']
         self.output = ['u', 'v', 's', 'H', 'C']
@@ -97,6 +106,7 @@ This includes the ``key`` names of the input and output variables of the PINN, s
 After that, we assign the data used for training:
 
 .. code-block:: python
+
    issm = {}
    issm["data_size"] = {"u":1000, "v":1000, "s":1000, "H":1000, "C":None, "vel":1000}
    issm["data_path"] = "./dataset/Helheim_fastflow.mat"
@@ -112,6 +122,7 @@ If the variables is included in the training, but not gaven in ``data_size``, th
 Last, add an additional loss function
 
 .. code-block:: python
+
    vel_loss = {}
    vel_loss['name'] = "vel log"
    vel_loss['function'] = "VEL_LOG"
@@ -122,6 +133,7 @@ Last, add an additional loss function
 Now, we can run the PINN model: 
 
 .. code-block:: python
+
    experiment = pinn.PINN(hp)
    experiment.compile()
    experiment.train()
