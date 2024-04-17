@@ -1,20 +1,20 @@
-A simple PINN example to infer the basal friction coefficent
-============================================================
+Infer basal friction coefficients using SSA
+===========================================
 
 Problem setup
 -------------
 
-We use  Shelfy Stream Approximation (SSA): 
+We use Shelfy Stream Approximation (SSA): 
 
 .. math:: \nabla\cdot\boldsymbol{\sigma}_{SSA}+\boldsymbol{\tau}_b=\rho_i g H \nabla s, \quad \text{in } \Omega
 
-where `\boldsymbol{\tau}_b` is the basal shear stress, determined by a friction law
+where :math:`\boldsymbol{\tau}_b` is the basal shear stress, determined by a friction law
 
 .. math:: \boldsymbol{\tau}_b = -C^2|\boldsymbol{u}|^{m-1}\boldsymbol{u}
 
-with the a calving front boundary condition
+with friction coefficient :math:`C \ge 0`.
 
-.. math:: \boldsymbol{n}\cdot\boldsymbol{\sigma}=(\bar{p}_i-\bar{p}_w)\boldsymbol{n} \quad \text{on } \Gamma
+Knowning the observations of surface velocity :math:`\hat{\boldsymbol{u}}`, ice thickness :math:`\hat{H}`, and surface elevation :math:`\hat{s}`, we can use PINN to infer the basal friction coefficent :math:`C` while learning the observational data. 
 
 
 Implementation
@@ -40,7 +40,10 @@ We setup some configurations in DeepXDE:
    dde.config.set_random_seed(1234)
 
 
-The whole setup of the PINNICLE is stored in a ``dict`` with specific names. We begin with the general parameters:
+The whole setup of the PINNICLE is stored in a ``dict`` with specific names. PINNICLE will load all the parameters from this ``dict`` according to the corresponding keywords. 
+The details of the default and required parameters can be found in `pinnicle.parameter <https://pinnicle.readthedocs.io/en/latest/api/pinnicle.html#pinnicle.parameter.DataParameter>`_.
+
+We begin with the general parameters for the training:
 
 .. code-block:: python
 
@@ -63,7 +66,7 @@ Next, we set the nerual network architecture:
    hp["num_layers"] = 6
 
 
-Then, we define the domain of the computation:
+Then, we define the domain of the computation, and number of collocation points used to evaluate the PDEs residual:
 
 .. code-block:: python
 
@@ -101,9 +104,7 @@ There are several default setting in `SSAEquationParameter <https://pinnicle.rea
 
 
 This includes the ``key`` names of the input and output variables of the PINN, scaling factors, weights in the loss functions, ``key`` name of the residuals and weights, etc.
-
-
-After that, we assign the data used for training:
+You can set any names for the input and output, but the order in these two lists matters. And, these names will also be used to load the data in the following section:
 
 .. code-block:: python
 
@@ -113,13 +114,13 @@ After that, we assign the data used for training:
    hp["data"] = {"ISSM":issm}
 
 In ``data_size``, each ``key``:``value`` pair defines a variable in the training. 
-If the ``key`` is not redefined in ``name_map``, then it will be used as default in the physics. 
+If the ``key`` is not redefined in ``name_map``, then it will be used as default or set in the physics section above. 
 The ``value`` associated with the ``key`` gives the number of data points used for training. 
 If, the ``value`` is set to ``None``, then only Dirichlet boundary condition around the domain boundary will be used for the corresponding ``key``. 
 If the variables is included in the training, but not gaven in ``data_size``, then there will be no data for this variable in the training.
 
 
-Last, add an additional loss function
+Last, add an additional loss function to balance the contributions between the fast flow and slow moving regions:
 
 .. code-block:: python
 
