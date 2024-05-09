@@ -17,7 +17,7 @@ class SSAEquationParameter(EquationParameter, Constants):
         self.output_lb = [-1.0e4/self.yts, -1.0e4/self.yts, -1.0e3, 10.0, 0.01]
         self.output_ub = [ 1.0e4/self.yts,  1.0e4/self.yts,  2.5e3, 2000.0, 1.0e4]
         self.data_weights = [1.0e-8*self.yts**2.0, 1.0e-8*self.yts**2.0, 1.0e-6, 1.0e-6, 1.0e-8]
-        self.residuals = ["fSSA1", "fSSA2"]
+        self.residuals = ["f"+self._EQUATION_TYPE+"1", "f"+self._EQUATION_TYPE+"2"]
         self.pde_weights = [1.0e-10, 1.0e-10]
 
         # scalar variables: name:value
@@ -99,7 +99,7 @@ class MOLHOEquationParameter(EquationParameter, Constants):
         self.output_lb = [-1.0e4/self.yts, -1.0e4/self.yts, -1.0e4/self.yts, -1.0e4/self.yts, -1.0e3, 10.0, 0.01]
         self.output_ub = [ 1.0e4/self.yts,  1.0e4/self.yts,  1.0e4/self.yts,  1.0e4/self.yts,  2.5e3, 2000.0, 1.0e4]
         self.data_weights = [1.0e-8*self.yts**2.0, 1.0e-8*self.yts**2.0, 1.0e-8*self.yts**2.0, 1.0e-8*self.yts**2.0, 1.0e-6, 1.0e-6, 1.0e-8]
-        self.residuals = ["fMOLHO 1", "fMOLHO 2", "fMOLHO base 1", "fMOLHO base 2"]
+        self.residuals = ["f"+self._EQUATION_TYPE+" 1", "f"+self._EQUATION_TYPE+" 2", "f"+self._EQUATION_TYPE+" base 1", "f"+self._EQUATION_TYPE+" base 2"]
         self.pde_weights = [1.0e-10, 1.0e-10, 1.0e-10, 1.0e-10]
 
         # scalar variables: name:value

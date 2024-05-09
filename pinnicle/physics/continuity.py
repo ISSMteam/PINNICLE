@@ -17,7 +17,7 @@ class MCEquationParameter(EquationParameter, Constants):
         self.output_lb = [-1.0e4/self.yts, -1.0e4/self.yts, -5.0/self.yts, 10.0]
         self.output_ub = [ 1.0e4/self.yts,  1.0e4/self.yts,  5/self.yts, 2500.0]
         self.data_weights = [1.0e-8*self.yts**2, 1.0e-8*self.yts**2, 1.0*self.yts**2, 1.0e-6]
-        self.residuals = ["fMC"]
+        self.residuals = ["f"+self._EQUATION_TYPE]
         self.pde_weights = [1.0e8]
 
         # scalar variables: name:value
