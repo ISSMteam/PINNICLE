@@ -64,3 +64,17 @@ class Physics:
         vid = self.output_var.index('v')
         vel = (nn_output_var[:,uid:uid+1]**2.0 + nn_output_var[:,vid:vid+1]**2.0) ** 0.5
         return vel
+
+    def operator(self, pname):
+        """ grab the pde operator
+
+        Args:
+            pid : pde operator id (string)
+        """
+        # convert to upper case
+        pname = pname.upper()
+
+        for p in self.equations:
+            if p._EQUATION_TYPE == pname:
+                return p.pde
+

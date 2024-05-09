@@ -142,3 +142,20 @@ def test_update_Physics_SSA():
     hp["equations"] = {"SSA":SSA}
     with pytest.raises(Exception):
         phy = Physics(PhysicsParameter(hp))
+
+def test_operator():
+    MC = {}
+    MC["scalar_variables"] = {"B":1.26802073401e+08}
+    SSA = {}
+    SSA["scalar_variables"] = {"B":1.26802073401e+08}
+
+    hp = {}
+    hp["equations"] = {"MC":MC, 'SSA':SSA}
+    phy = Physics(PhysicsParameter(hp))
+    
+    assert phy.operator('mc')
+    assert phy.operator('Mc')
+    assert phy.operator('SSA')
+    assert phy.operator('ssa')
+
+
