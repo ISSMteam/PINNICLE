@@ -2,7 +2,7 @@ import os
 import pinnicle as pinn
 import numpy as np
 import deepxde as dde
-from pinnicle.utils import data_misfit, plot_nn, plot_similarity
+from pinnicle.utils import data_misfit, plot_nn, plot_similarity, plot_residuals
 
 dde.config.set_default_float('float64')
 dde.config.disable_xla_jit()
@@ -185,4 +185,34 @@ def test_similarity(tmp_path):
     fig, axs = plot_similarity(experiment, feature_name="C", sim="rmse", cols=[0, 2, 1])
     assert (fig is not None) and (np.size(axs) == 3) 
     fig, axs = plot_similarity(experiment, feature_name="H", sim="SIMPLE")
-    assert (fig is not None) and (np.size(axs) == 3) 
+    assert (fig is not None) and (np.size(axs) == 3)
+
+def test_residuals(tmp_path):
+    hp["save_path"] = str(tmp_path)
+    hp["is_save"] = False
+    issm["data_size"] = {"u":100, "v":100, "s":100, "H":100, "C":None}
+    hp["data"] = {"ISSM": issm}
+    experiment = pinn.PINN(params=hp)
+    experiment.compile()
+    # plot_residuals(pinn, cmap='RdBu', cbar_bins=10, cbar_limits=[-5e3, 5e3])
+    # default
+    fig, axs = plot_residuals(experiment)
+    assert (fig is not None) and (np.size(axs)==2)
+    fig, axs = plot_residuals(experiment, cmap='jet')
+    assert (fig is not None) and (np.size(axs)==2)
+    fig, axs = plot_residuals(experiment, cbar_bins=5)
+    assert (fig is not None) and (np.size(axs)==2)
+    fig, axs = plot_residuals(experiment, cbar_limits=[-1e4, 1e4])
+    assert (fig is not None) and (np.size(axs)==2)
+    fig, axs = plot_residuals(experiment, cmap='rainbow', cbar_bins=20, cbar_limits=[-7.5e3, 7.5e3])
+    assert (fig is not None) and (np.size(axs)==2)
+
+    # add more physics, test again
+    MC = {}
+    MC["scalar_variables"] = {"B":1.26802073401e+08}
+    hp["equations"] = {"SSA":SSA, 'MC':MC}
+    experiment = pinn.PINN(params=hp)
+    experiment.compile()
+
+    fig, axs = plot_residuals(experiment)
+    assert (fig is not None) and (np.size(axs)==3)

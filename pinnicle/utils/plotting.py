@@ -2,6 +2,7 @@ import numpy as np
 import math
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
+import matplotlib.ticker as ticker
 import matplotlib as mpl
 from matplotlib.colors import ListedColormap
 from scipy.interpolate import griddata
@@ -220,7 +221,7 @@ def plot_data(X, Y, im_data, axs=None, vranges={}, **kwargs):
     
     return axs
 
-def plot_similarity(pinn, feature_name, sim='MAE', cmap='jet', scale=1, cols=[0, 1, 2]):
+def plot_similarity(pinn, feature_name, sim='MAE', cmap='jet', scale=1, cols=[0, 1, 2], cbar_bins=10):
     """
     plotting the similarity between reference and predicted 
     solutions, mae default
@@ -314,7 +315,67 @@ def plot_similarity(pinn, feature_name, sim='MAE', cmap='jet', scale=1, cols=[0,
         axs[c].set_title(title, fontsize=14)
         cb = plt.colorbar(ax, ax=axs[c])
         cb.ax.tick_params(labelsize=14)
+        colorbar_bins = ticker.MaxNLocator(nbins=cbar_bins)
+        cb.locator = colorbar_bins
+        cb.update_ticks()
         axs[c].axis('off')
 
     # save figure to path as defined
     return fig, axs
+
+def plot_residuals(pinn, cmap='RdBu', cbar_bins=10, cbar_limits=[-5e3, 5e3]):
+    """plotting the pde residuals
+    """
+    input_names = pinn.nn.parameters.input_variables
+    output_names = pinn.nn.parameters.output_variables
+
+    # inputs
+    X_ref = pinn.model_data.data['ISSM'].X_dict
+    xref = X_ref[input_names[0]].flatten()[:,None]
+    for i in range(1, len(input_names)):
+        xref = np.hstack((xref, X_ref[input_names[i]].flatten()[:,None]))
+    meshx = np.squeeze(xref[:, 0])
+    meshy = np.squeeze(xref[:, 1])
+    
+    Nr = len(pinn.physics.residuals)
+    fig, axs = plt.subplots(1, len(pinn.physics.residuals), figsize=(5*Nr, 4))
+    levels = np.linspace(cbar_limits[0], cbar_limits[-1], 500)
+    # counting the pde residuals
+    pde_dict = {} # counting the number of residuals per pde
+    for i in pinn.params.physics.equations.keys():
+        pde_dict[i] = 0
+
+    for r in range(Nr):
+        # looping through the equation keys
+        for p in pinn.params.physics.equations.keys():
+            # check if the equation key is in the residual name
+            if p in pinn.physics.residuals[r]:
+                pde_dict[p] += 1
+                pde_pred = pinn.model.predict(xref, operator=pinn.physics.operator(p))
+                op_pred = pde_pred[pde_dict[p]-1] # operator predicton
+
+                if Nr <= 1:
+                    ax = axs.tricontourf(meshx, meshy, np.squeeze(op_pred), levels=levels, cmap=cmap, norm=colors.CenteredNorm())
+                    cb = plt.colorbar(ax=axs)
+                    cb.ax.tick_params(labelsize=14)
+                    # adjusting the number of ticks
+                    colorbar_bins = ticker.MaxNLocator(nbins=cbar_bins)
+                    cb.locator = colorbar_bins
+                    cb.update_ticks()
+                    # setting the title
+                    axs.set_title(str(pinn.physics.residuals[r]), fontsize=14)
+                    axs.axis('off')
+                else:
+                    ax = axs[r].tricontourf(meshx, meshy, np.squeeze(op_pred), levels=levels, cmap=cmap, norm=colors.CenteredNorm())
+                    cb = plt.colorbar(ax, ax=axs[r])
+                    cb.ax.tick_params(labelsize=14)
+                    # adjusting the number of ticks
+                    colorbar_bins = ticker.MaxNLocator(nbins=cbar_bins)
+                    cb.locator = colorbar_bins
+                    cb.update_ticks()
+                    # title
+                    axs[r].set_title(str(pinn.physics.residuals[r]), fontsize=14)
+                    axs[r].axis('off')
+
+    return fig, axs
+
