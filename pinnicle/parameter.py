@@ -170,6 +170,9 @@ class NNParameter(ParameterBase):
         self.activation = "tanh"
         self.initializer = "Glorot uniform"
 
+        # parallel neural network
+        self.is_parallel = False
+
         #  scaling parameters
         self.input_lb = None
         self.input_ub = None
