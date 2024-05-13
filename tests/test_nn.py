@@ -38,3 +38,19 @@ def test_output_scale_nn():
     x = np.linspace(-1.0, 1.0, 100)
     assert np.all(p.net._output_transform(0, x) > d.output_lb - d.output_lb*np.finfo(float).eps) 
     assert np.all(p.net._output_transform(0, x) < d.output_ub + d.output_ub*np.finfo(float).eps) 
+
+def test_pfnn():
+    hp={}
+    hp['input_variables'] = ['x','y']
+    hp['output_variables'] = ['u', 'v','s']
+    hp['num_neurons'] = 4
+    hp['num_layers'] = 5
+    hp['is_parallel'] = False
+    d = NNParameter(hp)
+    p = pinn.nn.FNN(d)
+    assert len(p.net.layers) == 6
+    hp['is_parallel'] = True
+    d = NNParameter(hp)
+    p = pinn.nn.FNN(d)
+    assert len(p.net.layers) == 18
+
