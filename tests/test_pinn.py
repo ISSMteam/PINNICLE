@@ -3,6 +3,7 @@ import pinnicle as pinn
 import numpy as np
 import deepxde as dde
 from pinnicle.utils import data_misfit, plot_nn, plot_similarity, plot_residuals
+import pytest
 
 dde.config.set_default_float('float64')
 dde.config.disable_xla_jit()
@@ -186,6 +187,10 @@ def test_similarity(tmp_path):
     assert (fig is not None) and (np.size(axs) == 3) 
     fig, axs = plot_similarity(experiment, feature_name="H", sim="SIMPLE")
     assert (fig is not None) and (np.size(axs) == 3)
+    fig, axs = plot_similarity(experiment, feature_name=['u', 'v'], feat_title='vel')
+    assert (fig is not None) and (np.size(axs) == 3)
+    with pytest.raises(TypeError):
+        fig, axs = plot_similarity(experiment, feature_name=['u', 'v'])
 
 def test_residuals(tmp_path):
     hp["save_path"] = str(tmp_path)
