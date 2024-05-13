@@ -221,25 +221,43 @@ def plot_data(X, Y, im_data, axs=None, vranges={}, **kwargs):
     
     return axs
 
-def plot_similarity(pinn, feature_name, sim='MAE', cmap='jet', scale=1, cols=[0, 1, 2], cbar_bins=10):
+def plot_similarity(pinn, feature_name, feat_title=None, sim='MAE', cmap='jet', scale=1, cols=[0, 1, 2], cbar_bins=10):
     """
     plotting the similarity between reference and predicted 
     solutions, mae default
 
-    Parameters
-    ----------
-    sim options: 'MAE', 'MSE', 'RMSE', 'SIMPLE' (upper or lowercase work)
+    Args:
+    pinn : pinnicle.model
+        the trained PINN model
+    feature_name : str
+        the name of a predicted feature of the PINN. 
+        for the L-2 norm of two or more predictions, write as a list. e.g., ['u', 'v'].
+    feat_title : str (default=None, will be set to feature_name if None provided)
+        the name of the predicted feature in the title.
+    sim : str (default='MAE')
+        the similarity/comparison type.
+        options include: 'MAE', 'MSE', 'RMSE', 'SIMPLE'
+        (can be written as upper case or lower case) e.g., 'MSE' and 'mse' will give the same result. 
+    cmap : str (default='jet', for similarity default='RdBu')
+        the matplotlib colormap name as a str. 
+    scale : float (default=1)
+        the scale by which to multiply predictions (e.g., m/s * yts = m/year, then scale = yts)
+    cols : list (default=[0, 1, 2])
+        can specify which columns of the figure to extract. 0 = reference, 1 = prediction, 2 = similarity.
+    cbar_bins : int (default=10)
+        the number of bins/ticks on the c-axis. 
 
-    scale : the factor by which the predicted solution must be multiplied by. 
-    e.g., to convert velocity from m/s to m/year, scale = 3600*24*365 (year to seconds)
-
-    col 0 = reference solution
-    col 1 = predicted solution
-    col 2 = similarity
-
-    e.g. to plot only reference and predicted solution: 
-    plot_similarity(pinn, feature_name, savepath, cols=[0, 1])
+    Returns: 
+    fig, axs
+        plot of the reference, prediction, and similarity
     """
+    # setting the figure title
+    if feat_title == None:
+        if type(feature_name) == list:
+            raise TypeError('feat_title must be provided as an input string')
+        else:
+            feat_title = feature_name
+
     # initialize figure, default all 3 columns
     if len(cols) == 1:
         # subplots returns a single Axes if only 1 figure, but we need array later
@@ -270,13 +288,26 @@ def plot_similarity(pinn, feature_name, sim='MAE', cmap='jet', scale=1, cols=[0,
         sol = np.hstack((sol, X_sol[output_names[i]].flatten()[:,None]))
 
     # grab feature
-    fid = output_names.index(feature_name)
-    ref_sol = np.squeeze(sol[:, fid:fid+1]*scale)
-    pred_sol = np.squeeze(pred[:, fid:fid+1]*scale)
+    # initializing reference and prediction
+    ref_sol = np.zeros_like(np.squeeze(sol[:, 0:1]*scale))
+    pred_sol = np.zeros_like(np.squeeze(pred[:, 0:1]*scale))
+    
+    if type(feature_name) == list:
+        for feat in feature_name:
+            fid = output_names.index(feat)
+            ref_sol += (np.squeeze(sol[:, fid:fid+1]*scale))**2
+            pred_sol += (np.squeeze(pred[:, fid:fid+1]*scale))**2
+        ref_sol = np.sqrt(ref_sol)
+        pred_sol = np.sqrt(pred_sol)
+    else:
+        fid = output_names.index(feature_name)
+        ref_sol = np.squeeze(sol[:, fid:fid+1]*scale)
+        pred_sol = np.squeeze(pred[:, fid:fid+1]*scale)
+    
     [cmin, cmax] = [np.min(np.append(ref_sol, pred_sol)), np.max(np.append(ref_sol, pred_sol))]
     levels = np.linspace(cmin*0.9, cmax*1.1, 500)
     data_list = [ref_sol, pred_sol]
-    title_list = [ feature_name + r"$_{ref}$", feature_name + r"$_{pred}$"]
+    title_list = [ feat_title + r"$_{ref}$", feat_title + r"$_{pred}$"]
 
     # plotting 
     for c, col in enumerate(cols):
@@ -284,25 +315,25 @@ def plot_similarity(pinn, feature_name, sim='MAE', cmap='jet', scale=1, cols=[0,
             if sim.upper() == 'MAE':
                 diff = np.abs(ref_sol-pred_sol)
                 diff_val = np.round(np.mean(diff), 2)
-                title = r"|"+feature_name+r"$_{ref} - $"+feature_name+r"$_{pred}$|, MAE="+str(diff_val)
+                title = r"|"+feat_title+r"$_{ref} - $"+feat_title+r"$_{pred}$|, MAE="+str(diff_val)
             elif sim.upper() == 'MSE':
                 diff = (ref_sol-pred_sol)**2
                 diff_val = np.round(np.mean(diff), 2)
-                title = r"$($"+feature_name+r"$_{ref} - $"+feature_name+r"$_{pred})^2$, MSE="+str(diff_val)
+                title = r"$($"+feat_title+r"$_{ref} - $"+feat_title+r"$_{pred})^2$, MSE="+str(diff_val)
             elif sim.upper() == 'RMSE':
                 diff = (ref_sol-pred_sol)**2
                 diff_val = np.round(np.sqrt(np.mean(diff)), 2)
                 diff = np.sqrt(diff)
-                title = r"$(($"+feature_name+r"$_{ref} - $"+feature_name+r"$_{pred})^2)^{1/2}$, RMSE="+str(diff_val)
+                title = r"$(($"+feat_title+r"$_{ref} - $"+feat_title+r"$_{pred})^2)^{1/2}$, RMSE="+str(diff_val)
             elif sim.upper() == 'SIMPLE':
                 diff = ref_sol-pred_sol
                 diff_val = np.round(np.mean(diff), 2)
-                title = feature_name+r"$_{ref} - $"+feature_name+r"$_{pred}$, AVG. DIFF="+str(diff_val)
+                title = feat_title+r"$_{ref} - $"+feat_title+r"$_{pred}$, AVG. DIFF="+str(diff_val)
             else:
                 print('Default similarity MAE implemented.')
                 diff = np.abs(ref_sol-pred_sol)
                 diff_val = np.round(np.mean(diff), 2)
-                title = r"|"+feature_name+r"$_{ref} - $"+feature_name+r"$_{pred}$|, MAE="+str(diff_val)
+                title = r"|"+feat_title+r"$_{ref} - $"+feat_title+r"$_{pred}$|, MAE="+str(diff_val)
             
             levels = np.linspace(np.min(diff)*0.9, np.max(diff)*1.1, 500)
             data = np.squeeze(diff)
