@@ -210,6 +210,10 @@ class NNParameter(ParameterBase):
         super().set_parameters(pdict)
         self.input_size = len(self.input_variables)
         self.output_size = len(self.output_variables)
+        # num_eurons is list 
+        if isinstance(self.num_neurons, list):
+            self.num_layers = len(self.num_neurons)
+
 
 
 class PhysicsParameter(ParameterBase):
