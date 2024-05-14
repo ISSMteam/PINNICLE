@@ -34,7 +34,7 @@ hp["is_save"] = False
 hp["activation"] = "tanh"
 hp["initializer"] = "Glorot uniform"
 hp["num_neurons"] = 10
-hp["num_layers"] = 6
+hp["num_layers"] = 4
 
 # data
 issm = {}
@@ -99,7 +99,32 @@ def test_save_and_load_setting(tmp_path):
     experiment2 = pinn.PINN(loadFrom=tmp_path)
     assert experiment.params.param_dict == experiment2.params.param_dict
 
-#def test_train(tmp_path):
+def test_train(tmp_path):
+    hp["is_save"] = False
+    hp["num_collocation_points"] = 100
+    issm["data_size"] = {"u":100, "v":100, "s":100, "H":100, "C":None, "vel":100}
+    hp["data"] = {"ISSM": issm}
+    experiment = pinn.PINN(params=hp)
+    experiment.compile()
+    experiment.train()
+    assert experiment.loss_names == ['fSSA1', 'fSSA2', 'u', 'v', 's', 'H', 'C', "vel log"]
+
+def test_train_PFNN(tmp_path):
+    hp["is_parallel"] = True
+    hp["is_save"] = False
+    hp["num_collocation_points"] = 100
+    issm["data_size"] = {"u":100, "v":100, "s":100, "H":100, "C":None, "vel":100}
+    hp["num_neurons"] = [4,10];
+    hp["data"] = {"ISSM": issm}
+    experiment = pinn.PINN(params=hp)
+    experiment.compile()
+    experiment.train()
+    assert experiment.loss_names == ['fSSA1', 'fSSA2', 'u', 'v', 's', 'H', 'C', "vel log"]
+    assert experiment.params.nn.num_layers == 2
+    assert len(experiment.model.net.layers) == 5*(2+1)
+    assert len(experiment.model.net.trainable_weights) == 30
+
+#def test_save_train(tmp_path):
 #    hp["save_path"] = str(tmp_path)
 #    hp["is_save"] = True
 #    hp["num_collocation_points"] = 100
@@ -143,7 +168,6 @@ def test_only_callbacks(tmp_path):
     callbacks = experiment.update_callbacks()
     assert callbacks is not None
     assert len(callbacks) == 3
-
 
 def test_plot(tmp_path):
     hp["save_path"] = str(tmp_path)

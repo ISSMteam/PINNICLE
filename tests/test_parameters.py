@@ -59,7 +59,9 @@ def test_nn_parameter():
     d.output_lb = 1
     d.output_ub = 10
     assert d.is_output_scaling()
-
+    d = NNParameter({"num_neurons":[1,2,3]})
+    assert d.num_layers == 3
+    
 def test_parameters():
     p = Parameters()
     domain = DomainParameter()
