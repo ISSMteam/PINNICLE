@@ -114,12 +114,15 @@ def test_train_PFNN(tmp_path):
     hp["is_save"] = False
     hp["num_collocation_points"] = 100
     issm["data_size"] = {"u":100, "v":100, "s":100, "H":100, "C":None, "vel":100}
+    hp["num_neurons"] = [4,10];
     hp["data"] = {"ISSM": issm}
     experiment = pinn.PINN(params=hp)
     experiment.compile()
     experiment.train()
     assert experiment.loss_names == ['fSSA1', 'fSSA2', 'u', 'v', 's', 'H', 'C', "vel log"]
-    assert len(experiment.model.net.trainable_weights) == 50
+    assert experiment.params.nn.num_layers == 2
+    assert len(experiment.model.net.layers) == 5*(2+1)
+    assert len(experiment.model.net.trainable_weights) == 30
 
 #def test_save_train(tmp_path):
 #    hp["save_path"] = str(tmp_path)

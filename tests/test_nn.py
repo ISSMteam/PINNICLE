@@ -54,3 +54,18 @@ def test_pfnn():
     p = pinn.nn.FNN(d)
     assert len(p.net.layers) == 18
 
+def test_pfnn_list_neuron():
+    hp={}
+    hp['input_variables'] = ['x','y']
+    hp['output_variables'] = ['u', 'v','s']
+    hp['num_neurons'] = [3,4,5]
+    hp['num_layers'] = 5
+    hp['is_parallel'] = False
+    d = NNParameter(hp)
+    p = pinn.nn.FNN(d)
+    assert len(p.net.layers) == 4
+    hp['is_parallel'] = True
+    d = NNParameter(hp)
+    p = pinn.nn.FNN(d)
+    assert len(p.net.layers) == 12
+
