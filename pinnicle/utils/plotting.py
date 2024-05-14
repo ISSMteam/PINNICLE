@@ -387,7 +387,7 @@ def plot_residuals(pinn, cmap='RdBu', cbar_bins=10, cbar_limits=[-5e3, 5e3]):
 
                 if Nr <= 1:
                     ax = axs.tricontourf(meshx, meshy, np.squeeze(op_pred), levels=levels, cmap=cmap, norm=colors.CenteredNorm())
-                    cb = plt.colorbar(ax=axs)
+                    cb = plt.colorbar(ax, ax=axs)
                     cb.ax.tick_params(labelsize=14)
                     # adjusting the number of ticks
                     colorbar_bins = ticker.MaxNLocator(nbins=cbar_bins)
