@@ -99,11 +99,27 @@ def test_save_and_load_setting(tmp_path):
     experiment2 = pinn.PINN(loadFrom=tmp_path)
     assert experiment.params.param_dict == experiment2.params.param_dict
 
+def test_train_only_data(tmp_path):
+    hp["is_parallel"] = False
+    hp["is_save"] = False
+    hp["num_collocation_points"] = 100
+    issm["data_size"] = {"u":100, "v":100, "s":100, "H":100}
+    hp["num_neurons"] = [4,10];
+    hp["data"] = {"ISSM": issm}
+    dummy = {}
+    dummy["output"] = ['v', 'H']
+    hp["equations"] = {"DUMMY":dummy}
+    experiment = pinn.PINN(params=hp)
+    experiment.compile()
+    experiment.train()
+    assert experiment.loss_names == ['v', 'H']
+
 def test_train(tmp_path):
     hp["is_save"] = False
     hp["num_collocation_points"] = 100
     issm["data_size"] = {"u":100, "v":100, "s":100, "H":100, "C":None, "vel":100}
     hp["data"] = {"ISSM": issm}
+    hp["equations"] = {"SSA":SSA}
     experiment = pinn.PINN(params=hp)
     experiment.compile()
     experiment.train()
