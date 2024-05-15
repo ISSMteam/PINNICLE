@@ -13,6 +13,8 @@ def test_Constants():
     assert phy.equations[0].rhow == 1023.0
     assert phy.equations[0].g == 9.81
     assert phy.equations[0].yts == 3600.0*24*365
+    assert phy.equations[0].variable_lb.keys() == phy.equations[0].variable_ub.keys()
+    assert all([phy.equations[0].variable_lb[k] < phy.equations[0].variable_ub[k] for k in phy.equations[0].variable_lb])
 
 def test_update_cid():
     p = SSAEquationParameter({"scalar_variables":{"B":1}})
@@ -158,4 +160,18 @@ def test_operator():
     assert phy.operator('SSA')
     assert phy.operator('ssa')
 
+def test_Physics_dummy():
+    dummy = {}
+    dummy["output"] = ['u', 's', 'C']
+    hp = {}
+    hp["equations"] = {"DUMMY":dummy}
+    phy = Physics(PhysicsParameter(hp))
 
+    assert phy.input_var == ['x', 'y']
+    assert phy.output_var == ['u', 's',  'C']
+    assert phy.residuals == []
+    assert phy.equations[0].local_output_var == {'u': 0, 's': 1, 'C': 2}
+    assert len(phy.output_lb) == 3
+    assert len(phy.output_ub) == 3
+    assert len(phy.data_weights) == 3
+    assert len(phy.pde_weights) == 0
