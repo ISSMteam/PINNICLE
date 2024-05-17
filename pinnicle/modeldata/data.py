@@ -25,6 +25,7 @@ class DataBase(ABC):
         self.X_dict = {}
         self.data_dict = {}
         self.mask_dict = {}
+        self.mesh_dict = {}
 
         # input to PINN
         self.X = None

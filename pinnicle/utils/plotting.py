@@ -410,3 +410,163 @@ def plot_residuals(pinn, cmap='RdBu', cbar_bins=10, cbar_limits=[-5e3, 5e3]):
 
     return fig, axs
 
+def tripcolor_similarity(pinn, feature_name, feat_title=None, sim='MAE', cmap='jet', scale=1, colorbar_bins=10):
+    """tripcolor similarity, plot with ISSM triangulation
+    """
+    if feat_title == None:
+        if type(feature_name)==list:
+            raise TypeError('feat_title must be provided as a str type input.')
+        else:
+            feat_title = feature_name
+
+    # initialize figure
+    fig, axs = plt.subplots(1, 3, figsize=(15, 4))
+
+    # neural network features 
+    input_names = pinn.nn.parameters.input_variables
+    output_names = pinn.nn.parameters.output_variables
+
+    # inputs
+    X_ref = pinn.model_data.data['ISSM'].X_dict
+    xref = X_ref[input_names[0]].flatten()[:,None]
+    for i in range(1, len(input_names)):
+        xref = np.hstack((xref, X_ref[input_names[i]].flatten()[:,None]))
+    meshx = np.squeeze(xref[:, 0])
+    meshy = np.squeeze(xref[:, 1])
+
+    # predictions
+    pred = pinn.model.predict(xref)
+
+    # reference solution
+    X_sol = pinn.model_data.data['ISSM'].data_dict
+    sol = X_sol[output_names[0]].flatten()[:,None]
+    for i in range(1, len(output_names)):
+        sol = np.hstack((sol, X_sol[output_names[i]].flatten()[:,None]))
+
+    # triangulation from ISSM (matlab --> python indexing)
+    elements = pinn.model_data.data['ISSM'].mesh_dict['elements']-1
+    triangles = mpl.tri.Triangulation(meshx, meshy, elements)
+
+    # grab feature
+    # initializing ref and pred
+    ref_sol = np.zeros_like(np.squeeze(sol[:, 0:1]*scale))
+    pred_sol = np.zeros_like(np.squeeze(pred[:, 0:1]*scale))
+    if type(feature_name) == list:
+        for feat in feature_name:
+            fid = output_names.index(feat)
+            ref_sol += (np.squeeze(sol[:, fid:fid+1]*scale))**2
+            pred_sol += (np.squeeze(pred[:, fid:fid+1]*scale))**2
+        ref_sol = np.sqrt(ref_sol)
+        pred_sol = np.sqrt(pred_sol)
+    else:
+        fid = output_names.index(feature_name)
+        ref_sol = np.squeeze(sol[:, fid:fid+1]*scale)
+        pred_sol = np.squeeze(pred[:, fid:fid+1]*scale)
+
+    [cmin, cmax] = [0.9*np.min(np.append(ref_sol, pred_sol)), 1.1*np.max(np.append(ref_sol, pred_sol))]
+    norm_center = (cmin+cmax)/2
+    data_list = [ref_sol, pred_sol]
+    title_list = [ feat_title + r"$_{ref}$", feat_title + r"$_{pred}$"]
+
+    # looping through the columns of the plot
+    for c in range(3):
+        if c == 2:
+            if sim.upper() == 'MAE':
+                diff = np.abs(ref_sol-pred_sol)
+                diff_val = np.round(np.mean(diff), 2)
+                title = r"|"+feat_title+r"$_{ref} - $"+feat_title+r"$_{pred}$|, MAE="+str(diff_val)
+            elif sim.upper() == 'MSE':
+                diff = (ref_sol-pred_sol)**2
+                diff_val = np.round(np.mean(diff), 2)
+                title = r"$($"+feat_title+r"$_{ref} - $"+feat_title+r"$_{pred})^2$, MSE="+str(diff_val)
+            elif sim.upper() == 'RMSE':
+                diff = (ref_sol-pred_sol)**2
+                diff_val = np.round(np.sqrt(np.mean(diff)), 2)
+                diff = np.sqrt(diff)
+                title = r"$(($"+feat_title+r"$_{ref} - $"+feat_title+r"$_{pred})^2)^{1/2}$, RMSE="+str(diff_val)
+            elif sim.upper() == 'SIMPLE':
+                diff = ref_sol-pred_sol
+                diff_val = np.round(np.mean(diff), 2)
+                title = feat_title+r"$_{ref} - $"+feat_title+r"$_{pred}$, AVG. DIFF="+str(diff_val)
+            else:
+                print('Default similarity MAE implemented.')
+                diff = np.abs(ref_sol-pred_sol)
+                diff_val = np.round(np.mean(diff), 2)
+                title = r"|"+feat_title+r"$_{ref} - $"+feat_title+r"$_{pred}$|, MAE="+str(diff_val)
+
+            diff_map = np.squeeze(diff)
+            clim = np.max([np.abs(np.min(diff)*0.9), np.abs(np.max(diff)*1.1)])
+            ax = axs[c].tripcolor(triangles, diff_map, cmap='RdBu', norm=colors.CenteredNorm(clip=[-1*clim, clim]))
+        else:
+            ax = axs[c].tripcolor(triangles, data_list[c], cmap=cmap, norm=colors.CenteredNorm(vcenter=norm_center, clip=[cmin, cmax]))
+            title = title_list[c]
+
+        # common settings
+        axs[c].set_title(title, fontsize=14)
+        cb = plt.colorbar(ax, ax=axs[c])
+        cb.ax.tick_params(labelsize=14)
+        num_bins = ticker.MaxNLocator(nbins=colorbar_bins)
+        cb.locator = num_bins
+        cb.update_ticks()
+        axs[c].axis('off')
+
+    return fig, axs
+
+def tripcolor_residuals(pinn, cmap='RdBu', colorbar_bins=10, cbar_limits=[-5e3, 5e3]):
+    """plot pde residuals with ISSM triangulation
+    """
+    input_names = pinn.nn.parameters.input_variables
+    output_names = pinn.nn.parameters.output_variables
+
+    # inputs
+    X_ref = pinn.model_data.data['ISSM'].X_dict
+    xref = X_ref[input_names[0]].flatten()[:,None]
+    for i in range(1, len(input_names)):
+        xref = np.hstack((xref, X_ref[input_names[i]].flatten()[:,None]))
+    meshx = np.squeeze(xref[:, 0])
+    meshy = np.squeeze(xref[:, 1])
+
+    # grabbing ISSM elements/triangles
+    elements = pinn.model_data.data['ISSM'].mesh_dict['elements']-1
+    triangles = mpl.tri.Triangulation(meshx, meshy, elements)
+
+    Nr = len(pinn.physics.residuals)
+    fig, axs = plt.subplots(1, len(pinn.physics.residuals), figsize=(5*Nr, 4))
+
+    pde_dict = {} # counting the number of residuals per pde
+    for i in pinn.params.physics.equations.keys():
+        pde_dict[i] = 0
+
+    for r in range(Nr):
+        # looping through the equations keys
+        for p in pinn.params.physics.equations.keys():
+            if p in pinn.physics.residuals[r]:
+                pde_dict[p] += 1
+                pde_pred = pinn.model.predict(xref, operator=pinn.physics.operator(p))
+
+                op_pred = pde_pred[pde_dict[p]-1]
+                if Nr <= 1:
+                    ax = axs.tripcolor(triangles, np.squeeze(op_pred), cmap=cmap, norm=colors.CenteredNorm(clip=[cbar_limits[0], cbar_limits[-1]]))
+                    cb = plt.colorbar(ax, ax=axs)
+                    cb.ax.tick_params(labelsize=14)
+                    # adjusting the number of ticks
+                    num_bins = ticker.MaxNLocator(nbins=colorbar_bins)
+                    cb.locator = num_bins
+                    cb.update_ticks()
+                    # setting the title
+                    axs.set_title(str(pinn.physics.residuals[r]), fontsize=14)
+                    axs.axis('off')
+                else:
+                    ax = axs[r].tripcolor(triangles, np.squeeze(op_pred), cmap=cmap, norm=colors.CenteredNorm(clip=[cbar_limits[0], cbar_limits[-1]]))
+                    cb = plt.colorbar(ax, ax=axs[r])
+                    cb.ax.tick_params(labelsize=14)
+                    # adjusting the number of ticks
+                    num_bins = ticker.MaxNLocator(nbins=colorbar_bins)
+                    cb.locator = num_bins
+                    cb.update_ticks()
+                    # title
+                    axs[r].set_title(str(pinn.physics.residuals[r]), fontsize=14)
+                    axs[r].axis('off')
+
+    return fig, axs
+
