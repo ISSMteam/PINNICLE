@@ -47,3 +47,24 @@ Documentation = "https://pinnicle.readthedocs.io"
 [tool.setuptools.packages.find]
 where = ["."]
 exclude = ["DATA", "Models", "docs*", "examples*"]
+
+
+[tool.coverage.report]
+# Regexes for lines to exclude from consideration
+exclude_also = [
+    # Don't complain about missing debug-only code:
+    "def __repr__",
+    "if self\\.debug",
+
+    # Don't complain if tests don't hit defensive assertion code:
+    "raise AssertionError",
+    "raise NotImplementedError",
+
+    # Don't complain about abstract methods, they aren't run:
+    "@(abc\\.)?abstractmethod",
+
+	 # Don't complain pytest.mark.skip:
+	 "@pytest.mark.skip",
+    ]
+
+ignore_errors = true

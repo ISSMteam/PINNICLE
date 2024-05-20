@@ -99,6 +99,15 @@ def test_save_and_load_setting(tmp_path):
     experiment2 = pinn.PINN(loadFrom=tmp_path)
     assert experiment.params.param_dict == experiment2.params.param_dict
 
+def test_update_parameters():
+    experiment = pinn.PINN(params=hp)
+    experiment.update_parameters({})
+    assert experiment.params.param_dict == hp
+    experiment.update_parameters({"add_param": 1})
+    assert experiment.params.param_dict["add_param"] == 1
+    experiment.update_parameters({"add_param": 2})
+    assert experiment.params.param_dict["add_param"] == 2
+
 def test_train_only_data(tmp_path):
     hp["is_parallel"] = False
     hp["is_save"] = False
@@ -140,35 +149,37 @@ def test_train_PFNN(tmp_path):
     assert len(experiment.model.net.layers) == 5*(2+1)
     assert len(experiment.model.net.trainable_weights) == 30
 
-#def test_save_train(tmp_path):
-#    hp["save_path"] = str(tmp_path)
-#    hp["is_save"] = True
-#    hp["num_collocation_points"] = 100
-#    issm["data_size"] = {"u":100, "v":100, "s":100, "H":100, "C":None, "vel":100}
-#    hp["data"] = {"ISSM": issm}
-#    experiment = pinn.PINN(params=hp)
-#    experiment.compile()
-#    experiment.train()
-#    assert experiment.loss_names == ['fSSA1', 'fSSA2', 'u', 'v', 's', 'H', 'C', "vel log"]
-#    assert os.path.isfile(f"{tmp_path}/pinn/model-{hp['epochs']}.ckpt.index")
-#
-#def test_train_with_callbacks(tmp_path):
-#    hp["save_path"] = str(tmp_path)
-#    hp["is_save"] = True
-#    hp["num_collocation_points"] = 100
-#    issm["data_size"] = {"u":100, "v":100, "s":100, "H":100, "C":None, "vel":100}
-#    hp["data"] = {"ISSM": issm}
-#    hp["min_delta"] = 1e10
-#    hp["period"] = 5
-#    hp["patience"] = 8
-#    hp["checkpoint"] = True
-#    experiment = pinn.PINN(params=hp)
-#    experiment.compile()
-#    experiment.train()
-#    assert experiment.loss_names == ['fSSA1', 'fSSA2', 'u', 'v', 's', 'H', 'C', "vel log"]
-#    assert os.path.isfile(f"{tmp_path}/pinn/model-1.ckpt.index")
-#    assert os.path.isfile(f"{tmp_path}/pinn/model-9.ckpt.index")
-#    assert not os.path.isfile(f"{tmp_path}/pinn/model-{hp['epochs']}.ckpt.index")
+@pytest.mark.skip(reason="[tf] change to h5 format")
+def test_save_train(tmp_path):
+    hp["save_path"] = str(tmp_path)
+    hp["is_save"] = True
+    hp["num_collocation_points"] = 100
+    issm["data_size"] = {"u":100, "v":100, "s":100, "H":100, "C":None, "vel":100}
+    hp["data"] = {"ISSM": issm}
+    experiment = pinn.PINN(params=hp)
+    experiment.compile()
+    experiment.train()
+    assert experiment.loss_names == ['fSSA1', 'fSSA2', 'u', 'v', 's', 'H', 'C', "vel log"]
+    assert os.path.isfile(f"{tmp_path}/pinn/model-{hp['epochs']}.ckpt.index")
+
+@pytest.mark.skip(reason="[tf] change to h5 format")
+def test_train_with_callbacks(tmp_path):
+    hp["save_path"] = str(tmp_path)
+    hp["is_save"] = True
+    hp["num_collocation_points"] = 100
+    issm["data_size"] = {"u":100, "v":100, "s":100, "H":100, "C":None, "vel":100}
+    hp["data"] = {"ISSM": issm}
+    hp["min_delta"] = 1e10
+    hp["period"] = 5
+    hp["patience"] = 8
+    hp["checkpoint"] = True
+    experiment = pinn.PINN(params=hp)
+    experiment.compile()
+    experiment.train()
+    assert experiment.loss_names == ['fSSA1', 'fSSA2', 'u', 'v', 's', 'H', 'C', "vel log"]
+    assert os.path.isfile(f"{tmp_path}/pinn/model-1.ckpt.index")
+    assert os.path.isfile(f"{tmp_path}/pinn/model-9.ckpt.index")
+    assert not os.path.isfile(f"{tmp_path}/pinn/model-{hp['epochs']}.ckpt.index")
 
 def test_only_callbacks(tmp_path):
     hp["save_path"] = str(tmp_path)
