@@ -210,7 +210,7 @@ def test_plot(tmp_path):
                        experiment.model_data.data["ISSM"].X_dict['y'].flatten()[:,None]))
     assert experiment.plot_predictions(X_ref=X_ref, 
                                        sol_ref=experiment.model_data.data["ISSM"].data_dict, 
-                                       resolution=10) is None
+                                       resolution=10, absvariable=['C']) is None
     X, Y, im_data, axs = plot_nn(experiment, experiment.model_data.data["ISSM"].data_dict, resolution=10);
     assert X.shape == (10,10)
     assert Y.shape == (10,10)
