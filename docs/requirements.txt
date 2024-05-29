@@ -3,7 +3,7 @@ mat73
 matplotlib
 numpy
 pandas
-scikit-learn
+scikit-learn==1.4.2
 scipy
 
 # TensorFlow 1.x
