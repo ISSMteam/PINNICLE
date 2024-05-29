@@ -83,7 +83,7 @@ We add physics, SSA, to the PINN by:
    hp["equations"] = {"SSA":SSA}
 
 
-There are several default setting in `SSAEquationParameter <https://pinnicle.readthedocs.io/en/add_example/_modules/pinnicle/physics/stressbalance.html#SSAEquationParameter.set_default>`_ such as:
+There are several default setting in `SSAEquationParameter <https://pinnicle.readthedocs.io/en/latest/api/pinnicle.physics.html#pinnicle.physics.stressbalance.SSAEquationParameter>`_ such as:
 
 .. code-block:: python
 

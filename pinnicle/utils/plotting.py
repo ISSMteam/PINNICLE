@@ -2,6 +2,7 @@ import numpy as np
 import math
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
+import matplotlib.ticker as ticker
 import matplotlib as mpl
 from matplotlib.colors import ListedColormap
 from scipy.interpolate import griddata
@@ -18,7 +19,7 @@ def cmap_Rignot():
     cmap = ListedColormap(cmap)
     return cmap
 
-def plot_solutions(pinn, path="", X_ref=None, sol_ref=None, cols=None, resolution=200, **kwargs):
+def plot_solutions(pinn, path="", X_ref=None, sol_ref=None, cols=None, resolution=200, absvariable=[], **kwargs):
     """ plot model predictions
 
     Args:
@@ -27,6 +28,7 @@ def plot_solutions(pinn, path="", X_ref=None, sol_ref=None, cols=None, resolutio
         u_ref (dict): Reference solutions, if None, then just plot the predicted solutions
         cols (int): Number of columns of subplot
         resolution (int): Number of grid points per row/column for plotting
+        absvariable (list): Names of variables in the predictions that will need to take abs() before comparison
     """
     # generate Cartisian grid of X, Y
     # currently only work on 2D
@@ -43,6 +45,9 @@ def plot_solutions(pinn, path="", X_ref=None, sol_ref=None, cols=None, resolutio
         sol_pred = pinn.model.predict(X_nn)
         plot_data = {k+"_pred":np.reshape(sol_pred[:,i:i+1], X.shape) for i,k in enumerate(pinn.params.nn.output_variables)}
         vranges = {k+"_pred":[pinn.params.nn.output_lb[i], pinn.params.nn.output_ub[i]] for i,k in enumerate(pinn.params.nn.output_variables)}
+        # take abs
+        for k in absvariable:
+            plot_data[k+"_pred"] = np.abs( plot_data[k+"_pred"])
 
         # if ref solution is provided
         if (sol_ref is not None) and (X_ref is not None):
@@ -219,26 +224,44 @@ def plot_data(X, Y, im_data, axs=None, vranges={}, **kwargs):
         plt.colorbar(im, ax=axs[i], shrink=0.8)
     
     return axs
-
-def plot_similarity(pinn, feature_name, sim='MAE', cmap='jet', scale=1, cols=[0, 1, 2]):
+    
+def plot_similarity(pinn, feature_name, feat_title=None, sim='MAE', cmap='jet', scale=1, cols=[0, 1, 2], cbar_bins=10):
     """
-    plotting the similarity between reference and predicted 
+    plotting the similarity between reference and predicted
     solutions, mae default
 
-    Parameters
-    ----------
-    sim options: 'MAE', 'MSE', 'RMSE', 'SIMPLE' (upper or lowercase work)
+    Args:
+    pinn : pinnicle.model
+        the trained PINN model
+    feature_name : str
+        the name of a predicted feature of the PINN.
+        for the L-2 norm of two or more predictions, write as a list. e.g., ['u', 'v'].
+    feat_title : str (default=None, will be set to feature_name if None provided)
+        the name of the predicted feature in the title.
+    sim : str (default='MAE')
+        the similarity/comparison type.
+        options include: 'MAE', 'MSE', 'RMSE', 'SIMPLE'
+        (can be written as upper case or lower case) e.g., 'MSE' and 'mse' will give the same result.
+    cmap : str (default='jet', for similarity default='RdBu')
+        the matplotlib colormap name as a str.
+    scale : float (default=1)
+        the scale by which to multiply predictions (e.g., m/s * yts = m/year, then scale = yts)
+    cols : list (default=[0, 1, 2])
+        can specify which columns of the figure to extract. 0 = reference, 1 = prediction, 2 = similarity.
+    cbar_bins : int (default=10)
+        the number of bins/ticks on the c-axis.
 
-    scale : the factor by which the predicted solution must be multiplied by. 
-    e.g., to convert velocity from m/s to m/year, scale = 3600*24*365 (year to seconds)
-
-    col 0 = reference solution
-    col 1 = predicted solution
-    col 2 = similarity
-
-    e.g. to plot only reference and predicted solution: 
-    plot_similarity(pinn, feature_name, savepath, cols=[0, 1])
+    Returns:
+    fig, axs
+        plot of the reference, prediction, and similarity
     """
+    # setting the figure title
+    if feat_title == None:
+        if type(feature_name) == list:
+            raise TypeError('feat_title must be provided as an input string')
+        else:
+            feat_title = feature_name
+
     # initialize figure, default all 3 columns
     if len(cols) == 1:
         # subplots returns a single Axes if only 1 figure, but we need array later
@@ -269,40 +292,53 @@ def plot_similarity(pinn, feature_name, sim='MAE', cmap='jet', scale=1, cols=[0,
         sol = np.hstack((sol, X_sol[output_names[i]].flatten()[:,None]))
 
     # grab feature
-    fid = output_names.index(feature_name)
-    ref_sol = np.squeeze(sol[:, fid:fid+1]*scale)
-    pred_sol = np.squeeze(pred[:, fid:fid+1]*scale)
+    # initializing reference and prediction
+    ref_sol = np.zeros_like(np.squeeze(sol[:, 0:1]*scale))
+    pred_sol = np.zeros_like(np.squeeze(pred[:, 0:1]*scale))
+
+    if type(feature_name) == list:
+        for feat in feature_name:
+            fid = output_names.index(feat)
+            ref_sol += (np.squeeze(sol[:, fid:fid+1]*scale))**2
+            pred_sol += (np.squeeze(pred[:, fid:fid+1]*scale))**2
+        ref_sol = np.sqrt(ref_sol)
+        pred_sol = np.sqrt(pred_sol)
+    else:
+        fid = output_names.index(feature_name)
+        ref_sol = np.squeeze(sol[:, fid:fid+1]*scale)
+        pred_sol = np.squeeze(pred[:, fid:fid+1]*scale)
+
     [cmin, cmax] = [np.min(np.append(ref_sol, pred_sol)), np.max(np.append(ref_sol, pred_sol))]
     levels = np.linspace(cmin*0.9, cmax*1.1, 500)
     data_list = [ref_sol, pred_sol]
-    title_list = [ feature_name + r"$_{ref}$", feature_name + r"$_{pred}$"]
+    title_list = [ feat_title + r"$_{ref}$", feat_title + r"$_{pred}$"]
 
-    # plotting 
+    # plotting
     for c, col in enumerate(cols):
         if col == 2:
             if sim.upper() == 'MAE':
                 diff = np.abs(ref_sol-pred_sol)
                 diff_val = np.round(np.mean(diff), 2)
-                title = r"|"+feature_name+r"$_{ref} - $"+feature_name+r"$_{pred}$|, MAE="+str(diff_val)
+                title = r"|"+feat_title+r"$_{ref} - $"+feat_title+r"$_{pred}$|, MAE="+str(diff_val)
             elif sim.upper() == 'MSE':
                 diff = (ref_sol-pred_sol)**2
                 diff_val = np.round(np.mean(diff), 2)
-                title = r"$($"+feature_name+r"$_{ref} - $"+feature_name+r"$_{pred})^2$, MSE="+str(diff_val)
+                title = r"$($"+feat_title+r"$_{ref} - $"+feat_title+r"$_{pred})^2$, MSE="+str(diff_val)
             elif sim.upper() == 'RMSE':
                 diff = (ref_sol-pred_sol)**2
                 diff_val = np.round(np.sqrt(np.mean(diff)), 2)
                 diff = np.sqrt(diff)
-                title = r"$(($"+feature_name+r"$_{ref} - $"+feature_name+r"$_{pred})^2)^{1/2}$, RMSE="+str(diff_val)
+                title = r"$(($"+feat_title+r"$_{ref} - $"+feat_title+r"$_{pred})^2)^{1/2}$, RMSE="+str(diff_val)
             elif sim.upper() == 'SIMPLE':
                 diff = ref_sol-pred_sol
                 diff_val = np.round(np.mean(diff), 2)
-                title = feature_name+r"$_{ref} - $"+feature_name+r"$_{pred}$, AVG. DIFF="+str(diff_val)
+                title = feat_title+r"$_{ref} - $"+feat_title+r"$_{pred}$, AVG. DIFF="+str(diff_val)
             else:
                 print('Default similarity MAE implemented.')
                 diff = np.abs(ref_sol-pred_sol)
                 diff_val = np.round(np.mean(diff), 2)
-                title = r"|"+feature_name+r"$_{ref} - $"+feature_name+r"$_{pred}$|, MAE="+str(diff_val)
-            
+                title = r"|"+feat_title+r"$_{ref} - $"+feat_title+r"$_{pred}$|, MAE="+str(diff_val)
+
             levels = np.linspace(np.min(diff)*0.9, np.max(diff)*1.1, 500)
             data = np.squeeze(diff)
             ax = axs[c].tricontourf(meshx, meshy, data, levels=levels, cmap='RdBu', norm=colors.CenteredNorm())
@@ -314,7 +350,67 @@ def plot_similarity(pinn, feature_name, sim='MAE', cmap='jet', scale=1, cols=[0,
         axs[c].set_title(title, fontsize=14)
         cb = plt.colorbar(ax, ax=axs[c])
         cb.ax.tick_params(labelsize=14)
+        colorbar_bins = ticker.MaxNLocator(nbins=cbar_bins)
+        cb.locator = colorbar_bins
+        cb.update_ticks()
         axs[c].axis('off')
 
     # save figure to path as defined
     return fig, axs
+
+def plot_residuals(pinn, cmap='RdBu', cbar_bins=10, cbar_limits=[-5e3, 5e3]):
+    """plotting the pde residuals
+    """
+    input_names = pinn.nn.parameters.input_variables
+    output_names = pinn.nn.parameters.output_variables
+
+    # inputs
+    X_ref = pinn.model_data.data['ISSM'].X_dict
+    xref = X_ref[input_names[0]].flatten()[:,None]
+    for i in range(1, len(input_names)):
+        xref = np.hstack((xref, X_ref[input_names[i]].flatten()[:,None]))
+    meshx = np.squeeze(xref[:, 0])
+    meshy = np.squeeze(xref[:, 1])
+    
+    Nr = len(pinn.physics.residuals)
+    fig, axs = plt.subplots(1, len(pinn.physics.residuals), figsize=(5*Nr, 4))
+    levels = np.linspace(cbar_limits[0], cbar_limits[-1], 500)
+    # counting the pde residuals
+    pde_dict = {} # counting the number of residuals per pde
+    for i in pinn.params.physics.equations.keys():
+        pde_dict[i] = 0
+
+    for r in range(Nr):
+        # looping through the equation keys
+        for p in pinn.params.physics.equations.keys():
+            # check if the equation key is in the residual name
+            if p in pinn.physics.residuals[r]:
+                pde_dict[p] += 1
+                pde_pred = pinn.model.predict(xref, operator=pinn.physics.operator(p))
+                op_pred = pde_pred[pde_dict[p]-1] # operator predicton
+
+                if Nr <= 1:
+                    ax = axs.tricontourf(meshx, meshy, np.squeeze(op_pred), levels=levels, cmap=cmap, norm=colors.CenteredNorm())
+                    cb = plt.colorbar(ax=axs)
+                    cb.ax.tick_params(labelsize=14)
+                    # adjusting the number of ticks
+                    colorbar_bins = ticker.MaxNLocator(nbins=cbar_bins)
+                    cb.locator = colorbar_bins
+                    cb.update_ticks()
+                    # setting the title
+                    axs.set_title(str(pinn.physics.residuals[r]), fontsize=14)
+                    axs.axis('off')
+                else:
+                    ax = axs[r].tricontourf(meshx, meshy, np.squeeze(op_pred), levels=levels, cmap=cmap, norm=colors.CenteredNorm())
+                    cb = plt.colorbar(ax, ax=axs[r])
+                    cb.ax.tick_params(labelsize=14)
+                    # adjusting the number of ticks
+                    colorbar_bins = ticker.MaxNLocator(nbins=cbar_bins)
+                    cb.locator = colorbar_bins
+                    cb.update_ticks()
+                    # title
+                    axs[r].set_title(str(pinn.physics.residuals[r]), fontsize=14)
+                    axs[r].axis('off')
+
+    return fig, axs
+

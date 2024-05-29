@@ -14,49 +14,14 @@ class PINN:
     """ a basic PINN model
     """
     def __init__(self, params={}, loadFrom=""):
-        # Step 1: load setup parameters
+        # load setup parameters
         if os.path.exists(loadFrom):
             # overwrite params with saved params.json file
             params = self.load_setting(path=loadFrom)
         self.params = Parameters(params)
 
-        # Step 2: set physics, all the rest steps depend on what pdes are included in the model
-        self.physics = Physics(self.params.physics)
-        # assign default physic.input_var, output_var, outout_lb, and output_ub to nn
-        self._update_nn_parameters()
-
-        # Step 3: load all avaliable data on the given domain and set up for training data
-        # domain of the model
-        self.domain = Domain(self.params.domain)
-        # create an instance of Data
-        #self.model_data = DataBase.create(self.params.data.source, parameters=self.params.data)
-        self.model_data = Data(self.params.data)
-        # load from data file
-        self.model_data.load_data()
-        # update according to the setup: data_size
-        self.model_data.prepare_training_data()
-
-        # Step 4: update training data
-        self.training_data, self.loss_names, self.params.training.loss_weights, self.params.training.loss_functions = self.update_training_data(self.model_data)
-
-        # Step 5: set up deepxde training data object using PDE + data
-        #  deepxde data object
-        self.dde_data = dde.data.PDE(
-                self.domain.geometry,
-                self.physics.pdes,
-                self.training_data,  # all the data loss will be evaluated
-                num_domain=self.params.domain.num_collocation_points, # collocation points
-                num_boundary=0,  # no need to set for data misfit, unless add calving front boundary, etc.
-                num_test=None)
-
-        # Step 6: set up neural networks
-        # automate the input scaling according to the domain, this step need to be done before setting up NN
-        self._update_ub_lb_in_nn(self.model_data)
-        # define the neural network in use
-        self.nn = FNN(self.params.nn)
-
-        # Step 7: setup the deepxde PINN model
-        self.model = dde.Model(self.dde_data, self.nn.net)
+        # set up the model according to self.params
+        self.setup()
 
     def check_path(self, path, loadOnly=False):
         """check the path, set to default, and create folder if needed
@@ -140,6 +105,47 @@ class PINN:
         path = self.check_path(path)
         save_dict_to_json(self.params.param_dict, path, "params.json")
     
+    def setup(self):
+        """ setup the model according to `self.params` from the constructor
+        """
+        # Step 2: set physics, all the rest steps depend on what pdes are included in the model
+        self.physics = Physics(self.params.physics)
+        # assign default physic.input_var, output_var, outout_lb, and output_ub to nn
+        self._update_nn_parameters()
+
+        # Step 3: load all avaliable data on the given domain and set up for training data
+        # domain of the model
+        self.domain = Domain(self.params.domain)
+        # create an instance of Data
+        #self.model_data = DataBase.create(self.params.data.source, parameters=self.params.data)
+        self.model_data = Data(self.params.data)
+        # load from data file
+        self.model_data.load_data()
+        # update according to the setup: data_size
+        self.model_data.prepare_training_data()
+
+        # Step 4: update training data
+        self.training_data, self.loss_names, self.params.training.loss_weights, self.params.training.loss_functions = self.update_training_data(self.model_data)
+
+        # Step 5: set up deepxde training data object using PDE + data
+        #  deepxde data object
+        self.dde_data = dde.data.PDE(
+                self.domain.geometry,
+                self.physics.pdes,
+                self.training_data,  # all the data loss will be evaluated
+                num_domain=self.params.domain.num_collocation_points, # collocation points
+                num_boundary=0,  # no need to set for data misfit, unless add calving front boundary, etc.
+                num_test=None)
+
+        # Step 6: set up neural networks
+        # automate the input scaling according to the domain, this step need to be done before setting up NN
+        self._update_ub_lb_in_nn(self.model_data)
+        # define the neural network in use
+        self.nn = FNN(self.params.nn)
+
+        # Step 7: setup the deepxde PINN model
+        self.model = dde.Model(self.dde_data, self.nn.net)
+
     def train(self, iterations=0):
         """ train the model
         """
@@ -238,6 +244,18 @@ class PINN:
 
         return training_temp, loss_names, loss_weights, loss_functions
 
+    def update_parameters(self, params):
+        """ update self.params according to the input params. If key already exists, update the value; if not, add the pair
+        """
+        # update self.params.param_dict from params
+        self.params.param_dict.update(params)
+
+        # call the constructor
+        self.params = Parameters(self.params.param_dict)
+
+        # setup the model
+        self.setup()
+        
     def _update_nn_parameters(self):
         """ assign physic.input_var, output_var, output_lb, and output_ub to nn
         """

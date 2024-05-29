@@ -10,7 +10,10 @@ class FNN:
         self.parameters = parameters
 
         # create new NN
-        self.net = self.createFNN()
+        if self.parameters.is_parallel:
+            self.net = self.createPFNN()
+        else:
+            self.net = self.createFNN()
 
         # apply transform
         # by default, use min-max scale for the input
@@ -27,8 +30,32 @@ class FNN:
         """
         create a fully connected neural network
         """
-        layer_size = [self.parameters.input_size] + [self.parameters.num_neurons] * self.parameters.num_layers + [self.parameters.output_size]
+        if isinstance(self.parameters.num_neurons, list):
+            # directly use the given list of num_neurons
+            layer_size = [self.parameters.input_size] + \
+                        self.parameters.num_neurons + \
+                        [self.parameters.output_size]
+        else:
+            # repeat num_layers times
+            layer_size = [self.parameters.input_size] + \
+                        [self.parameters.num_neurons] * self.parameters.num_layers + \
+                        [self.parameters.output_size]
+
         return dde.nn.FNN(layer_size, self.parameters.activation, self.parameters.initializer)
+
+    def createPFNN(self):
+        """
+        create a parallel fully connected neural network
+        """
+        if isinstance(self.parameters.num_neurons, list):
+            layer_size = [self.parameters.input_size] + \
+                        [[n]*self.parameters.output_size for n in self.parameters.num_neurons] + \
+                        [self.parameters.output_size]
+        else:
+            layer_size = [self.parameters.input_size] + \
+                        [[self.parameters.num_neurons]*self.parameters.output_size] * self.parameters.num_layers + \
+                        [self.parameters.output_size]
+        return dde.nn.PFNN(layer_size, self.parameters.activation, self.parameters.initializer)
         
     def _add_input_transform(self, func):
         """
