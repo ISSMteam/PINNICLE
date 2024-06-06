@@ -47,7 +47,7 @@ User guide
 .. toctree::
    :maxdepth: 1
 
-   pinn_examples
+   pinnicle_examples
 
 
 API reference

@@ -18,7 +18,7 @@ In the future, PINNICLE will support the following backends:
 
 - To install and use the package, you should clone the folder to your local machine and put it along with your project scripts::
 
-    $ git clone https://github.com/enigne/PINNICLE.git
+    $ git clone https://github.com/ISSMteam/PINNICLE.git
 
 * Other dependencies
 
