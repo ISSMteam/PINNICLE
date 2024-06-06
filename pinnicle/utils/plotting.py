@@ -19,7 +19,7 @@ def cmap_Rignot():
     cmap = ListedColormap(cmap)
     return cmap
 
-def plot_solutions(pinn, path="", X_ref=None, sol_ref=None, cols=None, resolution=200, **kwargs):
+def plot_solutions(pinn, path="", X_ref=None, sol_ref=None, cols=None, resolution=200, absvariable=[], **kwargs):
     """ plot model predictions
 
     Args:
@@ -28,6 +28,7 @@ def plot_solutions(pinn, path="", X_ref=None, sol_ref=None, cols=None, resolutio
         u_ref (dict): Reference solutions, if None, then just plot the predicted solutions
         cols (int): Number of columns of subplot
         resolution (int): Number of grid points per row/column for plotting
+        absvariable (list): Names of variables in the predictions that will need to take abs() before comparison
     """
     # generate Cartisian grid of X, Y
     # currently only work on 2D
@@ -44,6 +45,9 @@ def plot_solutions(pinn, path="", X_ref=None, sol_ref=None, cols=None, resolutio
         sol_pred = pinn.model.predict(X_nn)
         plot_data = {k+"_pred":np.reshape(sol_pred[:,i:i+1], X.shape) for i,k in enumerate(pinn.params.nn.output_variables)}
         vranges = {k+"_pred":[pinn.params.nn.output_lb[i], pinn.params.nn.output_ub[i]] for i,k in enumerate(pinn.params.nn.output_variables)}
+        # take abs
+        for k in absvariable:
+            plot_data[k+"_pred"] = np.abs( plot_data[k+"_pred"])
 
         # if ref solution is provided
         if (sol_ref is not None) and (X_ref is not None):
