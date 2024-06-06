@@ -341,14 +341,14 @@ def plot_similarity(pinn, feature_name, feat_title=None, sim='MAE', cmap='jet', 
 
             levels = np.linspace(np.min(diff)*0.9, np.max(diff)*1.1, 500)
             data = np.squeeze(diff)
-            ax = axs[c].tricontourf(meshx, meshy, data, levels=levels, cmap='RdBu', norm=colors.CenteredNorm())
+            axes = axs[c].tricontourf(meshx, meshy, data, levels=levels, cmap='RdBu', norm=colors.CenteredNorm())
         else:
-            ax = axs[c].tricontourf(meshx, meshy, data_list[col], levels=levels, cmap=cmap)
+            axes = axs[c].tricontourf(meshx, meshy, data_list[col], levels=levels, cmap=cmap)
             title = title_list[col]
 
         # common settings
         axs[c].set_title(title, fontsize=14)
-        cb = plt.colorbar(ax, ax=axs[c])
+        cb = plt.colorbar(axes, ax=axs[c])
         cb.ax.tick_params(labelsize=14)
         colorbar_bins = ticker.MaxNLocator(nbins=cbar_bins)
         cb.locator = colorbar_bins
@@ -390,8 +390,8 @@ def plot_residuals(pinn, cmap='RdBu', cbar_bins=10, cbar_limits=[-5e3, 5e3]):
                 op_pred = pde_pred[pde_dict[p]-1] # operator predicton
 
                 if Nr <= 1:
-                    ax = axs.tricontourf(meshx, meshy, np.squeeze(op_pred), levels=levels, cmap=cmap, norm=colors.CenteredNorm())
-                    cb = plt.colorbar(ax, ax=axs)
+                    axes = axs.tricontourf(meshx, meshy, np.squeeze(op_pred), levels=levels, cmap=cmap, norm=colors.CenteredNorm())
+                    cb = plt.colorbar(axes, ax=axs)
                     cb.ax.tick_params(labelsize=14)
                     # adjusting the number of ticks
                     colorbar_bins = ticker.MaxNLocator(nbins=cbar_bins)
@@ -401,8 +401,8 @@ def plot_residuals(pinn, cmap='RdBu', cbar_bins=10, cbar_limits=[-5e3, 5e3]):
                     axs.set_title(str(pinn.physics.residuals[r]), fontsize=14)
                     axs.axis('off')
                 else:
-                    ax = axs[r].tricontourf(meshx, meshy, np.squeeze(op_pred), levels=levels, cmap=cmap, norm=colors.CenteredNorm())
-                    cb = plt.colorbar(ax, ax=axs[r])
+                    axes = axs[r].tricontourf(meshx, meshy, np.squeeze(op_pred), levels=levels, cmap=cmap, norm=colors.CenteredNorm())
+                    cb = plt.colorbar(axes, ax=axs[r])
                     cb.ax.tick_params(labelsize=14)
                     # adjusting the number of ticks
                     colorbar_bins = ticker.MaxNLocator(nbins=cbar_bins)
@@ -500,14 +500,14 @@ def tripcolor_similarity(pinn, feature_name, feat_title=None, sim='MAE', cmap='j
 
             diff_map = np.squeeze(diff)
             clim = np.max([np.abs(np.min(diff)*0.9), np.abs(np.max(diff)*1.1)])
-            ax = axs[c].tripcolor(triangles, diff_map, cmap='RdBu', norm=colors.CenteredNorm(clip=[-1*clim, clim]))
+            axes = axs[c].tripcolor(triangles, diff_map, cmap='RdBu', norm=colors.CenteredNorm(clip=[-1*clim, clim]))
         else:
-            ax = axs[c].tripcolor(triangles, data_list[c], cmap=cmap, norm=colors.CenteredNorm(vcenter=norm_center, clip=[cmin, cmax]))
+            axes = axs[c].tripcolor(triangles, data_list[c], cmap=cmap, norm=colors.CenteredNorm(vcenter=norm_center, clip=[cmin, cmax]))
             title = title_list[c]
 
         # common settings
         axs[c].set_title(title, fontsize=14)
-        cb = plt.colorbar(ax, ax=axs[c])
+        cb = plt.colorbar(axes, ax=axs[c])
         cb.ax.tick_params(labelsize=14)
         num_bins = ticker.MaxNLocator(nbins=colorbar_bins)
         cb.locator = num_bins
@@ -550,8 +550,8 @@ def tripcolor_residuals(pinn, cmap='RdBu', colorbar_bins=10, cbar_limits=[-5e3, 
 
                 op_pred = pde_pred[pde_dict[p]-1]
                 if Nr <= 1:
-                    ax = axs.tripcolor(triangles, np.squeeze(op_pred), cmap=cmap, norm=colors.CenteredNorm(clip=[cbar_limits[0], cbar_limits[-1]]))
-                    cb = plt.colorbar(ax, ax=axs)
+                    axes = axs.tripcolor(triangles, np.squeeze(op_pred), cmap=cmap, norm=colors.CenteredNorm(clip=[cbar_limits[0], cbar_limits[-1]]))
+                    cb = plt.colorbar(axes, ax=axs)
                     cb.ax.tick_params(labelsize=14)
                     # adjusting the number of ticks
                     num_bins = ticker.MaxNLocator(nbins=colorbar_bins)
@@ -561,8 +561,8 @@ def tripcolor_residuals(pinn, cmap='RdBu', colorbar_bins=10, cbar_limits=[-5e3, 
                     axs.set_title(str(pinn.physics.residuals[r]), fontsize=14)
                     axs.axis('off')
                 else:
-                    ax = axs[r].tripcolor(triangles, np.squeeze(op_pred), cmap=cmap, norm=colors.CenteredNorm(clip=[cbar_limits[0], cbar_limits[-1]]))
-                    cb = plt.colorbar(ax, ax=axs[r])
+                    axes = axs[r].tripcolor(triangles, np.squeeze(op_pred), cmap=cmap, norm=colors.CenteredNorm(clip=[cbar_limits[0], cbar_limits[-1]]))
+                    cb = plt.colorbar(axes, ax=axs[r])
                     cb.ax.tick_params(labelsize=14)
                     # adjusting the number of ticks
                     num_bins = ticker.MaxNLocator(nbins=colorbar_bins)
