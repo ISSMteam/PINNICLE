@@ -16,17 +16,17 @@ It is possible to add additional loss functions to the total loss. Here is an ex
    vel_loss['weight'] = 1.0e-6
    hp["additional_loss"] = {"vel":vel_loss}
 
-In this example, we define a `dict` which contains:
-- `name`: A user-defined name for the loss function.
-- `function`: A function ID from `LOSS_DICT` in `deepxde.losses <https://deepxde.readthedocs.io/en/latest/_modules/deepxde/losses.html#get>`_ or `pinnicle.utils.data_misfit <https://pinnicle.readthedocs.io/en/latest/_modules/pinnicle/utils/data_misfit.html#get>`_. These lists include most commonly used loss functions, such as `"mean"`, `"MAE"`, `"MSE"`, `"MAPE"`, `"zero"`, `"VEL_LOG"`, `"MEAN_SQUARE_LOG"`, etc. Before writing your own loss function, refer to these lists, as these functions are optimized with the backends.
-- `weight`: the weight of this loss function. 
+In this example, we define a ``dict`` which contains:
+- ``name``: A user-defined name for the loss function.
+- ``function``: A function ID from ``LOSS_DICT`` in ``deepxde.losses <https://deepxde.readthedocs.io/en/latest/_modules/deepxde/losses.html#get>``_ or ``pinnicle.utils.data_misfit <https://pinnicle.readthedocs.io/en/latest/_modules/pinnicle/utils/data_misfit.html#get>``_. These lists include most commonly used loss functions, such as ``"mean"``, ``"MAE"``, ``"MSE"``, ``"MAPE"``, ``"zero"``, ``"VEL_LOG"``, ``"MEAN_SQUARE_LOG"``, etc. Before writing your own loss function, refer to these lists, as these functions are optimized with the backends.
+- ``weight``: the weight of this loss function. 
 
-Finally, add the new `dict` to `hp["additional_loss"]` with the key indicating the variable to which this loss function should be applied. In the above example, we are adding the mean absolute percentage error of the velocity magnitude to the total loss.
+Finally, add the new ``dict`` to ``hp["additional_loss"]`` with the key indicating the variable to which this loss function should be applied. In the above example, we are adding the mean absolute percentage error of the velocity magnitude to the total loss.
 
 Dummy Equations
 ---------------
 
-PINNICLE provides `Dummy <https://pinnicle.readthedocs.io/en/latest/api/pinnicle.physics.html#module-pinnicle.physics.dummy>`_ physics, which allows you to train the neural network using data only. Here is an example:
+PINNICLE provides ``Dummy <https://pinnicle.readthedocs.io/en/latest/api/pinnicle.physics.html#module-pinnicle.physics.dummy>``_ physics, which allows you to train the neural network using data only. Here is an example:
 
 .. code-block:: python
 
@@ -34,15 +34,15 @@ PINNICLE provides `Dummy <https://pinnicle.readthedocs.io/en/latest/api/pinnicle
     dummy["output"] = ['u', 's', 'C']
     hp["equations"] = {"DUMMY": dummy}
 
-In this example, we define a `dict` with a key `output`, where the value is a list of three output variables. Then, we add this `dict` to `hp['equations']` with the key `DUMMY` (all uppercase). Additionally, you need to provide the data for `u`, `s`, and `C` in the `data` section, similar to other examples. The neural network will then be trained solely with the provided data.
+In this example, we define a ``dict`` with a key ``output``, where the value is a list of three output variables. Then, we add this ``dict`` to ``hp['equations']`` with the key ``DUMMY`` (all uppercase). Additionally, you need to provide the data for ``u``, ``s``, and ``C`` in the ``data`` section, similar to other examples. The neural network will then be trained solely with the provided data.
 
-By default, the `Dummy` physics already has `x` and `y` as `input`. If there is no need to change this, only the `output` needs to be defined.
+By default, the ``Dummy`` physics already has ``x`` and ``y`` as ``input``. If there is no need to change this, only the ``output`` needs to be defined.
 
 
 Architecture of the Neural Network
 ----------------------------------
 
-PINNICLE supports both fully connected neural networks and parallel neural networks. To choose one, simply set `hp["is_parallel"]` to `False` or `True`. Currently, PINNICLE only supports parallel networks for each individual output, and all these networks are of the same size.
+PINNICLE supports both fully connected neural networks and parallel neural networks. To choose one, simply set ``hp["is_parallel"]`` to ``False`` or ``True``. Currently, PINNICLE only supports parallel networks for each individual output, and all these networks are of the same size.
 
 Another feature of the neural network architecture is that you can set the number of neurons and layers as follows:
 

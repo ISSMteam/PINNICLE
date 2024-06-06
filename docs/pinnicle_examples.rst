@@ -10,8 +10,8 @@ Basic
    :maxdepth: 1
 
    examples/ssa
-   examples/mc
-   examples/couple
+..   examples/mc 
+..   examples/couple
 
 Advanced
 --------
