@@ -2,7 +2,7 @@ import os
 import pinnicle as pinn
 import numpy as np
 import deepxde as dde
-from pinnicle.utils import data_misfit, plot_nn, plot_similarity, plot_residuals
+from pinnicle.utils import data_misfit, plot_nn, plot_similarity, plot_residuals, tripcolor_similarity, tripcolor_residuals
 import pytest
 
 dde.config.set_default_float('float64')
@@ -272,3 +272,51 @@ def test_residuals(tmp_path):
 
     fig, axs = plot_residuals(experiment)
     assert (fig is not None) and (np.size(axs)==3)
+
+def test_trisimilarity(tmp_path):
+    hp["equations"] = {"SSA":SSA}
+    hp["save_path"] = str(tmp_path)
+    hp["is_save"] = False
+    issm["data_size"] = {"u":100, "v":100, "s":100, "H":100, "C":None}
+    hp["data"] = {"ISSM": issm}
+    experiment = pinn.PINN(params=hp)
+    experiment.compile()
+    # plot_similarity(pinn, feature_name, sim='MAE', cmap='jet', scale=1, cols=[0, 1, 2])
+    # default
+    fig, axs = tripcolor_similarity(experiment, feature_name='s')
+    assert (fig is not None) and (np.size(axs) == 3)
+    fig, axs = tripcolor_similarity(experiment, feature_name='s', sim='mae')
+    assert (fig is not None) and (np.size(axs) == 3)
+    fig, axs = tripcolor_similarity(experiment, feature_name='s', sim='SIMPLE')
+    assert (fig is not None) and (np.size(axs) == 3)
+    fig, axs = tripcolor_similarity(experiment, feature_name='s', cmap='terrain')
+    assert (fig is not None) and (np.size(axs) == 3)
+    fig, axs = tripcolor_similarity(experiment, feature_name='s', sim='Rmse')
+    assert (fig is not None) and (np.size(axs) == 3)
+    fig, axs = tripcolor_similarity(experiment, feature_name='s', sim='mse')
+    assert (fig is not None) and (np.size(axs) == 3)
+    fig, axs = tripcolor_similarity(experiment, feature_name='s', colorbar_bins=5)
+    assert (fig is not None) and (np.size(axs) == 3)
+    fig, axs = tripcolor_similarity(experiment, feature_name=['u', 'v'], feat_title='vel', scale=experiment.model_data.yts)
+    assert (fig is not None) and (np.size(axs) == 3)
+    with pytest.raises(TypeError):
+        fig, axs = tripcolor_similarity(experiment, feature_name=['u', 'v'])
+
+def test_triresiduals(tmp_path):
+    hp["equations"] = {"SSA":SSA}
+    hp["save_path"] = str(tmp_path)
+    hp["is_save"] = False
+    issm["data_size"] = {"u":100, "v":100, "s":100, "H":100, "C":None}
+    hp["data"] = {"ISSM": issm}
+    experiment = pinn.PINN(params=hp)
+    experiment.compile()
+
+    fig, axs = tripcolor_residuals(experiment)
+    assert (fig is not None) and (np.size(axs)==2)
+    fig, axs = tripcolor_residuals(experiment, cmap='jet')
+    assert (fig is not None) and (np.size(axs)==2)
+    fig, axs = tripcolor_residuals(experiment, colorbar_bins=5)
+    assert (fig is not None) and (np.size(axs)==2)
+    fig, axs = tripcolor_residuals(experiment, cbar_limits=[-7e3, 7e3])
+    assert (fig is not None) and (np.size(axs)==2)
+

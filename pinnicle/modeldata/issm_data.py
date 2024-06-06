@@ -72,6 +72,11 @@ class ISSMmdData(DataBase, Constants):
         self.mask_dict['icemask'] = md['mask']['ice_levelset']
         # B.C.
         self.mask_dict['DBC_mask'] = md['mesh']['vertexonboundary']
+        # mesh information
+        self.mesh_dict['edges'] = md['mesh']['edges']
+        self.mesh_dict['elements'] = md['mesh']['elements']
+        self.mesh_dict['lat'] = md['mesh']['lat']
+        self.mesh_dict['long'] = md['mesh']['long']
 
     def plot(self, data_names=[], vranges={}, axs=None, resolution=200, **kwargs):
         """ use `utils.plot_dict_data` to plot the ISSM data
