@@ -53,7 +53,17 @@ class ISSMmdData(DataBase, Constants):
         self.data_dict['s'] = md['geometry']['surface']
         self.data_dict['a'] = (md['smb']['mass_balance'] - md['balancethickness']['thickening_rate'])/self.yts
         self.data_dict['H'] = md['geometry']['thickness']
-        self.data_dict['C'] = md['friction']['C']
+        try:
+            self.data_dict['C'] = md['friction']['C'] # Weertman
+        except: 
+            C_b = md['friction']['coefficient'] # Budd
+            rho_ice = md['materials']['rho_ice']
+            rho_w = md['materials']['rho_water']
+            g = md['constants']['g']
+            base = md['geometry']['base']
+            N = rho_ice*g*self.data_dict['H'] + rho_w*g*base
+            N[np.where(N <= 0, True, False)] = 1
+            self.data_dict['C'] = C_b*np.sqrt(N)
         self.data_dict['B'] = md['materials']['rheology_B']
         self.data_dict['vel'] = np.sqrt(self.data_dict['u']**2.0+self.data_dict['v']**2.0)
         # clean up is any of the keys are empty
