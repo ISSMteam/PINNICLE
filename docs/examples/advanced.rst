@@ -18,7 +18,7 @@ It is possible to add additional loss functions to the total loss. Here is an ex
 
 In this example, we define a ``dict`` which contains:
 - ``name``: A user-defined name for the loss function.
-- ``function``: A function ID from ``LOSS_DICT`` in ``deepxde.losses <https://deepxde.readthedocs.io/en/latest/_modules/deepxde/losses.html#get>``_ or ``pinnicle.utils.data_misfit <https://pinnicle.readthedocs.io/en/latest/_modules/pinnicle/utils/data_misfit.html#get>``_. These lists include most commonly used loss functions, such as ``"mean"``, ``"MAE"``, ``"MSE"``, ``"MAPE"``, ``"zero"``, ``"VEL_LOG"``, ``"MEAN_SQUARE_LOG"``, etc. Before writing your own loss function, refer to these lists, as these functions are optimized with the backends.
+- ``function``: A function ID from ``LOSS_DICT`` in `deepxde.losses <https://deepxde.readthedocs.io/en/latest/_modules/deepxde/losses.html#get>`_ or `pinnicle.utils.data_misfit <https://pinnicle.readthedocs.io/en/latest/_modules/pinnicle/utils/data_misfit.html#get>`_. These lists include most commonly used loss functions, such as ``"mean"``, ``"MAE"``, ``"MSE"``, ``"MAPE"``, ``"zero"``, ``"VEL_LOG"``, ``"MEAN_SQUARE_LOG"``, etc. Before writing your own loss function, refer to these lists, as these functions are optimized with the backends.
 - ``weight``: the weight of this loss function. 
 
 Finally, add the new ``dict`` to ``hp["additional_loss"]`` with the key indicating the variable to which this loss function should be applied. In the above example, we are adding the mean absolute percentage error of the velocity magnitude to the total loss.
@@ -26,7 +26,7 @@ Finally, add the new ``dict`` to ``hp["additional_loss"]`` with the key indicati
 Dummy Equations
 ---------------
 
-PINNICLE provides ``Dummy <https://pinnicle.readthedocs.io/en/latest/api/pinnicle.physics.html#module-pinnicle.physics.dummy>``_ physics, which allows you to train the neural network using data only. Here is an example:
+PINNICLE provides `Dummy <https://pinnicle.readthedocs.io/en/latest/api/pinnicle.physics.html#module-pinnicle.physics.dummy>`_ physics, which allows you to train the neural network using data only. Here is an example:
 
 .. code-block:: python
 
