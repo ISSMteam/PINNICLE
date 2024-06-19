@@ -24,7 +24,8 @@ class DummyEquationParameter(EquationParameter, Constants):
     def update(self):
         """ set all the weights to 1, and load all the lb and ub is not given
         """
-        self.data_weights = [1.0 for ou in self.output]
+        if not self.data_weights:
+            self.data_weights = [1.0 for ou in self.output]
         if not self.output_lb:
             self.output_lb = [self.variable_lb[k] for k in self.output]
         if not self.output_ub:
