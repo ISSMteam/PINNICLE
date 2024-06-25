@@ -1,7 +1,7 @@
 import pytest
 import pinnicle as pinn
 from pinnicle.parameter import DataParameter, SingleDataParameter, NNParameter, DomainParameter, PhysicsParameter, Parameters, EquationParameter, TrainingParameter
-from pinnicle.physics import SSAEquationParameter
+from pinnicle.physics import SSAEquationParameter, DummyEquationParameter
 
 yts = 3600*24*365.0
 
@@ -83,6 +83,7 @@ def test_equation_parameters():
     p = EquationParameter(SSA)
     assert p.input == SSA["input"]
     assert p.output == SSA["output"]
+    assert p.data_weights == SSA["data_weights"]
 
     p = SSAEquationParameter(SSA)
     assert p.scalar_variables['n'] == 3.0
@@ -109,6 +110,22 @@ def test_equation_parameters():
     hp['equations'] = {'NOT DEFINED': {}}
     with pytest.raises(Exception):
         p = Parameters(hp)
+
+def test_dummy_equation_parameters():
+    DUMMY = {}
+    DUMMY["input"] = ["x", "y"]
+    DUMMY["output"] = ["u", "v", "s", "H", "C"]
+    DUMMY["output_lb"] = [-1.0e4/yts, -1.0e4/yts, -1.0e3,  10.0, 0.01]
+    DUMMY["output_ub"] = [ 1.0e4/yts,  1.0e4/yts,  2.5e3, 2.0e3, 1.0e4]
+
+    p = DummyEquationParameter(DUMMY)
+    assert p.input == DUMMY["input"]
+    assert p.output == DUMMY["output"]
+    assert p.data_weights == [1.0]*5
+
+    DUMMY["data_weights"] = [1.0e-8*yts**2.0, 1.0e-8*yts**2.0, 1.0e-6, 1.0e-6, 1.0e-8]
+    p = DummyEquationParameter(DUMMY)
+    assert p.data_weights == DUMMY["data_weights"]
 
 def test_training_parameters():
     hp =  {}
