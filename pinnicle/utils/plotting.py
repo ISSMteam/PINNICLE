@@ -468,7 +468,6 @@ def tripcolor_similarity(pinn, feature_name, feat_title=None, sim='MAE', cmap='j
         pred_sol = np.squeeze(pred[:, fid:fid+1]*scale)
 
     [cmin, cmax] = [0.9*np.min(np.append(ref_sol, pred_sol)), 1.1*np.max(np.append(ref_sol, pred_sol))]
-    norm_center = (cmin+cmax)/2
     data_list = [ref_sol, pred_sol]
     title_list = [ feat_title + r"$_{ref}$", feat_title + r"$_{pred}$"]
 
@@ -500,19 +499,18 @@ def tripcolor_similarity(pinn, feature_name, feat_title=None, sim='MAE', cmap='j
 
             diff_map = np.squeeze(diff)
             clim = np.max([np.abs(np.min(diff)*0.9), np.abs(np.max(diff)*1.1)])
-            axes = axs[c].tripcolor(triangles, diff_map, cmap='RdBu', norm=colors.CenteredNorm(clip=[-1*clim, clim]))
+            axes = axs[c].tripcolor(triangles, diff_map, cmap='RdBu', norm=colors.Normalize(vmin=-1*clim, vmax=clim))
         else:
-            axes = axs[c].tripcolor(triangles, data_list[c], cmap=cmap, norm=colors.CenteredNorm(vcenter=norm_center, clip=[cmin, cmax]))
+            axes = axs[c].tripcolor(triangles, data_list[c], cmap=cmap, norm=colors.Normalize(vmin=cmin, vmax=cmax))
             title = title_list[c]
 
         # common settings
         axs[c].set_title(title, fontsize=14)
-        cb = plt.colorbar(axes, ax=axs[c])
-        cb.ax.tick_params(labelsize=14)
-        num_bins = ticker.MaxNLocator(nbins=colorbar_bins)
-        cb.locator = num_bins
-        cb.update_ticks()
         axs[c].axis('off')
+        cb = plt.colorbar(axes, ax=axs[c])
+        cb.ax.tick_params(labelsize=12)
+        cb.locator = ticker.MaxNLocator(nbins=colorbar_bins)
+        cb.update_ticks()
 
     return fig, axs
 
