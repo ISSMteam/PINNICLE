@@ -48,6 +48,7 @@ User guide
    :maxdepth: 1
 
    data
+   advanced
    pinnicle_examples
 
 

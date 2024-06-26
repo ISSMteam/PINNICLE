@@ -19,5 +19,5 @@ Advanced
 .. toctree::
    :maxdepth: 2
 
-   examples/advanced
+..   examples/advanced
 
