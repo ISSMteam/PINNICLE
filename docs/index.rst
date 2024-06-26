@@ -1,7 +1,7 @@
 PINNICLE
 ========
 
-`PINNICLE <https://github.com/enigne/PINNICLE>`_ is a Python library for solving ice sheet modeling problems using a unified framework with Physics Informed Neural Networks
+`PINNICLE <https://github.com/ISSMteam/PINNICLE>`_ is a Python library for solving ice sheet modeling problems using a unified framework with Physics Informed Neural Networks
 
 
 .. note::
@@ -33,7 +33,7 @@ Data format
 - Scattered data 
 
 
-Check out the :doc:`Usage` section for further information, including how to :ref:`installation` the project.
+Check out the :doc:`Usage` section for further information, including how to install the project.
 
 User guide
 ----------
@@ -47,6 +47,7 @@ User guide
 .. toctree::
    :maxdepth: 1
 
+   data
    pinnicle_examples
 
 
