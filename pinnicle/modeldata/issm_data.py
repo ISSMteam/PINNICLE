@@ -53,22 +53,22 @@ class ISSMmdData(DataBase, Constants):
         self.data_dict['s'] = md['geometry']['surface']
         self.data_dict['a'] = (md['smb']['mass_balance'] - md['balancethickness']['thickening_rate'])/self.yts
         self.data_dict['H'] = md['geometry']['thickness']
+        self.data_dict['B'] = md['materials']['rheology_B']
+        self.data_dict['vel'] = np.sqrt(self.data_dict['u']**2.0+self.data_dict['v']**2.0)
         # check the friction law
         if 'C' in md['friction']:
             self.data_dict['C'] = md['friction']['C'] # Weertman
         else:
-            # convert Budd to Weertman type friction coefficient
+            # convert Budd to Weertman type friction coefficient (m=1/3 by default)
             C_b = md['friction']['coefficient'] # Budd
             rho_ice = md['materials']['rho_ice']
             rho_w = md['materials']['rho_water']
             g = md['constants']['g']
             base = md['geometry']['base']
             N = rho_ice*g*self.data_dict['H'] + rho_w*g*base
-            N[np.where(N <= 0, True, False)] = 1
-            self.data_dict['C'] = C_b*np.sqrt(N)
+            N[np.where(N <= 1.0, True, False)] = 1.0
+            self.data_dict['C'] = C_b*np.sqrt(N)*(self.data_dict['vel']**(1.0/3.0))
 
-        self.data_dict['B'] = md['materials']['rheology_B']
-        self.data_dict['vel'] = np.sqrt(self.data_dict['u']**2.0+self.data_dict['v']**2.0)
         # clean up is any of the keys are empty
         self.data_dict = {k:self.data_dict[k] for k in self.data_dict if self.data_dict[k].shape != ()}
         # ice mask
