@@ -75,17 +75,18 @@ class PINN:
         path = self.check_path(path)
         self.history.plot(path)
 
-    def plot_predictions(self, path="", **kwargs):
+    def plot_predictions(self, path="", filename="2Dsolution.png", **kwargs):
         """ plot model predictions
 
         Args:
             path (Path, str): Path to save the figures
+            filename (str): name to save the figures, if set to None, then the figure will not be saved
             X_ref (dict): Coordinates of the reference solutions, if None, then just plot the predicted solutions
             u_ref (dict): Reference solutions, if None, then just plot the predicted solutions
             cols (int): Number of columns of subplot
         """
         path = self.check_path(path)
-        plot_solutions(self, path=path, **kwargs)
+        plot_solutions(self, path=path, filename=filename, **kwargs)
 
     def save_history(self, path=""):
         """ save training history

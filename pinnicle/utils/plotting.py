@@ -19,11 +19,12 @@ def cmap_Rignot():
     cmap = ListedColormap(cmap)
     return cmap
 
-def plot_solutions(pinn, path="", X_ref=None, sol_ref=None, cols=None, resolution=200, absvariable=[], **kwargs):
+def plot_solutions(pinn, path="", filename="2Dsolution.png", X_ref=None, sol_ref=None, cols=None, resolution=200, absvariable=[], **kwargs):
     """ plot model predictions
 
     Args:
         path (Path, str): Path to save the figures
+        filename (str): name to save the figures, if set to None, then the figure will not be saved
         X_ref (dict): Coordinates of the reference solutions, if None, then just plot the predicted solutions
         u_ref (dict): Reference solutions, if None, then just plot the predicted solutions
         cols (int): Number of columns of subplot
@@ -90,7 +91,8 @@ def plot_solutions(pinn, path="", X_ref=None, sol_ref=None, cols=None, resolutio
 
             fig.colorbar(im, ax=ax, shrink=0.8)
 
-        plt.savefig(path+"2Dsolution.png")
+        if filename:
+            plt.savefig(path+filename)
 
     else:
         raise ValueError("Plot is only implemented for 2D problem")
