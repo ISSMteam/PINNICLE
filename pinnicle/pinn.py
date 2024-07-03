@@ -233,6 +233,10 @@ class PINN:
                     # currently, only implement 'vel'
                     elif d == "vel":
                         training_temp.append(dde.icbc.PointSetOperatorBC(training_data.X[d], training_data.sol[d], self.physics.vel_mag))
+                    elif d == "sx":
+                        training_temp.append(dde.icbc.PointSetOperatorBC(training_data.X[d], training_data.sol[d], self.physics.surf_x))
+                    elif d == "sy":
+                        training_temp.append(dde.icbc.PointSetOperatorBC(training_data.X[d], training_data.sol[d], self.physics.surf_y))
                     else:
                         raise ValueError(f"{d} is not found in the output_variable of the nn, and not defined")
 
