@@ -2,7 +2,7 @@ import os
 import pinnicle as pinn
 import numpy as np
 import deepxde as dde
-from pinnicle.utils import data_misfit, plot_nn, plot_similarity, plot_residuals, tripcolor_similarity, tripcolor_residuals
+from pinnicle.utils import data_misfit, plot_nn
 import pytest
 
 dde.config.set_default_float('float64')
@@ -216,4 +216,3 @@ def test_plot(tmp_path):
     assert Y.shape == (10,10)
     assert len(im_data) == 5
     assert im_data['u'].shape == (10,10) 
-
