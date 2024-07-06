@@ -2,7 +2,7 @@ import os
 import pinnicle as pinn
 import numpy as np
 import deepxde as dde
-from pinnicle.utils import data_misfit, plot_nn, plot_similarity, plot_residuals, tripcolor_similarity, tripcolor_residuals
+from pinnicle.utils import data_misfit, plot_nn, plot_similarity, plot_residuals, tripcolor_residuals
 import pytest
 
 dde.config.set_default_float('float64')

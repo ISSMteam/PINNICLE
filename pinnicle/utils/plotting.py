@@ -286,7 +286,7 @@ def plot_residuals(pinn, cmap='RdBu', cbar_bins=10, cbar_limits=[-5e3, 5e3]):
 def plot_similarity(pinn, feature, feat_title=None, mdata='ISSM', figsize=(15, 4), sim='mae', cmap='jet', clim=None, scale=1, colorbar_bins=10, elements=None):
     """plotting function: reference sol, prediction, and difference
     """
-    if feat_title=None:
+    if feat_title==None:
         if type(feature)==list:
             raise TypeError('feat_title must be provided as input str')
         else:
@@ -324,7 +324,7 @@ def plot_similarity(pinn, feature, feat_title=None, mdata='ISSM', figsize=(15, 4
         if pinn.model_data.data[mdata].mesh_dict == {}:
             triangles = mpl.tri.Triangulation(meshx, meshy)
         else:
-            if pinn.params.param_dict['data'][mdata]['data_path'].endswith('mat'):
+            if pinn.params.param_dict['data'][mdata]['data_path'].endswith('.mat'):
                 elements = pinn.model_data.data[mdata].mesh_dict['elements']-1
             else:
                 elements = pinn.model_data.data[mdata].mesh_dict['elements']
