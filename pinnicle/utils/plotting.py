@@ -227,6 +227,139 @@ def plot_data(X, Y, im_data, axs=None, vranges={}, **kwargs):
     
     return axs
     
+def plot_similarity(pinn, feature_name, feat_title=None, sim='MAE', cmap='jet', scale=1, cols=[0, 1, 2], cbar_bins=10):
+    """
+    plotting the similarity between reference and predicted
+    solutions, mae default
+
+    Args:
+    pinn : pinnicle.model
+        the trained PINN model
+    feature_name : str
+        the name of a predicted feature of the PINN.
+        for the L-2 norm of two or more predictions, write as a list. e.g., ['u', 'v'].
+    feat_title : str (default=None, will be set to feature_name if None provided)
+        the name of the predicted feature in the title.
+    sim : str (default='MAE')
+        the similarity/comparison type.
+        options include: 'MAE', 'MSE', 'RMSE', 'SIMPLE'
+        (can be written as upper case or lower case) e.g., 'MSE' and 'mse' will give the same result.
+    cmap : str (default='jet', for similarity default='RdBu')
+        the matplotlib colormap name as a str.
+    scale : float (default=1)
+        the scale by which to multiply predictions (e.g., m/s * yts = m/year, then scale = yts)
+    cols : list (default=[0, 1, 2])
+        can specify which columns of the figure to extract. 0 = reference, 1 = prediction, 2 = similarity.
+    cbar_bins : int (default=10)
+        the number of bins/ticks on the c-axis.
+
+    Returns:
+    fig, axs
+        plot of the reference, prediction, and similarity
+    """
+    # setting the figure title
+    if feat_title == None:
+        if type(feature_name) == list:
+            raise TypeError('feat_title must be provided as an input string')
+        else:
+            feat_title = feature_name
+
+    # initialize figure, default all 3 columns
+    if len(cols) == 1:
+        # subplots returns a single Axes if only 1 figure, but we need array later
+        fig, ax_single = plt.subplots(1, len(cols), figsize=(5*len(cols), 4))
+        axs = [ax_single]
+    else:
+        fig, axs = plt.subplots(1, len(cols), figsize=(5*len(cols), 4))
+
+    # inputs and outputs of NN
+    input_names = pinn.nn.parameters.input_variables
+    output_names = pinn.nn.parameters.output_variables
+
+    # inputs
+    X_ref = pinn.model_data.data['ISSM'].X_dict
+    xref = X_ref[input_names[0]].flatten()[:,None]
+    for i in range(1, len(input_names)):
+        xref = np.hstack((xref, X_ref[input_names[i]].flatten()[:,None]))
+    meshx = np.squeeze(xref[:, 0])
+    meshy = np.squeeze(xref[:, 1])
+
+    # predictions
+    pred = pinn.model.predict(xref)
+
+    # reference solution
+    X_sol = pinn.model_data.data['ISSM'].data_dict
+    sol = X_sol[output_names[0]].flatten()[:,None] # initializing array
+    for i in range(1, len(output_names)):
+        sol = np.hstack((sol, X_sol[output_names[i]].flatten()[:,None]))
+
+    # grab feature
+    # initializing reference and prediction
+    ref_sol = np.zeros_like(np.squeeze(sol[:, 0:1]*scale))
+    pred_sol = np.zeros_like(np.squeeze(pred[:, 0:1]*scale))
+
+    if type(feature_name) == list:
+        for feat in feature_name:
+            fid = output_names.index(feat)
+            ref_sol += (np.squeeze(sol[:, fid:fid+1]*scale))**2
+            pred_sol += (np.squeeze(pred[:, fid:fid+1]*scale))**2
+        ref_sol = np.sqrt(ref_sol)
+        pred_sol = np.sqrt(pred_sol)
+    else:
+        fid = output_names.index(feature_name)
+        ref_sol = np.squeeze(sol[:, fid:fid+1]*scale)
+        pred_sol = np.squeeze(pred[:, fid:fid+1]*scale)
+
+    [cmin, cmax] = [np.min(np.append(ref_sol, pred_sol)), np.max(np.append(ref_sol, pred_sol))]
+    levels = np.linspace(cmin*0.9, cmax*1.1, 500)
+    data_list = [ref_sol, pred_sol]
+    title_list = [ feat_title + r"$_{ref}$", feat_title + r"$_{pred}$"]
+
+    # plotting
+    for c, col in enumerate(cols):
+        if col == 2:
+            if sim.upper() == 'MAE':
+                diff = np.abs(ref_sol-pred_sol)
+                diff_val = np.round(np.mean(diff), 2)
+                title = r"|"+feat_title+r"$_{ref} - $"+feat_title+r"$_{pred}$|, MAE="+str(diff_val)
+            elif sim.upper() == 'MSE':
+                diff = (ref_sol-pred_sol)**2
+                diff_val = np.round(np.mean(diff), 2)
+                title = r"$($"+feat_title+r"$_{ref} - $"+feat_title+r"$_{pred})^2$, MSE="+str(diff_val)
+            elif sim.upper() == 'RMSE':
+                diff = (ref_sol-pred_sol)**2
+                diff_val = np.round(np.sqrt(np.mean(diff)), 2)
+                diff = np.sqrt(diff)
+                title = r"$(($"+feat_title+r"$_{ref} - $"+feat_title+r"$_{pred})^2)^{1/2}$, RMSE="+str(diff_val)
+            elif sim.upper() == 'SIMPLE':
+                diff = ref_sol-pred_sol
+                diff_val = np.round(np.mean(diff), 2)
+                title = feat_title+r"$_{ref} - $"+feat_title+r"$_{pred}$, AVG. DIFF="+str(diff_val)
+            else:
+                print('Default similarity MAE implemented.')
+                diff = np.abs(ref_sol-pred_sol)
+                diff_val = np.round(np.mean(diff), 2)
+                title = r"|"+feat_title+r"$_{ref} - $"+feat_title+r"$_{pred}$|, MAE="+str(diff_val)
+
+            levels = np.linspace(np.min(diff)*0.9, np.max(diff)*1.1, 500)
+            data = np.squeeze(diff)
+            axes = axs[c].tricontourf(meshx, meshy, data, levels=levels, cmap='RdBu', norm=colors.CenteredNorm())
+        else:
+            axes = axs[c].tricontourf(meshx, meshy, data_list[col], levels=levels, cmap=cmap)
+            title = title_list[col]
+
+        # common settings
+        axs[c].set_title(title, fontsize=14)
+        cb = plt.colorbar(axes, ax=axs[c])
+        cb.ax.tick_params(labelsize=14)
+        colorbar_bins = ticker.MaxNLocator(nbins=cbar_bins)
+        cb.locator = colorbar_bins
+        cb.update_ticks()
+        axs[c].axis('off')
+
+    # save figure to path as defined
+    return fig, axs
+
 def plot_residuals(pinn, cmap='RdBu', cbar_bins=10, cbar_limits=[-5e3, 5e3]):
     """plotting the pde residuals
     """
@@ -283,37 +416,39 @@ def plot_residuals(pinn, cmap='RdBu', cbar_bins=10, cbar_limits=[-5e3, 5e3]):
 
     return fig, axs
 
-def plot_similarity(pinn, feature, feat_title=None, mdata='ISSM', figsize=(15, 4), sim='mae', cmap='jet', clim=None, scale=1, colorbar_bins=10, elements=None):
-    """plotting function: reference sol, prediction, and difference
+def tripcolor_similarity(pinn, feature_name, feat_title=None, sim='MAE', cmap='jet', scale=1, colorbar_bins=10):
+    """tripcolor similarity, plot with ISSM triangulation
     """
+
     if feat_title==None:
-        if type(feature)==list:
+        if type(feature_name)==list:
             raise TypeError('feat_title must be provided as input str')
         else:
-            feat_title=feature
+            feat_title = feature_name
 
-    fig, axs = plt.subplots(1, 3, figsize=figsize)
+    # initialize figure
+    fig, axs = plt.subplots(1, 3, figsize=(15, 4))
 
-    # neural network inputs and outputs
-    ins = pinn.nn.parameters.input_variables
-    outs = pinn.nn.parameters.output_variables
+    # neural network features 
+    input_names = pinn.nn.parameters.input_variables
+    output_names = pinn.nn.parameters.output_variables
 
     # inputs
-    X_ref = pinn.model_data.data[mdata].X_dict
-    xref = X_ref[ins[0]].flatten()[:,None]
-    for i in range(1, len(ins)):
-        xref = np.hstack((xref, X_ref[ins[i]].flatten()[:,None]))
+    X_ref = pinn.model_data.data['ISSM'].X_dict
+    xref = X_ref[input_names[0]].flatten()[:,None]
+    for i in range(1, len(input_names)):
+        xref = np.hstack((xref, X_ref[input_names[i]].flatten()[:,None]))
     meshx = np.squeeze(xref[:, 0])
     meshy = np.squeeze(xref[:, 1])
 
     # predictions
     pred = pinn.model.predict(xref)
 
-    # reference sol
-    X_sol = pinn.model_data.data[mdata].data_dict
-    sol = X_sol[outs[0]].flatten()[:,None]
-    for i in range(1, len(outs)):
-        sol = np.hstack((sol, X_sol[outs[i]].flatten()[:,None]))
+    # reference solution
+    X_sol = pinn.model_data.data['ISSM'].data_dict
+    sol = X_sol[output_names[0]].flatten()[:,None]
+    for i in range(1, len(output_names)):
+        sol = np.hstack((sol, X_sol[output_names[i]].flatten()[:,None]))
 
     # elements, if any
     if elements!=None:
@@ -330,31 +465,29 @@ def plot_similarity(pinn, feature, feat_title=None, mdata='ISSM', figsize=(15, 4
                 elements = pinn.model_data.data[mdata].mesh_dict['elements']
             triangles = mpl.tri.Triangulation(meshx, meshy, elements)
 
-    # grabbing the feature
+    # grab feature
+    # initializing ref and pred
     ref_sol = np.zeros_like(np.squeeze(sol[:, 0:1]*scale))
     pred_sol = np.zeros_like(np.squeeze(pred[:, 0:1]*scale))
-    if type(feature)==list:
-        for feat in feature:
-            fid = outs.index(feat)
+    if type(feature_name) == list:
+        for feat in feature_name:
+            fid = output_names.index(feat)
             ref_sol += (np.squeeze(sol[:, fid:fid+1]*scale))**2
             pred_sol += (np.squeeze(pred[:, fid:fid+1]*scale))**2
         ref_sol = np.sqrt(ref_sol)
         pred_sol = np.sqrt(pred_sol)
     else:
-        fid = outs.index(feature)
+        fid = output_names.index(feature_name)
         ref_sol = np.squeeze(sol[:, fid:fid+1]*scale)
         pred_sol = np.squeeze(pred[:, fid:fid+1]*scale)
 
-    if clim==None:
-        [cmin, cmax] = [0.9*np.min(np.append(ref_sol, pred_sol)), 1.1*np.max(np.append(ref_sol, pred_sol))]
-    else:
-        [cmin, cmax] = clim
+    [cmin, cmax] = [0.9*np.min(np.append(ref_sol, pred_sol)), 1.1*np.max(np.append(ref_sol, pred_sol))]
     data_list = [ref_sol, pred_sol]
-    title_list = [feat_title + r"$_{ref}$", feat_title + r"$_{pred}$"]
+    title_list = [ feat_title + r"$_{ref}$", feat_title + r"$_{pred}$"]
 
-    # looping through plot
+    # looping through the columns of the plot
     for c in range(3):
-        if c==2:
+        if c == 2:
             if sim.upper() == 'MAE':
                 diff = np.abs(ref_sol-pred_sol)
                 diff_val = np.round(np.mean(diff), 2)
@@ -363,7 +496,7 @@ def plot_similarity(pinn, feature, feat_title=None, mdata='ISSM', figsize=(15, 4
                 diff = (ref_sol-pred_sol)**2
                 diff_val = np.round(np.mean(diff), 2)
                 title = r"$($"+feat_title+r"$_{ref} - $"+feat_title+r"$_{pred})^2$, MSE="+str(diff_val)
-            elif sim.upper() == 'RSME':
+            elif sim.upper() == 'RMSE':
                 diff = (ref_sol-pred_sol)**2
                 diff_val = np.round(np.sqrt(np.mean(diff)), 2)
                 diff = np.sqrt(diff)
@@ -385,7 +518,7 @@ def plot_similarity(pinn, feature, feat_title=None, mdata='ISSM', figsize=(15, 4
             axes = axs[c].tripcolor(triangles, data_list[c], cmap=cmap, norm=colors.Normalize(vmin=cmin, vmax=cmax))
             title = title_list[c]
 
-        # common plot settings
+        # common settings
         axs[c].set_title(title, fontsize=14)
         axs[c].axis('off')
         cb = plt.colorbar(axes, ax=axs[c])
