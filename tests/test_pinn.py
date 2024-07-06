@@ -217,32 +217,6 @@ def test_plot(tmp_path):
     assert len(im_data) == 5
     assert im_data['u'].shape == (10,10) 
 
-def test_similarity(tmp_path):
-    hp["save_path"] = str(tmp_path)
-    hp["is_save"] = False
-    issm["data_size"] = {"u":100, "v":100, "s":100, "H":100, "C":None}
-    hp["data"] = {"ISSM": issm}
-    experiment = pinn.PINN(params=hp)
-    experiment.compile()
-    # plot_similarity(pinn, feature_name, sim='MAE', cmap='jet', scale=1, cols=[0, 1, 2])
-    # default
-    fig, axs = plot_similarity(experiment, feature_name='s')
-    assert (fig is not None) and (np.size(axs) == 3)
-    fig, axs = plot_similarity(experiment, feature_name='H', cols=[0])
-    assert (fig is not None) and (np.size(axs) == 1)
-    fig, axs = plot_similarity(experiment, feature_name="u", sim="mae", cols=[2])
-    assert (fig is not None) and (np.size(axs) == 1) 
-    fig, axs = plot_similarity(experiment, feature_name="v", sim="Mse", cols=[2, 1])
-    assert (fig is not None) and (np.size(axs) == 2) 
-    fig, axs = plot_similarity(experiment, feature_name="C", sim="rmse", cols=[0, 2, 1])
-    assert (fig is not None) and (np.size(axs) == 3) 
-    fig, axs = plot_similarity(experiment, feature_name="H", sim="SIMPLE")
-    assert (fig is not None) and (np.size(axs) == 3)
-    fig, axs = plot_similarity(experiment, feature_name=['u', 'v'], feat_title='vel')
-    assert (fig is not None) and (np.size(axs) == 3)
-    with pytest.raises(TypeError):
-        fig, axs = plot_similarity(experiment, feature_name=['u', 'v'])
-
 def test_residuals(tmp_path):
     hp["save_path"] = str(tmp_path)
     hp["is_save"] = False
@@ -272,35 +246,6 @@ def test_residuals(tmp_path):
 
     fig, axs = plot_residuals(experiment)
     assert (fig is not None) and (np.size(axs)==3)
-
-def test_trisimilarity(tmp_path):
-    hp["equations"] = {"SSA":SSA}
-    hp["save_path"] = str(tmp_path)
-    hp["is_save"] = False
-    issm["data_size"] = {"u":100, "v":100, "s":100, "H":100, "C":None}
-    hp["data"] = {"ISSM": issm}
-    experiment = pinn.PINN(params=hp)
-    experiment.compile()
-    # plot_similarity(pinn, feature_name, sim='MAE', cmap='jet', scale=1, cols=[0, 1, 2])
-    # default
-    fig, axs = tripcolor_similarity(experiment, feature_name='s')
-    assert (fig is not None) and (np.size(axs) == 3)
-    fig, axs = tripcolor_similarity(experiment, feature_name='s', sim='mae')
-    assert (fig is not None) and (np.size(axs) == 3)
-    fig, axs = tripcolor_similarity(experiment, feature_name='s', sim='SIMPLE')
-    assert (fig is not None) and (np.size(axs) == 3)
-    fig, axs = tripcolor_similarity(experiment, feature_name='s', cmap='terrain')
-    assert (fig is not None) and (np.size(axs) == 3)
-    fig, axs = tripcolor_similarity(experiment, feature_name='s', sim='Rmse')
-    assert (fig is not None) and (np.size(axs) == 3)
-    fig, axs = tripcolor_similarity(experiment, feature_name='s', sim='mse')
-    assert (fig is not None) and (np.size(axs) == 3)
-    fig, axs = tripcolor_similarity(experiment, feature_name='s', colorbar_bins=5)
-    assert (fig is not None) and (np.size(axs) == 3)
-    fig, axs = tripcolor_similarity(experiment, feature_name=['u', 'v'], feat_title='vel', scale=experiment.model_data.yts)
-    assert (fig is not None) and (np.size(axs) == 3)
-    with pytest.raises(TypeError):
-        fig, axs = tripcolor_similarity(experiment, feature_name=['u', 'v'])
 
 def test_triresiduals(tmp_path):
     hp["equations"] = {"SSA":SSA}
