@@ -52,6 +52,21 @@ def test_Physics_SSA():
     assert len(phy.data_weights) == 5
     assert len(phy.pde_weights) == 2
 
+def test_Physics_SSAVB():
+    SSA = {}
+    SSA["scalar_variables"] = {"n":3}
+    hp = {}
+    hp["equations"] = {"SSA_VB":SSA}
+    phy = Physics(PhysicsParameter(hp))
+
+    assert phy.input_var == ['x', 'y']
+    assert phy.output_var == ['u', 'v', 's', 'H', 'C','B']
+    assert phy.residuals == ['fSSA_VB1', 'fSSA_VB2']
+    assert len(phy.output_lb) == 6
+    assert len(phy.output_ub) == 6
+    assert len(phy.data_weights) == 6
+    assert len(phy.pde_weights) == 2
+
 def test_Physics_MC():
     MC = {}
     MC["scalar_variables"] = {"B":1.26802073401e+08}
@@ -152,13 +167,17 @@ def test_operator():
     SSA["scalar_variables"] = {"B":1.26802073401e+08}
 
     hp = {}
-    hp["equations"] = {"MC":MC, 'SSA':SSA}
+    hp["equations"] = {"MC":MC, "SSA":SSA, "SSA_VB":{}, "MOLHO":{}}
     phy = Physics(PhysicsParameter(hp))
     
     assert phy.operator('mc')
     assert phy.operator('Mc')
     assert phy.operator('SSA')
     assert phy.operator('ssa')
+    assert phy.operator('SSA_VB')
+    assert phy.operator('ssa_vb')
+    assert phy.operator('molho')
+    assert phy.operator('MOLHO')
 
 def test_Physics_dummy():
     dummy = {}
