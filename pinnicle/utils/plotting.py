@@ -536,7 +536,7 @@ def plot_residuals(pinn, cmap='RdBu', cbar_bins=10, cbar_limits=[-5e3, 5e3]):
 
     return fig, axs
 
-def tripcolor_similarity(pinn, feature_name, feat_title=None, sim='MAE', cmap='jet', scale=1, colorbar_bins=10):
+def tripcolor_similarity(pinn, feature_name, feat_title=None, mdata='ISSM', sim='MAE', cmap='jet', scale=1, colorbar_bins=10, elements=None):
     """tripcolor similarity, plot with ISSM triangulation
     """
 
@@ -554,7 +554,7 @@ def tripcolor_similarity(pinn, feature_name, feat_title=None, sim='MAE', cmap='j
     output_names = pinn.nn.parameters.output_variables
 
     # inputs
-    X_ref = pinn.model_data.data['ISSM'].X_dict
+    X_ref = pinn.model_data.data[mdata].X_dict
     xref = X_ref[input_names[0]].flatten()[:,None]
     for i in range(1, len(input_names)):
         xref = np.hstack((xref, X_ref[input_names[i]].flatten()[:,None]))
@@ -565,7 +565,7 @@ def tripcolor_similarity(pinn, feature_name, feat_title=None, sim='MAE', cmap='j
     pred = pinn.model.predict(xref)
 
     # reference solution
-    X_sol = pinn.model_data.data['ISSM'].data_dict
+    X_sol = pinn.model_data.data[mdata].data_dict
     sol = X_sol[output_names[0]].flatten()[:,None]
     for i in range(1, len(output_names)):
         sol = np.hstack((sol, X_sol[output_names[i]].flatten()[:,None]))

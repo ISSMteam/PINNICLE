@@ -232,4 +232,3 @@ def test_diffplot(tmp_path):
     assert fig is not None
     assert axs.shape == (3,)
 
-
