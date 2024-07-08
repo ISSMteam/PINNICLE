@@ -52,6 +52,21 @@ def test_Physics_SSA():
     assert len(phy.data_weights) == 5
     assert len(phy.pde_weights) == 2
 
+def test_Physics_SSAvB():
+    SSA = {}
+    SSA["scalar_variables"] = {"n":3}
+    hp = {}
+    hp["equations"] = {"SSA vB":SSA}
+    phy = Physics(PhysicsParameter(hp))
+
+    assert phy.input_var == ['x', 'y']
+    assert phy.output_var == ['u', 'v', 's', 'H', 'C','B']
+    assert phy.residuals == ['fSSA vB1', 'fSSA vB2']
+    assert len(phy.output_lb) == 6
+    assert len(phy.output_ub) == 6
+    assert len(phy.data_weights) == 6
+    assert len(phy.pde_weights) == 2
+
 def test_Physics_MC():
     MC = {}
     MC["scalar_variables"] = {"B":1.26802073401e+08}
