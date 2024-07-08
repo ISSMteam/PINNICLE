@@ -88,7 +88,7 @@ class SSA(EquationBase): #{{{
 class SSAVariableBEquationParameter(EquationParameter, Constants):
     """ default parameters for SSA, with spatially varying rheology B
     """
-    _EQUATION_TYPE = 'SSA vB' 
+    _EQUATION_TYPE = 'SSA_VB' 
     def __init__(self, param_dict={}):
         # load necessary constants
         Constants.__init__(self)
@@ -110,7 +110,7 @@ class SSAVariableBEquationParameter(EquationParameter, Constants):
 class SSAVariableB(EquationBase): #{{{
     """ SSA on 2D problem with spatially varying B
     """
-    _EQUATION_TYPE = 'SSA vB' 
+    _EQUATION_TYPE = 'SSA_VB' 
     def __init__(self, parameters=SSAVariableBEquationParameter()):
         super().__init__(parameters)
 

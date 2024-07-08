@@ -199,7 +199,7 @@ def test_only_callbacks(tmp_path):
 def test_plot(tmp_path):
     hp["save_path"] = str(tmp_path)
     hp["is_save"] = True
-    issm["data_size"] = {"u":4000, "v":4000, "s":4000, "H":4000, "C":None}
+    issm["data_size"] = {"u":10, "v":10, "s":10, "H":10, "C":None}
     hp["data"] = {"ISSM": issm}
     experiment = pinn.PINN(params=hp)
     experiment.compile()
@@ -216,3 +216,17 @@ def test_plot(tmp_path):
     assert Y.shape == (10,10)
     assert len(im_data) == 5
     assert im_data['u'].shape == (10,10) 
+
+def test_SSA_pde_function():
+    SSA = {}
+    SSA["n"] = {"n":3}
+    hp["equations"] = {"SSA":SSA}
+    hp["num_collocation_points"] = 10
+    issm["data_size"] = {"u":10, "v":10, "s":10, "H":10, "C":None, "vel":10}
+    hp["data"] = {"ISSM": issm}
+    experiment = pinn.PINN(params=hp)
+    experiment.compile()
+    y = experiment.model.predict(experiment.model_data.X['u'], operator=experiment.physics.operator("SSA"))
+    assert len(y) == 2
+    assert y[0].shape == (10,1)
+    assert y[1].shape == (10,1)
