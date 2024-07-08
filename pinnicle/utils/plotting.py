@@ -226,7 +226,127 @@ def plot_data(X, Y, im_data, axs=None, vranges={}, **kwargs):
         plt.colorbar(im, ax=axs[i], shrink=0.8)
     
     return axs
+   
+def diffplot(pinn, feature, feat_title=None, mdata='ISSM', sim='mae', figsize=(15, 4), cmap='jet', scale=1, clim=None, cbar_bins=10, elements=None):
+    """
+    """
+    # init figure
+    fig, axs = plt.subplots(1, 3, figsize=figsize)
+
+    if feat_title==None:
+        if type(feature)==list:
+            raise TypeError('feat_title must be provided')
+        else:
+            feat_title=feature
+
+    # input and output names
+    input_names = pinn.nn.parameters.input_variables
+    output_names = pinn.nn.parameters.output_variables
+
+    # inputs
+    X_ref = pinn.model_data.data[mdata].X_dict
+    xref = X_ref[input_names[0]].flatten()[:,None]
+    for i in range(1, len(input_names)):
+        xref = np.hstack((xref, X_ref[input_names[i]].flatten()[:,None]))
+    meshx = np.squeeze(xref[:, 0])
+    meshy = np.squeeze(xref[:, 1])
+
+    # predictions
+    pred = pinn.model.predict(xref)
+    pred_sol = np.zeros_like(np.squeeze(pred[:, 0:1]))
+    # reference solution
+    if type(feature)==list:
+        for feat in feature:
+            if feat not in pinn.model_data.data[mdata].data_dict.keys():
+                raise KeyError('feature not provided as input, reference solution cannot be plotted')
+            else:
+                continue
+    else:
+        if feature not in pinn.model_data.data[mdata].data_dict.keys():
+            raise KeyError('feature not provided as input, reference solution cannot be plotted')
+    X_sol = pinn.model_data[mdata].data_dict
+    sol = X_sol[output_names[0]].flatten()[:,None] # initializing array
+    for i in range(1, len(output_names)):
+        sol = np.hstack((sol, X_sol[output_names[i]].flatten()[:,None]))
+    ref_sol = np.zeros_like(np.squeeze(sol[:, 0:1]))
     
+    # grab features
+    if type(feature)==list:
+        for feat in feature:
+            fid = output_names.index(feat)
+            pred_sol += (np.squeeze(pred[:, fid:fid+1]*scale))**2
+            ref_sol += (np.squeeze(sol[:, fid:fid+1]*scale))**2
+        pred_sol = np.sqrt(pred_sol)
+        ref_sol = np.sqrt(ref_sol)
+    else:
+        fid = output_names.index(feature)
+        ref_sol = np.squeeze(sol[:, fid:fid+1]*scale)
+        pred_sol = np.squeeze(pred[:, fid:fid+1]*scale)
+
+    # triangles / elements
+    if elements==None:
+        if pinn.model_data.data[mdata].mesh_dict == {}:
+            triangles = mpl.tri.Triangulation(meshx, meshy)
+        else:
+            if pinn.params.param_dict['data'][mdata]['data_path'].endswith('mat'):
+                elements = pinn.model_data.data[mdata].mesh_dict['elements']-1
+            else:
+                elements = pinn.model_data.data[mdata].mesh_dict['elements']
+            triangles = mpl.tri.Triangulation(meshx, meshy, elements)
+    else:
+        triangles = elements
+        if len(triangles)!=len(meshx):
+            raise ValueError('number of elements must equal number of (x, y) inputs')
+
+    if clim==None:
+        [cmin, cmax] = [np.min(np.append(ref_sol, pred_sol)), np.max(np.append(ref_sol, pred_sol))]
+    else:
+        [cmin, cmax] = clim
+    data_list = [ref_sol, pred_sol]
+    title_list = [feat_title + r"$_{ref}$", feat_title + r"$_{pred}$"
+
+    # looping through the plot
+    for c in range(3):
+        if c==2:
+            if sim.upper()=='MAE':
+                diff = np.abs(ref_sol-pred_sol)
+                diff_val = np.round(np.mean(diff), 2)
+                title = r"|"+feat_title+r"$_{ref} - $"+feat_title+r"$_{pred}$|, MAE="+str(diff_val)
+            elif sim.upper()=='MSE':
+                diff = (ref_sol-pred_sol)**2
+                diff_val = np.round(np.mean(diff), 2)
+                title = r"$($"+feat_title+r"$_{ref} - $"+feat_title+r"$_{pred})^2$, MSE="+str(diff_val)
+            elif sim.upper()=='RMSE':
+                diff = (ref_sol-pred_sol)**2
+                diff_val = np.round(np.sqrt(np.mean(diff)), 2)
+                diff = np.sqrt(diff)
+                title = r"$(($"+feat_title+r"$_{ref} - $"+feat_title+r"$_{pred})^2)^{1/2}$, RMSE="+str(diff_val)
+            elif sim.upper()=='SIMPLE':
+                diff = ref_sol-pred_sol
+                diff_val = np.round(np.mean(diff), 2)
+                title = feat_title+r"$_{ref} - $"+feat_title+r"$_{pred}$, AVG. DIFF="+str(diff_val)
+            else:
+                print('Default similarity MAE implemented.')
+                diff = np.abs(ref_sol-pred_sol)
+                diff_val = np.round(np.mean(diff), 2)
+                title = r"|"+feat_title+r"$_{ref} - $"+feat_title+r"$_{pred}$|, MAE="+str(diff_val)
+            diff_map = np.squeeze(diff)
+            clim = np.max([np.abs(np.min(diff)*0.9), np.abs(np.max(diff)*1.1)])
+            axes = axs[c].tripcolor(triangles, diff_map, cmap='RdBu', norm=colors.Normalize(vmin=-1*clim, vmax=clim))
+        else:
+            axes = axs[c].tripcolor(triangles, data_list[c], cmap=cmap, norm=colors.Normalize(vmin=cmin, vmax=cmax))
+            title = title_list[c]
+
+        # common settings
+        axs[c].set_title(title, fontsize=14)
+        axs[c].axis('off')
+        cb = plt.colorbar(axes, ax=axs[c])
+        cb.ax.tick_params(labelsize=12)
+        cb.locator = ticker.MaxNLocator(nbins=cbar_bins)
+        cb.update_ticks()
+    
+    return fig, axs
+
 def plot_similarity(pinn, feature_name, feat_title=None, sim='MAE', cmap='jet', scale=1, cols=[0, 1, 2], cbar_bins=10):
     """
     plotting the similarity between reference and predicted
