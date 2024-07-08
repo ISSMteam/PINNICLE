@@ -264,7 +264,7 @@ def diffplot(pinn, feature, feat_title=None, mdata='ISSM', sim='mae', figsize=(1
     else:
         if feature not in pinn.model_data.data[mdata].data_dict.keys():
             raise KeyError('feature not provided as input, reference solution cannot be plotted')
-    X_sol = pinn.model_data[mdata].data_dict
+    X_sol = pinn.model_data.data[mdata].data_dict
     sol = X_sol[output_names[0]].flatten()[:,None] # initializing array
     for i in range(1, len(output_names)):
         sol = np.hstack((sol, X_sol[output_names[i]].flatten()[:,None]))
@@ -303,7 +303,7 @@ def diffplot(pinn, feature, feat_title=None, mdata='ISSM', sim='mae', figsize=(1
     else:
         [cmin, cmax] = clim
     data_list = [ref_sol, pred_sol]
-    title_list = [feat_title + r"$_{ref}$", feat_title + r"$_{pred}$"
+    title_list = [feat_title + r"$_{ref}$", feat_title + r"$_{pred}$"]
 
     # looping through the plot
     for c in range(3):
