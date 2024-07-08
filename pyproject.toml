@@ -52,19 +52,21 @@ exclude = ["DATA", "Models", "docs*", "examples*"]
 [tool.coverage.report]
 # Regexes for lines to exclude from consideration
 exclude_also = [
-    # Don't complain about missing debug-only code:
-    "def __repr__",
-    "if self\\.debug",
+  # 1. Comments to turn coverage on and off:
+  "no cover: start(?s:.)*?no cover: stop",
+  # Don't complain about missing debug-only code:
+  "def __repr__",
+  "if self\\.debug",
 
-    # Don't complain if tests don't hit defensive assertion code:
-    "raise AssertionError",
-    "raise NotImplementedError",
+  # Don't complain if tests don't hit defensive assertion code:
+  "raise AssertionError",
+  "raise NotImplementedError",
 
-    # Don't complain about abstract methods, they aren't run:
-    "@(abc\\.)?abstractmethod",
+  # Don't complain about abstract methods, they aren't run:
+  "@(abc\\.)?abstractmethod",
 
-	 # Don't complain pytest.mark.skip:
-	 "@pytest.mark.skip",
-    ]
+  # Don't complain pytest.mark.skip:
+  "@pytest.mark.skip",
+]
 
 ignore_errors = true
