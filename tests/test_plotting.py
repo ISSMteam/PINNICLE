@@ -2,7 +2,7 @@ import os
 import pinnicle as pinn
 import numpy as np
 import deepxde as dde
-from pinnicle.utils import plot_similarity, plot_residuals, tripcolor_similarity, tripcolor_residuals, diffplot
+from pinnicle.utils import plot_residuals, tripcolor_similarity, tripcolor_residuals, diffplot
 import matplotlib.pyplot as plt
 import pytest
 
@@ -50,32 +50,6 @@ SSA = {}
 SSA["scalar_variables"] = {"B":1.26802073401e+08}
 hp["equations"] = {"SSA":SSA}
 
-def test_similarity(tmp_path):
-    hp["save_path"] = str(tmp_path)
-    hp["is_save"] = False
-    issm["data_size"] = {"u":100, "v":100, "s":100, "H":100, "C":None}
-    hp["data"] = {"ISSM": issm}
-    experiment = pinn.PINN(params=hp)
-    experiment.compile()
-    # plot_similarity(pinn, feature_name, sim='MAE', cmap='jet', scale=1, cols=[0, 1, 2])
-    # default
-    fig, axs = plot_similarity(experiment, feature_name='s')
-    assert (fig is not None) and (np.size(axs) == 3)
-    fig, axs = plot_similarity(experiment, feature_name='H', cols=[0])
-    assert (fig is not None) and (np.size(axs) == 1)
-    fig, axs = plot_similarity(experiment, feature_name="u", sim="mae", cols=[2])
-    assert (fig is not None) and (np.size(axs) == 1) 
-    fig, axs = plot_similarity(experiment, feature_name="v", sim="Mse", cols=[2, 1])
-    assert (fig is not None) and (np.size(axs) == 2) 
-    fig, axs = plot_similarity(experiment, feature_name="C", sim="rmse", cols=[0, 2, 1])
-    assert (fig is not None) and (np.size(axs) == 3) 
-    fig, axs = plot_similarity(experiment, feature_name="H", sim="SIMPLE")
-    assert (fig is not None) and (np.size(axs) == 3)
-    fig, axs = plot_similarity(experiment, feature_name=['u', 'v'], feat_title='vel')
-    assert (fig is not None) and (np.size(axs) == 3)
-    with pytest.raises(TypeError):
-        fig, axs = plot_similarity(experiment, feature_name=['u', 'v'])
-    plt.close("all") 
 
 def test_residuals(tmp_path):
     hp["save_path"] = str(tmp_path)
