@@ -8,6 +8,7 @@ from matplotlib.colors import ListedColormap
 from scipy.interpolate import griddata
 from scipy.spatial import cKDTree as KDTree
 import scipy.io as sio
+import pandas as pd
 
 def cmap_Rignot():
     """ colormap from ISSM
