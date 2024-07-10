@@ -2,7 +2,7 @@ import os
 import pinnicle as pinn
 import numpy as np
 import deepxde as dde
-from pinnicle.utils import plot_residuals, tripcolor_similarity, tripcolor_residuals, diffplot
+from pinnicle.utils import plot_residuals, tripcolor_similarity, tripcolor_residuals, diffplot, resplot
 import matplotlib.pyplot as plt
 import pytest
 
@@ -130,6 +130,19 @@ def test_triresiduals(tmp_path):
     fig, axs = tripcolor_residuals(experiment, cbar_limits=[-7e3, 7e3])
     assert (fig is not None) and (np.size(axs)==2)
     plt.close("all") 
+
+def test_resplot(tmp_path):
+    hp["equations"] = {"SSA":SSA}
+    hp["save_path"] = str(tmp_path)
+    hp["is_save"] = False
+    issm["data_size"] = {"u":100, "v":100, "s":100, "H":100, "C":None}
+    hp["data"] = {"ISSM": issm}
+    experiment = pinn.PINN(params=hp)
+    experiment.compile()
+
+    fig, axs = resplot(experiment)
+    assert (fig is not None) and (np.size(axs)==2)
+    plt.close("all")
 
 def test_diffplot(tmp_path):
     hp["save_path"] = str(tmp_path)

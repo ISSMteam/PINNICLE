@@ -347,6 +347,75 @@ def diffplot(pinn, feature, feat_title=None, mdata='ISSM', sim='mae', figsize=(1
     
     return fig, axs
 
+def resplot(pinn, mdata='ISSM', figsize=None, cmap='RdBu', cbar_bins=10, cbar_limits=[-5e3, 5e3], elements=None):
+    """plotting the pde residuals
+    """
+    input_names = pinn.nn.parameters.input_variables
+    output_names = pinn.nn.parameters.output_variables
+
+    # inputs
+    X_ref = pinn.model_data.data[mdata].X_dict
+    xref = X_ref[input_names[0]].flatten()[:, None]
+    for i in range(1, len(input_names)):
+        xref = np.hstack((xref, X_ref[input_names[i]].flatten()[:,None]))
+    meshx = np.squeeze(xref[:, 0])
+    meshy = np.squeeze(xref[:, 1])
+
+    # triangles / elements
+    if elements==None:
+        if pinn.model_data.data[mdata].mesh_dict == {}:
+            triangles = mpl.tri.Triangulation(meshx, meshy)
+        else:
+            if pinn.params.param_dict['data'][mdata]['data_path'].endswith('mat'):
+                elements = pinn.model_data.data[mdata].mesh_dict['elements']-1
+            else:
+                elements = pinn.model_data.data[mdata].mesh_dict['elements']
+            triangles = mpl.tri.Triangulation(meshx, meshy, elements)
+    else:
+        triangles = elements
+        if len(triangles) != len(meshx):
+            raise ValueError('number of elements must equal number of (x, y) inputs')
+
+    Nr = len(pinn.physics.residuals)
+    fig, axs = plt.subplots(1, len(pinn.physics.residuals), figsize=(5*Nr, 4))
+
+    pde_dict = {} # counting the number of residuals per pde
+    for i in pinn.params.physics.equations.keys():
+        pde_dict[i] = 0
+
+    for r in range(Nr):
+        # looping through the equation keys
+        for p in pinn.params.physics.equations.keys():
+            if p in pinn.physics.residuals[r]:
+                pde_dict[p] += 1
+                pde_pred = pinn.model.predict(xref, operator=pinn.physics.operator(p))
+
+                op_pred = pde_pred[pde_dict[p]-1]
+                if Nr <= 1:
+                    axes = axs.tripcolor(triangles, np.squeeze(op_pred), cmap=cmap, norm=colors.CenteredNorm(clip=[cbar_limits[0], cbar_limits[-1]]))
+                    cb = plt.colorbar(axes, ax=axs)
+                    cb.ax.tick_params(labelsize=14)
+                    # adjusting the number of ticks
+                    num_bins = ticker.MaxNLocator(nbins=cbar_bins)
+                    cb.locator = num_bins
+                    cb.update_ticks()
+                    # setting the title
+                    axs.set_title(str(pinn.physics.residuals[r]), fontsize=14)
+                    axs.axis('off')
+                else:
+                    axes = axs[r].tripcolor(triangles, np.squeeze(op_pred), cmap=cmap, norm=colors.CenteredNorm(clip=[cbar_limits[0], cbar_limits[-1]]))
+                    cb = plt.colorbar(axes, ax=axs[r])
+                    cb.ax.tick_params(labelsize=14)
+                    # adjusting the number of ticks
+                    num_bins = ticker.MaxNLocator(nbins=cbar_bins)
+                    cb.locator = num_bins
+                    cb.update_ticks()
+                    # title
+                    axs[r].set_title(str(pinn.physics.residuals[r]), fontsize=14)
+                    axs[r].axis('off')
+
+    return fig, axs
+
 def plot_residuals(pinn, cmap='RdBu', cbar_bins=10, cbar_limits=[-5e3, 5e3]):
     """plotting the pde residuals
     """
