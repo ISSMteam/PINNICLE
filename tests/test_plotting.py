@@ -2,7 +2,7 @@ import os
 import pinnicle as pinn
 import numpy as np
 import deepxde as dde
-from pinnicle.utils import tripcolor_similarity, tripcolor_residuals, diffplot, resplot
+from pinnicle.utils import tripcolor_similarity, tripcolor_residuals, diffplot, resplot, plot_tracks
 import matplotlib.pyplot as plt
 import pytest
 
@@ -13,11 +13,13 @@ weights = [7, 7, 5, 5, 3, 3, 5]
 
 inputFileName="Helheim_fastflow.mat"
 expFileName = "fastflow_CF.exp"
+radarFileName = "flightTracks.mat"
 
 # path for loading data and saving models
 repoPath = os.path.dirname(__file__) + "/../examples/"
 appDataPath = os.path.join(repoPath, "dataset")
 path = os.path.join(appDataPath, inputFileName)
+rpath = os.path.join(appDataPath, radarFileName)
 yts =3600*24*365
 loss_weights = [10**(-w) for w in weights]
 loss_weights[2] = loss_weights[2] * yts*yts
@@ -159,3 +161,16 @@ def test_diffplot(tmp_path):
     assert fig is not None
     assert axs.shape == (3,)
     plt.close("all") 
+
+def test_tracks(tmp_path):
+    hp["save_path"] = str(tmp_path)
+    hp["is_save"] = True
+    issm["data_size"] = {"u":100, "v":100, "s":100, "H":100, "C":None}
+    hp["data"] = {"ISSM": issm}
+    experiment = pinn.PINN(params=hp)
+    experiment.compile()
+
+    fig, axs = plot_tracks(experiment, 'H', filepath=rpath, feat_name_map="thickness")
+    assert fig is not None
+    assert np.shape(axs) == ()
+    plt.close("all")

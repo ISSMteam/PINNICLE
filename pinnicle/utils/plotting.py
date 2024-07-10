@@ -7,6 +7,8 @@ import matplotlib as mpl
 from matplotlib.colors import ListedColormap
 from scipy.interpolate import griddata
 from scipy.spatial import cKDTree as KDTree
+import scipy.io as sio
+import pandas as pd
 
 def cmap_Rignot():
     """ colormap from ISSM
@@ -586,3 +588,78 @@ def tripcolor_residuals(pinn, cmap='RdBu', colorbar_bins=10, cbar_limits=[-5e3, 
 
     return fig, axs
 
+def plot_tracks(pinn, feature, filepath=None, x_name_map='x', y_name_map='y', feat_name_map=None, gdata=None, mdata='ISSM', elements=None, scale=1, cmap='jet', figsize=(10, 8), clim=None, cbar_bins=10):
+    """plotting (sparse) ground truth data on top of prediction
+    """
+    if filepath == None and gdata == None:
+        raise TypeError('gfilepath and gdata cannot both be None, one must be provided')
+
+    if gdata != None:
+        print('using gdata provided')
+    else:
+        print('using filepath')
+        if feat_name_map==None:
+            raise TypeError('feat_name_map must be provided')
+        if filepath.endswith('.csv'):
+            df = pd.read_csv(filepath)
+        elif filepath.endswith('.mat'):
+            df = sio.loadmat(filepath)
+        else:
+            raise NotImplementedError('use .csv or .mat file formats')
+        xx = df[x_name_map]
+        yy = df[y_name_map]
+        gdata = df[feat_name_map]
+
+    # initialize figure
+    fig, axs = plt.subplots(1, 1, figsize=figsize)
+    
+    # neural network features
+    input_names = pinn.nn.parameters.input_variables
+    output_names = pinn.nn.parameters.output_variables
+
+    # inputs
+    X_ref = pinn.model_data.data[mdata].X_dict
+    xref = X_ref[input_names[0]].flatten()[:,None]
+    for i in range(1, len(input_names)):
+        xref = np.hstack((xref, X_ref[input_names[i]].flatten()[:,None]))
+    meshx = np.squeeze(xref[:, 0])
+    meshy = np.squeeze(xref[:, 1])
+
+    # predictions
+    pred = pinn.model.predict(xref)
+    if type(feature)==list:
+        raise TypeError('feature must be str')
+    fid = output_names.index(feature)
+    pred_sol = np.squeeze(pred[:, fid:fid+1]*scale)
+
+    # triangles/elements
+    if elements==None:
+        if pinn.model_data.data[mdata].mesh_dict == {}:
+            triangles = mpl.tri.Triangulation(meshx, meshy)
+        else:
+            if pinn.params.param_dict['data'][mdata]['data_path'].endswith('mat'):
+                elements = pinn.model_data.data[mdata].mesh_dict['elements']-1
+            else:
+                elements = pinn.model_data.data[mdata].mesh_dict['elements']
+            triangles = mpl.tri.Triangulation(meshx, meshy, elements)
+    else:
+        triangles = elements
+        if len(triangles)!=len(meshx):
+            raise ValueError('number of elements must equal number of (x, y) inputs')
+
+    if clim==None:
+        [cmin, cmax] = [np.min(pred_sol), np.max(pred_sol)]
+    else:
+        [cmin, cmax] = clim
+
+    axes = axs.tripcolor(triangles, pred_sol, cmap=cmap, norm=colors.Normalize(vmin=cmin, vmax=cmax))
+    axes = axs.scatter(xx, yy, s=2, c=gdata, cmap=cmap, vmin=cmin, vmax=cmax)
+    title = feature+r"$_{pred}$ & sparse " +feature+"_{true}"
+    axs.set_title(title, fontsize=12)
+    axs.axis('off')
+    cb = plt.colorbar(axes, ax=axs)
+    cb.ax.tick_params(labelsize=12)
+    cb.locator = ticker.MaxNLocator(nbins=cbar_bins)
+    cb.update_ticks()
+
+    return fig, axs
