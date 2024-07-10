@@ -107,7 +107,7 @@ class SSAVariableBEquationParameter(EquationParameter, Constants):
         self.scalar_variables = {
                 'n': 3.0,               # exponent of Glen's flow law
                 }
-class SSAVariableB(EquationBase): 
+class SSAVariableB(EquationBase): # {{{
     """ SSA on 2D problem with spatially varying B
     """
     _EQUATION_TYPE = 'SSA_VB' 
@@ -121,7 +121,6 @@ class SSAVariableB(EquationBase):
             nn_input_var: global input to the nn
             nn_output_var: global output from the nn
         """
-        # no cover: start
         # get the ids
         xid = self.local_input_var["x"]
         yid = self.local_input_var["y"]
@@ -166,7 +165,6 @@ class SSAVariableB(EquationBase):
         f2 = sigma21 + sigma22 - alpha*v/(u_norm+1e-30) - self.rhoi*self.g*H*s_y
     
         return [f1, f2] # }}} 
-        # no cover: stop
 #}}}
 # MOLHO constant B{{{
 class MOLHOEquationParameter(EquationParameter, Constants):

@@ -1,7 +1,9 @@
 import pytest
-import tensorflow as tf
+import deepxde as dde
 import os
 import numpy as np
+from deepxde import backend
+from deepxde.backend import backend_name
 from pinnicle.utils import save_dict_to_json, load_dict_from_json, data_misfit, load_mat, down_sample_core, down_sample
 
 data = {"s":1, "v":[1, 2, 3]}
@@ -20,13 +22,15 @@ def test_data_misfit():
     assert data_misfit.get("MSE") != None
     assert data_misfit.get("VEL_LOG") != None
     assert data_misfit.get("MEAN_SQUARE_LOG") != None
-    assert data_misfit.get("MAPE") != None
+    if backend_name == "tensorflow":
+        assert data_misfit.get("MAPE") != None
 
 def test_data_misfit_functions():
-    assert  data_misfit.get("MSE")(tf.convert_to_tensor([1.0]),tf.convert_to_tensor([1.0])) == 0.0
-    assert  data_misfit.get("VEL_LOG")(tf.convert_to_tensor([1.0]),tf.convert_to_tensor([1.0])) == 0.0
-    assert  data_misfit.get("MEAN_SQUARE_LOG")(tf.convert_to_tensor([1.0]),tf.convert_to_tensor([1.0])) == 0.0
-    assert  data_misfit.get("MAPE")(tf.convert_to_tensor([1.0]),tf.convert_to_tensor([1.0])) == 0.0
+    assert  data_misfit.get("MSE")(dde.backend.as_tensor([1.0]),dde.backend.as_tensor([1.0])) == 0.0
+    assert  data_misfit.get("VEL_LOG")(dde.backend.as_tensor([1.0]),dde.backend.as_tensor([1.0])) == 0.0
+    assert  data_misfit.get("MEAN_SQUARE_LOG")(dde.backend.as_tensor([1.0]),dde.backend.as_tensor([1.0])) == 0.0
+    if backend_name == "tensorflow":
+        assert  data_misfit.get("MAPE")(dde.backend.as_tensor([1.0]),dde.backend.as_tensor([1.0])) == 0.0
 
 def test_loadmat():
     filename = "flightTracks.mat"

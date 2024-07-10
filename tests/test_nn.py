@@ -1,6 +1,8 @@
 import pinnicle as pinn
 from pinnicle.nn.helper import minmax_scale, up_scale
 from pinnicle.parameter import NNParameter
+from deepxde import backend
+from deepxde.backend import backend_name
 import numpy as np
 
 def test_minmax_scale():
@@ -36,8 +38,8 @@ def test_output_scale_nn():
     d.output_ub = 10.0
     p = pinn.nn.FNN(d)
     x = np.linspace(-1.0, 1.0, 100)
-    assert np.all(p.net._output_transform(0, x) > d.output_lb - d.output_lb*np.finfo(float).eps) 
-    assert np.all(p.net._output_transform(0, x) < d.output_ub + d.output_ub*np.finfo(float).eps) 
+    assert np.all(p.net._output_transform([0], x) > d.output_lb - d.output_lb*np.finfo(float).eps) 
+    assert np.all(p.net._output_transform([0], x) < d.output_ub + d.output_ub*np.finfo(float).eps) 
 
 def test_pfnn():
     hp={}
@@ -48,11 +50,17 @@ def test_pfnn():
     hp['is_parallel'] = False
     d = NNParameter(hp)
     p = pinn.nn.FNN(d)
-    assert len(p.net.layers) == 6
+    if backend_name == "tensorflow":
+        assert len(p.net.layers) == 6
+    elif backend_name == "jax":
+        assert p.net.layer_sizes == [2, 4, 4, 4, 4, 4, 3]
     hp['is_parallel'] = True
     d = NNParameter(hp)
     p = pinn.nn.FNN(d)
-    assert len(p.net.layers) == 18
+    if backend_name == "tensorflow":
+        assert len(p.net.layers) == 18
+    elif backend_name == "jax":
+        assert p.net.layer_sizes == [2, [4, 4, 4], [4, 4, 4], [4, 4, 4], [4, 4, 4], [4, 4, 4], 3]
 
 def test_pfnn_list_neuron():
     hp={}
@@ -63,9 +71,14 @@ def test_pfnn_list_neuron():
     hp['is_parallel'] = False
     d = NNParameter(hp)
     p = pinn.nn.FNN(d)
-    assert len(p.net.layers) == 4
+    if backend_name == "tensorflow":
+        assert len(p.net.layers) == 4
+    elif backend_name == "jax":
+        assert p.net.layer_sizes == [2, 3, 4, 5, 3]
     hp['is_parallel'] = True
     d = NNParameter(hp)
     p = pinn.nn.FNN(d)
-    assert len(p.net.layers) == 12
-
+    if backend_name == "tensorflow":
+        assert len(p.net.layers) == 12
+    elif backend_name == "jax":
+        assert p.net.layer_sizes == [2, [3, 3, 3], [4, 4, 4], [5, 5, 5], 3]

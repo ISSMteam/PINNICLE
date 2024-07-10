@@ -6,7 +6,7 @@ from pinnicle.utils import data_misfit, plot_nn
 import pytest
 
 dde.config.set_default_float('float64')
-dde.config.disable_xla_jit()
+#dde.config.disable_xla_jit()
 
 weights = [7, 7, 5, 5, 3, 3, 5]
 
