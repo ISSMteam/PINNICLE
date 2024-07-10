@@ -84,6 +84,7 @@ class SSA(EquationBase): #{{{
     
         return [f1, f2] #}}}
 #}}}
+
 # SSA variable B {{{
 class SSAVariableBEquationParameter(EquationParameter, Constants):
     """ default parameters for SSA, with spatially varying rheology B
