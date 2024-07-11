@@ -2,6 +2,13 @@ import deepxde as dde
 from . import EquationBase, Constants
 from ..parameter import EquationParameter
 
+# ==========================================================
+# ==========================================================
+# UNDER DEVELOPMENT
+# Boundary conditions still need implementation. 
+# ==========================================================
+# ==========================================================
+
 # SiSA constant B {{{
 class SSAShelfEquationParameter(EquationParameter, Constants):
     """ default parameters for SSA on ice shelves
