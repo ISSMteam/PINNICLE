@@ -1,6 +1,7 @@
 import deepxde as dde
 from . import EquationBase, Constants
 from ..parameter import EquationParameter
+from ..utils import slice_column, jacobian
 
 # SSA constant B {{{
 class SSAEquationParameter(EquationParameter, Constants):
@@ -51,15 +52,20 @@ class SSA(EquationBase): #{{{
         Cid = self.local_output_var["C"]
 
         # unpacking normalized output
-        u, v, H, C = nn_output_var[:, uid:uid+1], nn_output_var[:, vid:vid+1], nn_output_var[:, Hid:Hid+1], nn_output_var[:, Cid:Cid+1]
+        u = slice_column(nn_output_var, uid, uid+1)
+        v = slice_column(nn_output_var, vid, vid+1)
+        H = slice_column(nn_output_var, Hid, Hid+1)
+        C = slice_column(nn_output_var, Cid, Cid+1)
     
         # spatial derivatives
         u_x = dde.grad.jacobian(nn_output_var, nn_input_var, i=uid, j=xid)
         v_x = dde.grad.jacobian(nn_output_var, nn_input_var, i=vid, j=xid)
-        s_x = dde.grad.jacobian(nn_output_var, nn_input_var, i=sid, j=xid)
         u_y = dde.grad.jacobian(nn_output_var, nn_input_var, i=uid, j=yid)
         v_y = dde.grad.jacobian(nn_output_var, nn_input_var, i=vid, j=yid)
-        s_y = dde.grad.jacobian(nn_output_var, nn_input_var, i=sid, j=yid)
+
+        # use jacobain from pinnicle for the those directly used in the compuation of residual
+        s_x = jacobian(nn_output_var, nn_input_var, i=sid, j=xid)
+        s_y = jacobian(nn_output_var, nn_input_var, i=sid, j=yid)
     
         eta = 0.5*self.B *(u_x**2.0 + v_y**2.0 + 0.25*(u_y+v_x)**2.0 + u_x*v_y+1.0e-15)**(0.5*(1.0-self.n)/self.n)
         # stress tensor
@@ -69,11 +75,11 @@ class SSA(EquationBase): #{{{
         B12 = etaH*(  u_y +   v_x)
     
         # Getting the other derivatives
-        sigma11 = dde.grad.jacobian(B11, nn_input_var, i=0, j=xid)
-        sigma12 = dde.grad.jacobian(B12, nn_input_var, i=0, j=yid)
+        sigma11 = jacobian(B11, nn_input_var, i=0, j=xid)
+        sigma12 = jacobian(B12, nn_input_var, i=0, j=yid)
     
-        sigma21 = dde.grad.jacobian(B12, nn_input_var, i=0, j=xid)
-        sigma22 = dde.grad.jacobian(B22, nn_input_var, i=0, j=yid)
+        sigma21 = jacobian(B12, nn_input_var, i=0, j=xid)
+        sigma22 = jacobian(B22, nn_input_var, i=0, j=yid)
     
         # compute the basal stress
         u_norm = (u**2+v**2)**0.5
@@ -133,15 +139,19 @@ class SSAVariableB(EquationBase): # {{{
         Bid = self.local_output_var["B"]
 
         # unpacking normalized output
-        u, v, H, C, B = nn_output_var[:, uid:uid+1], nn_output_var[:, vid:vid+1], nn_output_var[:, Hid:Hid+1], nn_output_var[:, Cid:Cid+1], nn_output_var[:, Bid:Bid+1]
-    
+        u = slice_column(nn_output_var, uid, uid+1)
+        v = slice_column(nn_output_var, vid, vid+1)
+        H = slice_column(nn_output_var, Hid, Hid+1)
+        C = slice_column(nn_output_var, Cid, Cid+1)
+        B = slice_column(nn_output_var, Bid, Bid+1)
+
         # spatial derivatives
-        u_x = dde.grad.jacobian(nn_output_var, nn_input_var, i=uid, j=xid)
-        v_x = dde.grad.jacobian(nn_output_var, nn_input_var, i=vid, j=xid)
-        s_x = dde.grad.jacobian(nn_output_var, nn_input_var, i=sid, j=xid)
-        u_y = dde.grad.jacobian(nn_output_var, nn_input_var, i=uid, j=yid)
-        v_y = dde.grad.jacobian(nn_output_var, nn_input_var, i=vid, j=yid)
-        s_y = dde.grad.jacobian(nn_output_var, nn_input_var, i=sid, j=yid)
+        u_x = jacobian(nn_output_var, nn_input_var, i=uid, j=xid)
+        v_x = jacobian(nn_output_var, nn_input_var, i=vid, j=xid)
+        s_x = jacobian(nn_output_var, nn_input_var, i=sid, j=xid)
+        u_y = jacobian(nn_output_var, nn_input_var, i=uid, j=yid)
+        v_y = jacobian(nn_output_var, nn_input_var, i=vid, j=yid)
+        s_y = jacobian(nn_output_var, nn_input_var, i=sid, j=yid)
     
         eta = 0.5*B *(u_x**2.0 + v_y**2.0 + 0.25*(u_y+v_x)**2.0 + u_x*v_y+1.0e-15)**(0.5*(1.0-self.n)/self.n)
         # stress tensor
@@ -151,11 +161,11 @@ class SSAVariableB(EquationBase): # {{{
         B12 = etaH*(  u_y +   v_x)
     
         # Getting the other derivatives
-        sigma11 = dde.grad.jacobian(B11, nn_input_var, i=0, j=xid)
-        sigma12 = dde.grad.jacobian(B12, nn_input_var, i=0, j=yid)
+        sigma11 = jacobian(B11, nn_input_var, i=0, j=xid)
+        sigma12 = jacobian(B12, nn_input_var, i=0, j=yid)
     
-        sigma21 = dde.grad.jacobian(B12, nn_input_var, i=0, j=xid)
-        sigma22 = dde.grad.jacobian(B22, nn_input_var, i=0, j=yid)
+        sigma21 = jacobian(B12, nn_input_var, i=0, j=xid)
+        sigma22 = jacobian(B22, nn_input_var, i=0, j=yid)
     
         # compute the basal stress
         u_norm = (u**2+v**2)**0.5
@@ -223,23 +233,28 @@ class MOLHO(EquationBase): #{{{
         Cid = self.local_output_var["C"]
 
         # unpacking normalized output
-        u, v, ub, vb = nn_output_var[:, uid:uid+1], nn_output_var[:, vid:vid+1], nn_output_var[:, ubid:ubid+1], nn_output_var[:, vbid:vbid+1]
-        H, C = nn_output_var[:, Hid:Hid+1], nn_output_var[:, Cid:Cid+1]
+        u = slice_column(nn_output_var, uid, uid+1)
+        v = slice_column(nn_output_var, vid, vid+1)
+        ub = slice_column(nn_output_var, ubid, ubid+1)
+        vb = slice_column(nn_output_var, vbid, vbid+1)
+        H = slice_column(nn_output_var, Hid, Hid+1)
+        C = slice_column(nn_output_var, Cid, Cid+1)
+
         ushear = u - ub
         vshear = v - vb
     
         # spatial derivatives
-        u_x = dde.grad.jacobian(nn_output_var, nn_input_var, i=uid, j=xid)
-        v_x = dde.grad.jacobian(nn_output_var, nn_input_var, i=vid, j=xid)
-        ub_x = dde.grad.jacobian(nn_output_var, nn_input_var, i=ubid, j=xid)
-        vb_x = dde.grad.jacobian(nn_output_var, nn_input_var, i=vbid, j=xid)
-        s_x = dde.grad.jacobian(nn_output_var, nn_input_var, i=sid, j=xid)
+        u_x = jacobian(nn_output_var, nn_input_var, i=uid, j=xid)
+        v_x = jacobian(nn_output_var, nn_input_var, i=vid, j=xid)
+        ub_x = jacobian(nn_output_var, nn_input_var, i=ubid, j=xid)
+        vb_x = jacobian(nn_output_var, nn_input_var, i=vbid, j=xid)
+        s_x = jacobian(nn_output_var, nn_input_var, i=sid, j=xid)
 
-        u_y = dde.grad.jacobian(nn_output_var, nn_input_var, i=uid, j=yid)
-        v_y = dde.grad.jacobian(nn_output_var, nn_input_var, i=vid, j=yid)
-        ub_y = dde.grad.jacobian(nn_output_var, nn_input_var, i=ubid, j=yid)
-        vb_y = dde.grad.jacobian(nn_output_var, nn_input_var, i=vbid, j=yid)
-        s_y = dde.grad.jacobian(nn_output_var, nn_input_var, i=sid, j=yid)
+        u_y = jacobian(nn_output_var, nn_input_var, i=uid, j=yid)
+        v_y = jacobian(nn_output_var, nn_input_var, i=vid, j=yid)
+        ub_y = jacobian(nn_output_var, nn_input_var, i=ubid, j=yid)
+        vb_y = jacobian(nn_output_var, nn_input_var, i=vbid, j=yid)
+        s_y = jacobian(nn_output_var, nn_input_var, i=sid, j=yid)
     
         # compute mus
         mu1 = 0.0
@@ -269,17 +284,17 @@ class MOLHO(EquationBase): #{{{
         B42 = mu2*(2.0*ub_x+4.0*vb_y) + mu3*(2.0*(u_x-ub_x)+4.0*(v_y-vb_y))
 
         # Getting the other derivatives
-        sigma11 = dde.grad.jacobian(B11, nn_input_var, i=0, j=xid)
-        sigma12 = dde.grad.jacobian(B12, nn_input_var, i=0, j=yid)
+        sigma11 = jacobian(B11, nn_input_var, i=0, j=xid)
+        sigma12 = jacobian(B12, nn_input_var, i=0, j=yid)
     
-        sigma21 = dde.grad.jacobian(B12, nn_input_var, i=0, j=xid)
-        sigma22 = dde.grad.jacobian(B22, nn_input_var, i=0, j=yid)
+        sigma21 = jacobian(B12, nn_input_var, i=0, j=xid)
+        sigma22 = jacobian(B22, nn_input_var, i=0, j=yid)
 
-        sigma31 = dde.grad.jacobian(B31, nn_input_var, i=0, j=xid)
-        sigma32 = dde.grad.jacobian(B32, nn_input_var, i=0, j=yid)
+        sigma31 = jacobian(B31, nn_input_var, i=0, j=xid)
+        sigma32 = jacobian(B32, nn_input_var, i=0, j=yid)
 
-        sigma41 = dde.grad.jacobian(B32, nn_input_var, i=0, j=xid)
-        sigma42 = dde.grad.jacobian(B42, nn_input_var, i=0, j=yid)
+        sigma41 = jacobian(B32, nn_input_var, i=0, j=xid)
+        sigma42 = jacobian(B42, nn_input_var, i=0, j=yid)
     
         # compute the basal stress
         u_norm = (ub**2+vb**2)**0.5

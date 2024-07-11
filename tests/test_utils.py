@@ -4,7 +4,7 @@ import os
 import numpy as np
 from deepxde import backend
 from deepxde.backend import backend_name
-from pinnicle.utils import save_dict_to_json, load_dict_from_json, data_misfit, load_mat, down_sample_core, down_sample
+from pinnicle.utils import save_dict_to_json, load_dict_from_json, data_misfit, load_mat, down_sample_core, down_sample, slice_column
 
 data = {"s":1, "v":[1, 2, 3]}
 
@@ -73,3 +73,9 @@ def test_down_sample():
 
     ind = down_sample(points, 4000)
     assert ind.shape == (3129,)
+
+def test_slice_column():
+    a = np.array([[1,2],[3,4]])
+    c = slice_column(a, 0, 1)
+    assert c.shape == (2,1)
+    assert c[1] == 3

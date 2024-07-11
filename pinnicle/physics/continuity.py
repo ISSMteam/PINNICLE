@@ -1,6 +1,6 @@
-import deepxde as dde
 from . import EquationBase, Constants
 from ..parameter import EquationParameter
+from ..utils import slice_column, jacobian
 
 class MCEquationParameter(EquationParameter, Constants):
     """ default parameters for mass conservation
@@ -50,18 +50,18 @@ class MC(EquationBase): #{{{
         Hid = self.local_output_var["H"]
 
         # unpacking normalized output
-        u, v, a, H = nn_output_var[:, uid:uid+1], nn_output_var[:, vid:vid+1], nn_output_var[:, aid:aid+1], nn_output_var[:, Hid:Hid+1]
+        u = slice_column(nn_output_var, uid, uid+1)
+        v = slice_column(nn_output_var, vid, vid+1)
+        a = slice_column(nn_output_var, aid, aid+1)
+        H = slice_column(nn_output_var, Hid, Hid+1)
     
         # spatial derivatives
-        u_x = dde.grad.jacobian(nn_output_var, nn_input_var, i=uid, j=xid)
-        H_x = dde.grad.jacobian(nn_output_var, nn_input_var, i=Hid, j=xid)
-        v_y = dde.grad.jacobian(nn_output_var, nn_input_var, i=vid, j=yid)
-        H_y = dde.grad.jacobian(nn_output_var, nn_input_var, i=Hid, j=yid)
+        u_x = jacobian(nn_output_var, nn_input_var, i=uid, j=xid)
+        H_x = jacobian(nn_output_var, nn_input_var, i=Hid, j=xid)
+        v_y = jacobian(nn_output_var, nn_input_var, i=vid, j=yid)
+        H_y = jacobian(nn_output_var, nn_input_var, i=Hid, j=yid)
     
         # residual
         f = H*u_x + H_x*u + H*v_y + H_y*v - a
     
         return [f] #}}}
-
-
-

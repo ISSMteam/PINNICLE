@@ -1,7 +1,7 @@
 from ..parameter import PhysicsParameter
 from . import EquationBase
 import itertools
-import deepxde as dde
+from ..utils import slice_column, jacobian
 
 class Physics:
     """ All the physics in used as constraint in the PINN
@@ -62,7 +62,9 @@ class Physics:
         """
         uid = self.output_var.index('u')
         vid = self.output_var.index('v')
-        vel = (nn_output_var[:,uid:uid+1]**2.0 + nn_output_var[:,vid:vid+1]**2.0) ** 0.5
+        u = slice_column(nn_output_var, uid, uid+1)
+        v = slice_column(nn_output_var, vid, vid+1)
+        vel = (u**2.0 + v**2.0) ** 0.5
         return vel
 
     def surf_x(self, nn_input_var, nn_output_var, X):
@@ -70,7 +72,7 @@ class Physics:
         """
         sid = self.output_var.index('s')
         xid = self.input_var.index('x')
-        dsdx = dde.grad.jacobian(nn_output_var, nn_input_var, i=sid, j=xid)
+        dsdx = jacobian(nn_output_var, nn_input_var, i=sid, j=xid)
         return dsdx
 
     def surf_y(self, nn_input_var, nn_output_var, X):
@@ -78,7 +80,7 @@ class Physics:
         """
         sid = self.output_var.index('s')
         yid = self.input_var.index('y')
-        dsdy = dde.grad.jacobian(nn_output_var, nn_input_var, i=sid, j=yid)
+        dsdy = jacobian(nn_output_var, nn_input_var, i=sid, j=yid)
         return dsdy
 
     def operator(self, pname):
