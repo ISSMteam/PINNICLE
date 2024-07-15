@@ -7,7 +7,6 @@ import matplotlib.pyplot as plt
 import pytest
 
 dde.config.set_default_float('float64')
-dde.config.disable_xla_jit()
 
 weights = [7, 7, 5, 5, 3, 3, 5]
 

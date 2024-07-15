@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from deepxde.backend import backend_name
 from ..parameter import EquationParameter
 from . import Constants
 
@@ -28,6 +29,14 @@ class EquationBase(ABC, Constants):
 
         # update scalar variables
         self.update_scalars(self.parameters.scalar_variables)
+
+        # set pde
+        if backend_name in ["tensorflow.compat.v1", "tensorflow", "paddle", "pytorch"]:
+            self.pde = self._pde
+        elif backend_name == "jax":
+            self.pde = self._pde_jax
+        else:
+            raise ValueError(f"Backeend {backend_name} is not defined")
 
     def get_input_list(self):
         """ get the List of names of input variables
@@ -80,9 +89,8 @@ class EquationBase(ABC, Constants):
         if isinstance(scalar_variables, dict):
             for key, value in scalar_variables.items():
                 setattr(self, key, value)
-
     @abstractmethod
-    def pde(self, nn_input_var, nn_output_var):
+    def _pde(self, nn_input_var, nn_output_var):
         """ pde function used in deepxde
         """
         return

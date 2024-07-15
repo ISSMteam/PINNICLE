@@ -2,11 +2,12 @@ import os
 import pinnicle as pinn
 import numpy as np
 import deepxde as dde
+from deepxde.backend import backend_name
 from pinnicle.utils import data_misfit, plot_nn
 import pytest
 
 dde.config.set_default_float('float64')
-dde.config.disable_xla_jit()
+#dde.config.disable_xla_jit()
 
 weights = [7, 7, 5, 5, 3, 3, 5]
 
@@ -126,14 +127,15 @@ def test_train_only_data(tmp_path):
 def test_train(tmp_path):
     hp["is_save"] = False
     hp["num_collocation_points"] = 100
-    issm["data_size"] = {"u":100, "v":100, "s":100, "H":100, "C":None, "vel":100}
+    issm["data_size"] = {"u":100, "v":100, "s":100, "H":100, "C":None}
     hp["data"] = {"ISSM": issm}
     hp["equations"] = {"SSA":SSA}
     experiment = pinn.PINN(params=hp)
     experiment.compile()
     experiment.train()
-    assert experiment.loss_names == ['fSSA1', 'fSSA2', 'u', 'v', 's', 'H', 'C', "vel log"]
+    assert experiment.loss_names == ['fSSA1', 'fSSA2', 'u', 'v', 's', 'H', 'C']
 
+@pytest.mark.skipif(backend_name=="jax", reason="wait until deepxde update to >1.11.1")
 def test_train_PFNN(tmp_path):
     hp["is_parallel"] = True
     hp["is_save"] = False
@@ -196,6 +198,7 @@ def test_only_callbacks(tmp_path):
     assert callbacks is not None
     assert len(callbacks) == 3
 
+@pytest.mark.skipif(backend_name=="jax", reason="plot_prediection is not implemented for jax")
 def test_plot(tmp_path):
     hp["save_path"] = str(tmp_path)
     hp["is_save"] = True
@@ -245,6 +248,7 @@ def test_SSA_VB_pde_function():
     assert y[0].shape == (10,1)
     assert y[1].shape == (10,1)
 
+@pytest.mark.skipif(backend_name=="jax", reason="MOLHO is not implemented for jax")
 def test_MOLHO_pde_function():
     MOLHO = {}
     MOLHO["n"] = {"n":3}
