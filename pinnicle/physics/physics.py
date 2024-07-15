@@ -1,3 +1,4 @@
+import deepxde as dde
 from ..parameter import PhysicsParameter
 from . import EquationBase
 import itertools
@@ -62,8 +63,8 @@ class Physics:
         """
         uid = self.output_var.index('u')
         vid = self.output_var.index('v')
-        u = slice_column(nn_output_var, uid, uid+1)
-        v = slice_column(nn_output_var, vid, vid+1)
+        u = slice_column(nn_output_var, uid)
+        v = slice_column(nn_output_var, vid) 
         vel = (u**2.0 + v**2.0) ** 0.5
         return vel
 
@@ -72,7 +73,7 @@ class Physics:
         """
         sid = self.output_var.index('s')
         xid = self.input_var.index('x')
-        dsdx = jacobian(nn_output_var, nn_input_var, i=sid, j=xid)
+        dsdx = dde.grad.jacobian(nn_output_var, nn_input_var, i=sid, j=xid)
         return dsdx
 
     def surf_y(self, nn_input_var, nn_output_var, X):
@@ -80,7 +81,7 @@ class Physics:
         """
         sid = self.output_var.index('s')
         yid = self.input_var.index('y')
-        dsdy = jacobian(nn_output_var, nn_input_var, i=sid, j=yid)
+        dsdy = dde.grad.jacobian(nn_output_var, nn_input_var, i=sid, j=yid)
         return dsdy
 
     def operator(self, pname):

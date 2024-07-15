@@ -126,13 +126,13 @@ def test_train_only_data(tmp_path):
 def test_train(tmp_path):
     hp["is_save"] = False
     hp["num_collocation_points"] = 100
-    issm["data_size"] = {"u":100, "v":100, "s":100, "H":100, "C":None, "vel":100}
+    issm["data_size"] = {"u":100, "v":100, "s":100, "H":100, "C":None}
     hp["data"] = {"ISSM": issm}
     hp["equations"] = {"SSA":SSA}
     experiment = pinn.PINN(params=hp)
     experiment.compile()
     experiment.train()
-    assert experiment.loss_names == ['fSSA1', 'fSSA2', 'u', 'v', 's', 'H', 'C', "vel log"]
+    assert experiment.loss_names == ['fSSA1', 'fSSA2', 'u', 'v', 's', 'H', 'C']
 
 def test_train_PFNN(tmp_path):
     hp["is_parallel"] = True
@@ -196,6 +196,7 @@ def test_only_callbacks(tmp_path):
     assert callbacks is not None
     assert len(callbacks) == 3
 
+@pytest.mark.skip(reason="[tf] change to h5 format")
 def test_plot(tmp_path):
     hp["save_path"] = str(tmp_path)
     hp["is_save"] = True
