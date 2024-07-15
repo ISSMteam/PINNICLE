@@ -420,5 +420,14 @@ class MOLHO(EquationBase): #{{{
         f4 = sigma41 + sigma42 + mu4*vshear - self.rhoi*self.g*H*s_y*(self.n+1.0)/(self.n+2.0)
 
         return [f1, f2, f3, f4] #}}}
+    def _pde_jax(self, nn_input_var, nn_output_var): #{{{
+        """ residual of MOLHO 2D PDEs
+
+        Args:
+            nn_input_var: global input to the nn
+            nn_output_var: global output from the nn
+        """
+        pass
+    #}}}
 #}}}
 #}}}
