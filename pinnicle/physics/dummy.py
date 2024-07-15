@@ -46,7 +46,15 @@ class Dummy(EquationBase): #{{{
     def __init__(self, parameters=DummyEquationParameter()):
         super().__init__(parameters)
 
-    def pde(self, nn_input_var, nn_output_var):
+    def _pde(self, nn_input_var, nn_output_var):
+        """ Dummy PDE returns nothing, to train the NN with data only
+
+        Args:
+            nn_input_var: global input to the nn
+            nn_output_var: global output from the nn
+        """
+        return [] 
+    def _pde_jax(self, nn_input_var, nn_output_var):
         """ Dummy PDE returns nothing, to train the NN with data only
 
         Args:
