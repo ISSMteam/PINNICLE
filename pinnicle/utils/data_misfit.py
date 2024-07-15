@@ -33,8 +33,8 @@ def get(identifier):
     if isinstance(identifier, str):
         if identifier in LOSS_DICT:
             return LOSS_DICT[identifier]
-        else:
-            return dde.losses.get(identifier)
+        elif identifier in dde.losses.LOSS_DICT:
+            return identifier
     if callable(identifier):
         return identifier
 
