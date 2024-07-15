@@ -43,6 +43,12 @@ jobs:
         DDE_BACKEND: tensorflow
       run: |
         pytest --cov .
+    - name: build and test for Jax
+      env:
+        DDE_BACKEND: jax
+      run: |
+        python -m pip install jax flax optax
+        pytest --cov .
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v3
       env:
