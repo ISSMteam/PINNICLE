@@ -50,10 +50,10 @@ class MC(EquationBase): #{{{
         Hid = self.local_output_var["H"]
 
         # unpacking normalized output
-        u = slice_column(nn_output_var, uid, uid+1)
-        v = slice_column(nn_output_var, vid, vid+1)
-        a = slice_column(nn_output_var, aid, aid+1)
-        H = slice_column(nn_output_var, Hid, Hid+1)
+        u = slice_column(nn_output_var, uid)
+        v = slice_column(nn_output_var, vid)
+        a = slice_column(nn_output_var, aid)
+        H = slice_column(nn_output_var, Hid)
     
         # spatial derivatives
         u_x = jacobian(nn_output_var, nn_input_var, i=uid, j=xid)
