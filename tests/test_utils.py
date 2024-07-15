@@ -19,18 +19,15 @@ def test_save_and_load_dict(tmp_path):
 def test_data_misfit():
     with pytest.raises(Exception):
         data_misfit.get("not defined")
-    assert data_misfit.get("MSE") != None
-    assert data_misfit.get("VEL_LOG") != None
-    assert data_misfit.get("MEAN_SQUARE_LOG") != None
-    if backend_name == "tensorflow":
-        assert data_misfit.get("MAPE") != None
+    dde_loss = ["mean absolute error", "MAE", "mae", "mean squared error", "mse", "mean absolute percentage error", "MAPE", "mape", "mean l2 relative error", "softmax cross entropy", "zero"]
+    for l in dde_loss:
+        assert data_misfit.get(l) == l
 
 def test_data_misfit_functions():
-    assert  data_misfit.get("MSE")(dde.backend.as_tensor([1.0]),dde.backend.as_tensor([1.0])) == 0.0
-    assert  data_misfit.get("VEL_LOG")(dde.backend.as_tensor([1.0]),dde.backend.as_tensor([1.0])) == 0.0
-    assert  data_misfit.get("MEAN_SQUARE_LOG")(dde.backend.as_tensor([1.0]),dde.backend.as_tensor([1.0])) == 0.0
-    if backend_name == "tensorflow":
-        assert  data_misfit.get("MAPE")(dde.backend.as_tensor([1.0]),dde.backend.as_tensor([1.0])) == 0.0
+    assert data_misfit.get("VEL_LOG") != None
+    assert data_misfit.get("MEAN_SQUARE_LOG") != None
+    assert data_misfit.get("VEL_LOG")(tf.convert_to_tensor([1.0]),tf.convert_to_tensor([1.0])) == 0.0
+    assert data_misfit.get("MEAN_SQUARE_LOG")(tf.convert_to_tensor([1.0]),tf.convert_to_tensor([1.0])) == 0.0
 
 def test_loadmat():
     filename = "flightTracks.mat"

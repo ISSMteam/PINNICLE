@@ -219,6 +219,7 @@ class PINN:
         else:
             loss_functions = self.params.training.loss_functions
 
+
         # if additional_loss is not empty
         if self.params.training.additional_loss:
             for d in self.params.training.additional_loss:
@@ -245,7 +246,10 @@ class PINN:
                     # weights
                     loss_weights.append(self.params.training.additional_loss[d].weight)
                     # append loss functions
-                    loss_functions.append(data_misfit.get(self.params.training.additional_loss[d].function))
+                    loss_functions.append(self.params.training.additional_loss[d].function)
+
+        # load the callable loss functions
+        loss_functions = [data_misfit.get(l) for l in loss_functions]
 
         return training_temp, loss_names, loss_weights, loss_functions
 
