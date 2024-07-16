@@ -1,6 +1,6 @@
 import deepxde as dde
 import deepxde.backend as bkd
-from deepxde.backend import backend_name, tf, jax
+from deepxde.backend import backend_name, tf, pytorch, jax
 
 def slice_column_tf(variable, i):
     """ slice the column i:i+1 of variable, tensorflow version
@@ -35,7 +35,7 @@ def jacobian_jax(output_var, input_var, i, j, val=0):
     J = dde.grad.jacobian(output_var, input_var, i, j)
     return J[val]
 
-if backend_name == "tensorflow":
+if backend_name in ["tensorflow", "pytorch"]:
     slice_column = slice_column_tf
     jacobian = jacobian_tf
 elif backend_name == "jax":

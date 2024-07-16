@@ -50,17 +50,17 @@ def test_pfnn():
     hp['is_parallel'] = False
     d = NNParameter(hp)
     p = pinn.nn.FNN(d)
-    if backend_name == "tensorflow":
-        assert len(p.net.layers) == 6
-    elif backend_name == "jax":
+    if backend_name == "jax":
         assert p.net.layer_sizes == [2, 4, 4, 4, 4, 4, 3]
+    else:
+        assert len(p.net.layers) == 6
     hp['is_parallel'] = True
     d = NNParameter(hp)
     p = pinn.nn.FNN(d)
-    if backend_name == "tensorflow":
-        assert len(p.net.layers) == 18
-    elif backend_name == "jax":
+    if backend_name == "jax":
         assert p.net.layer_sizes == [2, [4, 4, 4], [4, 4, 4], [4, 4, 4], [4, 4, 4], [4, 4, 4], 3]
+    else:
+        assert len(p.net.layers) == 18
 
 def test_pfnn_list_neuron():
     hp={}
@@ -71,14 +71,14 @@ def test_pfnn_list_neuron():
     hp['is_parallel'] = False
     d = NNParameter(hp)
     p = pinn.nn.FNN(d)
-    if backend_name == "tensorflow":
-        assert len(p.net.layers) == 4
-    elif backend_name == "jax":
+    if backend_name == "jax":
         assert p.net.layer_sizes == [2, 3, 4, 5, 3]
+    else:
+        assert len(p.net.layers) == 4
     hp['is_parallel'] = True
     d = NNParameter(hp)
     p = pinn.nn.FNN(d)
-    if backend_name == "tensorflow":
-        assert len(p.net.layers) == 12
-    elif backend_name == "jax":
+    if backend_name == "jax":
         assert p.net.layer_sizes == [2, [3, 3, 3], [4, 4, 4], [5, 5, 5], 3]
+    else:
+        assert len(p.net.layers) == 12
