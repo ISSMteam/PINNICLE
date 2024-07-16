@@ -20,12 +20,22 @@ def test_upscale():
     assert np.all(abs(y- np.linspace(lb, ub, 100)) < np.finfo(float).eps*ub)
 
 def test_new_nn():
-    p = pinn.nn.FNN()
-    d = NNParameter()
+    hp={}
+    hp['input_variables'] = ['x']
+    hp['output_variables'] = ['u']
+    hp['num_neurons'] = 1
+    hp['num_layers'] = 1
+    d = NNParameter(hp)
+    p = pinn.nn.FNN(d)
     assert (p.parameters.__dict__ == d.__dict__)
 
 def test_input_scale_nn():
-    d = NNParameter()
+    hp={}
+    hp['input_variables'] = ['x']
+    hp['output_variables'] = ['u']
+    hp['num_neurons'] = 1
+    hp['num_layers'] = 1
+    d = NNParameter(hp)
     d.input_lb = 1.0
     d.input_ub = 10.0
     p = pinn.nn.FNN(d)
@@ -33,7 +43,12 @@ def test_input_scale_nn():
     assert np.all(abs(p.net._input_transform(x)) < 1.0+np.finfo(float).eps)
 
 def test_output_scale_nn():
-    d = NNParameter()
+    hp={}
+    hp['input_variables'] = ['x']
+    hp['output_variables'] = ['u']
+    hp['num_neurons'] = 1
+    hp['num_layers'] = 1
+    d = NNParameter(hp)
     d.output_lb = 1.0
     d.output_ub = 10.0
     p = pinn.nn.FNN(d)
@@ -52,6 +67,8 @@ def test_pfnn():
     p = pinn.nn.FNN(d)
     if backend_name == "jax":
         assert p.net.layer_sizes == [2, 4, 4, 4, 4, 4, 3]
+    elif backend_name == "pytorch":
+        assert [k.in_features for k in p.net.linears] == [2, 4, 4, 4, 4, 4]
     else:
         assert len(p.net.layers) == 6
     hp['is_parallel'] = True
@@ -59,6 +76,8 @@ def test_pfnn():
     p = pinn.nn.FNN(d)
     if backend_name == "jax":
         assert p.net.layer_sizes == [2, [4, 4, 4], [4, 4, 4], [4, 4, 4], [4, 4, 4], [4, 4, 4], 3]
+    elif backend_name == "pytorch":
+        assert [[i.in_features for i in k] for k in p.net.layers] == [[2, 2, 2], [4, 4, 4], [4, 4, 4], [4, 4, 4], [4, 4, 4], [4, 4, 4]]
     else:
         assert len(p.net.layers) == 18
 
@@ -73,6 +92,8 @@ def test_pfnn_list_neuron():
     p = pinn.nn.FNN(d)
     if backend_name == "jax":
         assert p.net.layer_sizes == [2, 3, 4, 5, 3]
+    elif backend_name == "pytorch":
+        assert [k.in_features for k in p.net.linears] == [2, 3, 4, 5]
     else:
         assert len(p.net.layers) == 4
     hp['is_parallel'] = True
@@ -80,5 +101,7 @@ def test_pfnn_list_neuron():
     p = pinn.nn.FNN(d)
     if backend_name == "jax":
         assert p.net.layer_sizes == [2, [3, 3, 3], [4, 4, 4], [5, 5, 5], 3]
+    elif backend_name == "pytorch":
+        assert [[i.in_features for i in k] for k in p.net.layers] == [[2, 2, 2], [3, 3, 3], [4, 4, 4], [5, 5, 5]]
     else:
         assert len(p.net.layers) == 12
