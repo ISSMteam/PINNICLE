@@ -1,6 +1,6 @@
 import deepxde as dde
 import deepxde.backend as bkd
-from deepxde.backend import backend_name, tf, pytorch, jax
+from deepxde.backend import backend_name, tf, torch, jax
 
 def slice_column_tf(variable, i):
     """ slice the column i:i+1 of variable, tensorflow version
