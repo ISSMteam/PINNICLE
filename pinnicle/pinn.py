@@ -1,6 +1,5 @@
 import os
 import deepxde as dde
-import deepxde.backend as bkd
 import numpy as np
 
 from .utils import save_dict_to_json, load_dict_from_json, History, plot_solutions, data_misfit
@@ -271,14 +270,14 @@ class PINN:
         """
         self.params.nn.set_parameters({"input_variables": self.physics.input_var, 
             "output_variables": self.physics.output_var, 
-            "output_lb": bkd.as_tensor(self.physics.output_lb),
-            "output_ub": bkd.as_tensor(self.physics.output_ub)})
+            "output_lb": self.physics.output_lb,
+            "output_ub": self.physics.output_ub})
 
     def _update_ub_lb_in_nn(self, training_data):
         """ update input/output scalings parameters for nn
         """
         # automate the input scaling according to the domain
-        self.params.nn.set_parameters({"input_lb": bkd.as_tensor(self.domain.geometry.bbox[0,:]), "input_ub": bkd.as_tensor(self.domain.geometry.bbox[1,:])})
+        self.params.nn.set_parameters({"input_lb": self.domain.geometry.bbox[0,:], "input_ub": self.domain.geometry.bbox[1,:]})
 
         # check if training data exceed the scaling range
         for i,d in enumerate(self.params.nn.output_variables):
@@ -289,5 +288,5 @@ class PINN:
                     self.params.nn.output_lb[i] = np.min(training_data.sol[d])
 
         # wrap output_lb and output_ub with np.array
-        self.params.nn.output_lb = bkd.as_tensor(self.params.nn.output_lb)
-        self.params.nn.output_ub = bkd.as_tensor(self.params.nn.output_ub)
+        self.params.nn.output_lb = self.params.nn.output_lb
+        self.params.nn.output_ub = self.params.nn.output_ub
