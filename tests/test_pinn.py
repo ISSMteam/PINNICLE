@@ -135,7 +135,7 @@ def test_train(tmp_path):
     experiment.train()
     assert experiment.loss_names == ['fSSA1', 'fSSA2', 'u', 'v', 's', 'H', 'C']
 
-@pytest.mark.skipif(backend_name=="jax", reason="wait until deepxde update to >1.11.1")
+@pytest.mark.skipif(backend_name in ["jax", "pytorch"], reason="wait until deepxde update to >1.11.1, and support MAPE")
 def test_train_PFNN(tmp_path):
     hp["is_parallel"] = True
     hp["is_save"] = False

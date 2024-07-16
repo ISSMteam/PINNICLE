@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 import matplotlib.ticker as ticker
 import matplotlib as mpl
+import deepxde.backend as bkd
 from matplotlib.colors import ListedColormap
 from scipy.interpolate import griddata
 from scipy.spatial import cKDTree as KDTree
@@ -41,8 +42,8 @@ def plot_solutions(pinn, path="", filename="2Dsolution.png", X_ref=None, sol_ref
         X, Y = np.meshgrid(np.linspace(pinn.params.nn.input_lb[0], pinn.params.nn.input_ub[0], resolution),
                 np.linspace(pinn.params.nn.input_lb[1], pinn.params.nn.input_ub[1], resolution))
         X_nn = np.hstack((X.flatten()[:,None], Y.flatten()[:,None]))
-        grid_size = 2.0*(((pinn.params.nn.input_ub[0] - pinn.params.nn.input_lb[0])/resolution)**2+
-                         ((pinn.params.nn.input_ub[1] - pinn.params.nn.input_lb[1])/resolution)**2)**0.5
+        grid_size = bkd.to_numpy(2.0*(((pinn.params.nn.input_ub[0] - pinn.params.nn.input_lb[0])/resolution)**2+
+                         ((pinn.params.nn.input_ub[1] - pinn.params.nn.input_lb[1])/resolution)**2)**0.5)
 
         # predicted solutions
         sol_pred = pinn.model.predict(X_nn)
@@ -127,8 +128,8 @@ def plot_nn(pinn, data_names=None, X_mask=None, axs=None, vranges={}, resolution
                        np.linspace(nn_params.input_lb[1], nn_params.input_ub[1], resolution))
     X_nn = np.hstack((X.flatten()[:,None], Y.flatten()[:,None]))
 
-    grid_size = 2.0*(((nn_params.input_ub[0] - nn_params.input_lb[0])/resolution)**2+
-                     ((nn_params.input_ub[1] - nn_params.input_lb[1])/resolution)**2)**0.5
+    grid_size = bkd.to_numpy(2.0*(((nn_params.input_ub[0] - nn_params.input_lb[0])/resolution)**2+
+                     ((nn_params.input_ub[1] - nn_params.input_lb[1])/resolution)**2)**0.5)
     
     # ice mask coordinates
     if not X_mask:
