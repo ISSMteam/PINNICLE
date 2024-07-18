@@ -1,7 +1,6 @@
 import pinnicle as pinn
 from pinnicle.nn.helper import minmax_scale, up_scale
 from pinnicle.parameter import NNParameter
-from deepxde import backend
 from deepxde.backend import backend_name
 import numpy as np
 
@@ -39,8 +38,8 @@ def test_input_scale_nn():
     d.input_lb = 1.0
     d.input_ub = 10.0
     p = pinn.nn.FNN(d)
-    x = backend.as_tensor(np.linspace(d.input_lb, d.input_ub, 100))
-    assert np.all(abs(backend.to_numpy(p.net._input_transform(x))) < 1.0+np.finfo(float).eps)
+    x = np.linspace(d.input_lb, d.input_ub, 100)
+    assert np.all(abs(p.net._input_transform(x)) < 1.0+np.finfo(float).eps)
 
 def test_output_scale_nn():
     hp={}
@@ -52,10 +51,10 @@ def test_output_scale_nn():
     d.output_lb = 1.0
     d.output_ub = 10.0
     p = pinn.nn.FNN(d)
-    x = backend.as_tensor(np.linspace(-1.0, 1.0, 100))
-    y = backend.as_tensor([0])
-    assert np.all(backend.to_numpy(p.net._output_transform(y, x)) > 1.0 - 1.0*np.finfo(float).eps) 
-    assert np.all(backend.to_numpy(p.net._output_transform(y, x)) < 10.0 + 10.0*np.finfo(float).eps) 
+    x = np.linspace(-1.0, 1.0, 100)
+    y = [0.0]
+    assert np.all(p.net._output_transform(y, x) > 1.0 - 1.0*np.finfo(float).eps) 
+    assert np.all(p.net._output_transform(y, x) < 10.0 + 10.0*np.finfo(float).eps) 
 
 def test_pfnn():
     hp={}
