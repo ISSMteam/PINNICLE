@@ -42,8 +42,11 @@ def plot_solutions(pinn, path="", filename="2Dsolution.png", X_ref=None, sol_ref
         X, Y = np.meshgrid(np.linspace(pinn.params.nn.input_lb[0], pinn.params.nn.input_ub[0], resolution),
                 np.linspace(pinn.params.nn.input_lb[1], pinn.params.nn.input_ub[1], resolution))
         X_nn = np.hstack((X.flatten()[:,None], Y.flatten()[:,None]))
+
         grid_size = 2.0*(((pinn.params.nn.input_ub[0] - pinn.params.nn.input_lb[0])/resolution)**2+
                          ((pinn.params.nn.input_ub[1] - pinn.params.nn.input_lb[1])/resolution)**2)**0.5
+        if bkd.backend_name == "pytorch":
+            grid_size = bkd.to_numpy(grid_size)
 
         # predicted solutions
         sol_pred = pinn.model.predict(X_nn)
@@ -130,6 +133,8 @@ def plot_nn(pinn, data_names=None, X_mask=None, axs=None, vranges={}, resolution
 
     grid_size = 2.0*(((nn_params.input_ub[0] - nn_params.input_lb[0])/resolution)**2+
                      ((nn_params.input_ub[1] - nn_params.input_lb[1])/resolution)**2)**0.5
+    if bkd.backend_name == "pytorch":
+        grid_size = bkd.to_numpy(grid_size)
     
     # ice mask coordinates
     if not X_mask:
