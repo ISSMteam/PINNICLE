@@ -288,5 +288,5 @@ class PINN:
                     self.params.nn.output_lb[i] = np.min(training_data.sol[d])
 
         # wrap output_lb and output_ub with np.array
-        self.params.nn.output_lb = self.params.nn.output_lb
-        self.params.nn.output_ub = self.params.nn.output_ub
+        self.params.nn.output_lb = np.array(self.params.nn.output_lb)
+        self.params.nn.output_ub = np.array(self.params.nn.output_ub)

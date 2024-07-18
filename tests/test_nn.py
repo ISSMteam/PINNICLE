@@ -8,15 +8,15 @@ import numpy as np
 def test_minmax_scale():
     lb = 1.0
     ub = 10.0
-    x = backend.as_tensor(np.linspace(lb, ub, 100))
-    y = backend.to_numpy(minmax_scale(x, backend.as_tensor(lb), backend.as_tensor(ub)))
+    x = np.linspace(lb, ub, 100)
+    y = minmax_scale(x, lb, ub)
     assert np.all(abs(y- np.linspace(-1.0, 1.0, 100)) < np.finfo(float).eps*ub)
 
 def test_upscale():
     lb = 1.0
     ub = 10.0
-    x = backend.as_tensor(np.linspace(-1.0, 1.0, 100))
-    y = backend.to_numpy(up_scale(x, backend.as_tensor(lb), backend.as_tensor(ub)))
+    x = np.linspace(-1.0, 1.0, 100)
+    y = up_scale(x, lb, ub)
     assert np.all(abs(y- np.linspace(lb, ub, 100)) < np.finfo(float).eps*ub)
 
 def test_new_nn():

@@ -22,8 +22,8 @@ class FNN:
         if self.parameters.is_input_scaling():
             print(f"add input transform with {self.parameters.input_lb} and {self.parameters.input_ub}")
             # force the input and output lb and ub to be tensors
-            self.parameters.input_lb = bkd.as_tensor(self.parameters.input_lb)
-            self.parameters.input_ub = bkd.as_tensor(self.parameters.input_ub)
+            #self.parameters.input_lb = bkd.as_tensor(self.parameters.input_lb)
+            #self.parameters.input_ub = bkd.as_tensor(self.parameters.input_ub)
             # add input transform
             self._add_input_transform(minmax_scale)
 
@@ -31,8 +31,8 @@ class FNN:
         if self.parameters.is_output_scaling():
             print(f"add output transform with {self.parameters.output_lb} and {self.parameters.output_ub}")
             # force the input and output lb and ub to be tensors
-            self.parameters.output_lb = bkd.as_tensor(self.parameters.output_lb)
-            self.parameters.output_ub = bkd.as_tensor(self.parameters.output_ub)
+            #self.parameters.output_lb = bkd.as_tensor(self.parameters.output_lb)
+            #self.parameters.output_ub = bkd.as_tensor(self.parameters.output_ub)
             # add output transform
             self._add_output_transform(up_scale)
 
