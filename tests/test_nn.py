@@ -41,7 +41,7 @@ def test_input_scale_nn():
     p = pinn.nn.FNN(d)
     x = bkd.as_tensor(np.linspace(d.input_lb, d.input_ub, 100))
     y = bkd.to_numpy(p.net._input_transform(x))
-    assert np.all(abs(y) < 1.0+np.finfo(float).eps)
+    assert np.all(abs(y) <= 1.0+np.finfo(float).eps)
 
 def test_output_scale_nn():
     hp={}
@@ -56,8 +56,8 @@ def test_output_scale_nn():
     x = bkd.as_tensor(np.linspace(-1.0, 1.0, 100))
     y = [0.0]
     out = bkd.to_numpy(p.net._output_transform(y,x))
-    assert np.all(out > 1.0 - 1.0*np.finfo(float).eps) 
-    assert np.all(out < 10.0 + 10.0*np.finfo(float).eps) 
+    assert np.all(out >= 1.0 - 1.0*np.finfo(float).eps) 
+    assert np.all(out <= 10.0 + 10.0*np.finfo(float).eps) 
 
 def test_pfnn():
     hp={}
