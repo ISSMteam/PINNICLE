@@ -1,3 +1,5 @@
+import deepxde.backend as bkd
+
 def minmax_scale(x, lb, ub, scale=2.0, offset=1.0):
     """
     min-max scale

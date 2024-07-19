@@ -1,7 +1,7 @@
 import pinnicle as pinn
 from pinnicle.nn.helper import minmax_scale, up_scale
 from pinnicle.parameter import NNParameter
-from deepxde import backend
+import deepxde.backend as bkd
 from deepxde.backend import backend_name
 import numpy as np
 
@@ -20,26 +20,44 @@ def test_upscale():
     assert np.all(abs(y- np.linspace(lb, ub, 100)) < np.finfo(float).eps*ub)
 
 def test_new_nn():
-    p = pinn.nn.FNN()
-    d = NNParameter()
+    hp={}
+    hp['input_variables'] = ['x']
+    hp['output_variables'] = ['u']
+    hp['num_neurons'] = 1
+    hp['num_layers'] = 1
+    d = NNParameter(hp)
+    p = pinn.nn.FNN(d)
     assert (p.parameters.__dict__ == d.__dict__)
 
 def test_input_scale_nn():
-    d = NNParameter()
+    hp={}
+    hp['input_variables'] = ['x']
+    hp['output_variables'] = ['u']
+    hp['num_neurons'] = 1
+    hp['num_layers'] = 1
+    d = NNParameter(hp)
     d.input_lb = 1.0
     d.input_ub = 10.0
     p = pinn.nn.FNN(d)
-    x = np.linspace(d.input_lb, d.input_ub, 100)
-    assert np.all(abs(p.net._input_transform(x)) < 1.0+np.finfo(float).eps)
+    x = bkd.as_tensor(np.linspace(d.input_lb, d.input_ub, 100))
+    y = bkd.to_numpy(p.net._input_transform(x))
+    assert np.all(abs(y) <= 1.0+np.finfo(float).eps)
 
 def test_output_scale_nn():
-    d = NNParameter()
+    hp={}
+    hp['input_variables'] = ['x']
+    hp['output_variables'] = ['u']
+    hp['num_neurons'] = 1
+    hp['num_layers'] = 1
+    d = NNParameter(hp)
     d.output_lb = 1.0
     d.output_ub = 10.0
     p = pinn.nn.FNN(d)
-    x = np.linspace(-1.0, 1.0, 100)
-    assert np.all(p.net._output_transform([0], x) > d.output_lb - d.output_lb*np.finfo(float).eps) 
-    assert np.all(p.net._output_transform([0], x) < d.output_ub + d.output_ub*np.finfo(float).eps) 
+    x = bkd.as_tensor(np.linspace(-1.0, 1.0, 100))
+    y = [0.0]
+    out = bkd.to_numpy(p.net._output_transform(y,x))
+    assert np.all(out >= 1.0 - 1.0*np.finfo(float).eps) 
+    assert np.all(out <= 10.0 + 10.0*np.finfo(float).eps) 
 
 def test_pfnn():
     hp={}
@@ -50,17 +68,21 @@ def test_pfnn():
     hp['is_parallel'] = False
     d = NNParameter(hp)
     p = pinn.nn.FNN(d)
-    if backend_name == "tensorflow":
-        assert len(p.net.layers) == 6
-    elif backend_name == "jax":
+    if backend_name == "jax":
         assert p.net.layer_sizes == [2, 4, 4, 4, 4, 4, 3]
+    elif backend_name == "pytorch":
+        assert [k.in_features for k in p.net.linears] == [2, 4, 4, 4, 4, 4]
+    else:
+        assert len(p.net.layers) == 6
     hp['is_parallel'] = True
     d = NNParameter(hp)
     p = pinn.nn.FNN(d)
-    if backend_name == "tensorflow":
-        assert len(p.net.layers) == 18
-    elif backend_name == "jax":
+    if backend_name == "jax":
         assert p.net.layer_sizes == [2, [4, 4, 4], [4, 4, 4], [4, 4, 4], [4, 4, 4], [4, 4, 4], 3]
+    elif backend_name == "pytorch":
+        assert [[i.in_features for i in k] for k in p.net.layers] == [[2, 2, 2], [4, 4, 4], [4, 4, 4], [4, 4, 4], [4, 4, 4], [4, 4, 4]]
+    else:
+        assert len(p.net.layers) == 18
 
 def test_pfnn_list_neuron():
     hp={}
@@ -71,14 +93,18 @@ def test_pfnn_list_neuron():
     hp['is_parallel'] = False
     d = NNParameter(hp)
     p = pinn.nn.FNN(d)
-    if backend_name == "tensorflow":
-        assert len(p.net.layers) == 4
-    elif backend_name == "jax":
+    if backend_name == "jax":
         assert p.net.layer_sizes == [2, 3, 4, 5, 3]
+    elif backend_name == "pytorch":
+        assert [k.in_features for k in p.net.linears] == [2, 3, 4, 5]
+    else:
+        assert len(p.net.layers) == 4
     hp['is_parallel'] = True
     d = NNParameter(hp)
     p = pinn.nn.FNN(d)
-    if backend_name == "tensorflow":
-        assert len(p.net.layers) == 12
-    elif backend_name == "jax":
+    if backend_name == "jax":
         assert p.net.layer_sizes == [2, [3, 3, 3], [4, 4, 4], [5, 5, 5], 3]
+    elif backend_name == "pytorch":
+        assert [[i.in_features for i in k] for k in p.net.layers] == [[2, 2, 2], [3, 3, 3], [4, 4, 4], [5, 5, 5]]
+    else:
+        assert len(p.net.layers) == 12
