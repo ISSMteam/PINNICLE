@@ -97,6 +97,7 @@ def test_save_and_load_setting(tmp_path):
     experiment = pinn.PINN(params=hp)
     experiment.save_setting(path=tmp_path)
     assert experiment.params.param_dict == experiment.load_setting(path=tmp_path)
+    assert os.path.isdir(f"{tmp_path}/pinn/")
     experiment2 = pinn.PINN(loadFrom=tmp_path)
     assert experiment.params.param_dict == experiment2.params.param_dict
 
@@ -151,7 +152,6 @@ def test_train_PFNN(tmp_path):
     assert len(experiment.model.net.layers) == 5*(2+1)
     assert len(experiment.model.net.trainable_weights) == 30
 
-@pytest.mark.skip(reason="[tf] change to h5 format")
 def test_save_train(tmp_path):
     hp["save_path"] = str(tmp_path)
     hp["is_save"] = True
@@ -162,9 +162,8 @@ def test_save_train(tmp_path):
     experiment.compile()
     experiment.train()
     assert experiment.loss_names == ['fSSA1', 'fSSA2', 'u', 'v', 's', 'H', 'C', "vel log"]
-    assert os.path.isfile(f"{tmp_path}/pinn/model-{hp['epochs']}.ckpt.index")
+    assert os.path.isfile(f"{tmp_path}/pinn/model-{hp['epochs']}.weights.h5")
 
-@pytest.mark.skip(reason="[tf] change to h5 format")
 def test_train_with_callbacks(tmp_path):
     hp["save_path"] = str(tmp_path)
     hp["is_save"] = True
@@ -179,9 +178,9 @@ def test_train_with_callbacks(tmp_path):
     experiment.compile()
     experiment.train()
     assert experiment.loss_names == ['fSSA1', 'fSSA2', 'u', 'v', 's', 'H', 'C', "vel log"]
-    assert os.path.isfile(f"{tmp_path}/pinn/model-1.ckpt.index")
-    assert os.path.isfile(f"{tmp_path}/pinn/model-9.ckpt.index")
-    assert not os.path.isfile(f"{tmp_path}/pinn/model-{hp['epochs']}.ckpt.index")
+    assert os.path.isfile(f"{tmp_path}/pinn/model-1.weights.h5")
+    assert os.path.isfile(f"{tmp_path}/pinn/model-9.weights.h5")
+    assert not os.path.isfile(f"{tmp_path}/pinn/model-{hp['epochs']}.weights.h5")
 
 def test_only_callbacks(tmp_path):
     hp["save_path"] = str(tmp_path)

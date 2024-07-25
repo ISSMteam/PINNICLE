@@ -100,11 +100,13 @@ class PINN:
         path = self.check_path(path)
         self.model.save(f"{path}/{subfolder}/{name}")
 
-    def save_setting(self, path=""):
+    def save_setting(self, path="", subfolder="pinn"):
         """ save settings from self.params.param_dict
         """
         path = self.check_path(path)
         save_dict_to_json(self.params.param_dict, path, "params.json")
+        # create path/pinn/ to save the model weights
+        self.check_path(f"{path}/{subfolder}/")
     
     def setup(self):
         """ setup the model according to `self.params` from the constructor
