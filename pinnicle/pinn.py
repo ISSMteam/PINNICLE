@@ -1,4 +1,5 @@
 import os
+import glob
 import deepxde as dde
 import numpy as np
 
@@ -52,15 +53,28 @@ class PINN:
         # compile the model
         self.model.compile(opt, loss=loss, lr=lr, loss_weights=loss_weights)
 
-    def load_model(self, path="", epochs=-1, subfolder="pinn", name="model"):
+    def load_model(self, path="", epochs=-1, subfolder="pinn", name="model", fileformat=""):
         """laod the neural network from saved model
         """
         if epochs == -1:
             epochs = self.params.training.epochs
 
+        # get the path
         path = self.check_path(path, loadOnly=True)
-        self.model.restore(f"{path}/{subfolder}/{name}-{epochs}.ckpt")
-        # need to recompile the model, so that model.prediction can work properly
+
+        # find the model file 
+        if fileformat == "":
+            filename = glob.glob(f"{path}/{subfolder}/{name}-{epochs}.*")[0]
+        else:
+            filename = f"{path}/{subfolder}/{name}-{epochs}.{fileformat}"
+
+        # TODO: remove this step
+        # need to predict once, otherwise the weights can not be restored to the nn
+        self.compile()
+        self.model.predict(np.zeros([1, self.params.nn.input_size]))
+
+        # now the weights can be loaded
+        self.model.restore(filename)
         self.compile()
 
     def load_setting(self, path="", filename="params.json"):
