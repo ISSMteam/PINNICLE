@@ -140,7 +140,7 @@ def test_train(tmp_path):
     experiment.train()
     assert experiment.loss_names == ['fSSA1', 'fSSA2', 'u', 'v', 's', 'H', 'C']
 
-@pytest.mark.skipif(backend_name in ["jax", "pytorch"], reason="wait until deepxde update to >1.11.1, and support MAPE")
+@pytest.mark.skipif(backend_name in ["jax"], reason="save model is not implemented in deepxde for jax")
 def test_train_PFNN(tmp_path):
     hp_local = dict(hp)
     hp_local["is_parallel"] = True
@@ -163,6 +163,7 @@ def test_train_PFNN(tmp_path):
     assert len(experiment.model.net.layers) == 5*(2+1)
     assert len(experiment.model.net.trainable_weights) == 30
 
+@pytest.mark.skipif(backend_name in ["jax"], reason="save model is not implemented in deepxde for jax")
 def test_save_and_load_train(tmp_path):
     hp_local = dict(hp)
     hp_local["save_path"] = str(tmp_path)
@@ -186,6 +187,7 @@ def test_save_and_load_train(tmp_path):
     experiment_load.load_model(path=tmp_path, epochs=hp_local['epochs'])
     assert np.all(experiment_load.model.predict(experiment.model_data.X['u'])==experiment.model.predict(experiment.model_data.X['u']))
 
+@pytest.mark.skipif(backend_name in ["jax"], reason="save model is not implemented in deepxde for jax")
 def test_train_with_callbacks(tmp_path):
     hp_local = dict(hp)
     hp_local["save_path"] = str(tmp_path)
