@@ -50,6 +50,12 @@ SSA = {}
 SSA["scalar_variables"] = {"B":1.26802073401e+08}
 hp["equations"] = {"SSA":SSA}
 
+# extension of the saved model:
+if backend_name == "tensorflow":
+    extension = "weights.h5"
+elif backend_name == "pytorch":
+    extension = "pt"
+
 def test_compile_no_data():
     hp_local = dict(hp)
     issm["data_size"] = {}
@@ -160,8 +166,15 @@ def test_train_PFNN(tmp_path):
     experiment.train()
     assert experiment.loss_names == ['fSSA1', 'fSSA2', 'u', 'v', 's', 'H', 'C', "vel log"]
     assert experiment.params.nn.num_layers == 2
-    assert len(experiment.model.net.layers) == 5*(2+1)
-    assert len(experiment.model.net.trainable_weights) == 30
+    if backend_name == "pytorch":
+        assert len(experiment.model.net.layers) == 3
+        assert len(experiment.model.net.layers[0]) == 5
+        assert len(experiment.model.net.layers[1]) == 5
+        assert len(experiment.model.net.layers[2]) == 5
+        assert len(list(experiment.model.net.parameters())) == 30
+    else:
+        assert len(experiment.model.net.layers) == 5*(2+1)
+        assert len(experiment.model.net.trainable_weights) == 30
 
 @pytest.mark.skipif(backend_name in ["jax"], reason="save model is not implemented in deepxde for jax")
 def test_save_and_load_train(tmp_path):
@@ -182,7 +195,7 @@ def test_save_and_load_train(tmp_path):
     experiment.compile()
     experiment.train()
     assert experiment.loss_names == ['fSSA1', 'fSSA2', 'u', 'v', 's', 'H', 'C', "vel log"]
-    assert os.path.isfile(f"{tmp_path}/pinn/model-{hp_local['epochs']}.weights.h5")
+    assert os.path.isfile(f"{tmp_path}/pinn/model-{hp_local['epochs']}.{extension}")
     experiment_load = pinn.PINN(params=hp_local)
     experiment_load.load_model(path=tmp_path, epochs=hp_local['epochs'])
     assert np.all(experiment_load.model.predict(experiment.model_data.X['u'])==experiment.model.predict(experiment.model_data.X['u']))
@@ -210,9 +223,9 @@ def test_train_with_callbacks(tmp_path):
     experiment.compile()
     experiment.train()
     assert experiment.loss_names == ['fSSA1', 'fSSA2', 'u', 'v', 's', 'H', 'C', "vel log"]
-    assert os.path.isfile(f"{tmp_path}/pinn/model-1.weights.h5")
-    assert os.path.isfile(f"{tmp_path}/pinn/model-9.weights.h5")
-    assert not os.path.isfile(f"{tmp_path}/pinn/model-{hp_local['epochs']}.weights.h5")
+    assert os.path.isfile(f"{tmp_path}/pinn/model-1.{extension}")
+    assert os.path.isfile(f"{tmp_path}/pinn/model-9.{extension}")
+    assert not os.path.isfile(f"{tmp_path}/pinn/model-{hp_local['epochs']}.{extension}")
 
 def test_only_callbacks(tmp_path):
     hp_local = dict(hp)
