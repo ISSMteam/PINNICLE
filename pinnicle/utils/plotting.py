@@ -660,7 +660,7 @@ def plot_tracks(pinn, feature, filepath=None, x_name_map='x', y_name_map='y', fe
 
     axes = axs.tripcolor(triangles, pred_sol, cmap=cmap, norm=colors.Normalize(vmin=cmin, vmax=cmax))
     axes = axs.scatter(xx, yy, s=2, c=gdata, cmap=cmap, vmin=cmin, vmax=cmax)
-    title = feature+r"$_{pred}$ & sparse " +feature+"_{true}"
+    title = feature+r"$_{pred}$ & sparse " +feature+r"$_{true}$"
     axs.set_title(title, fontsize=12)
     axs.axis('off')
     cb = plt.colorbar(axes, ax=axs)
