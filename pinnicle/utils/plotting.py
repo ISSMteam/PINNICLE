@@ -669,3 +669,122 @@ def plot_tracks(pinn, feature, filepath=None, x_name_map='x', y_name_map='y', fe
     cb.update_ticks()
 
     return fig, axs
+
+def plot_average_model(pathlist, feature, feat_title=None, mdata='ISSM', cmap='jet', scale=1, figsize=(15, 4), colorbar_bins=10, elements=None):
+    """plotting the average model with ISSM triangulation
+    """
+    # figure title
+    if feat_title == None:
+        if type(feature)==list:
+            raise TypeError('feat_title must be provided as string input')
+        else:
+            feat_title = feature
+
+    # initialize figure
+    fig, axs = plt.subplots(1, 3, figsize=figsize)
+
+    for idx, path in enumerate(pathlist):
+        print(idx, path)
+        paramfile = open(path+'/params.json')
+        params = json.load(paramfile)
+
+        # create model
+        md = pinn.PINN(params)
+        md.compile()
+
+        # restore previous model
+        md.load_model(path)
+
+        # NN features
+        if idx == 0:
+            input_names = md.nn.parameters.input_variables
+            output_names = md.nn.parameters.output_variables
+
+            # inputs
+            X_ref = md.model_data.data[mdata].X_dict
+            xref = X_ref[input_names[0]].flatten()[:,None]
+            for i in range(1, len(input_names)):
+                xref = np.hstack((xref, X_ref[input_names[i]].flatten()[:,None]))
+            meshx = np.squeeze(xref[:, 0])
+            meshy = np.squeeze(xref[:, 1])
+
+            # reference solution
+            X_sol = md.model_data.data[mdata].data_dict
+            sol = X_sol[output_names[0]].flatten()[:,None]
+            for i in range(1, len(output_names)):
+                sol = np.hstack((sol, X_sol[output_names[i]].flatten()[:,None]))
+
+            # elements, if any
+            if elements!=None:
+                triangles = elements
+                if len(triangles)!=len(meshx):
+                    raise ValueError('number of elements must equal number number of vertices (x, y)')
+            else:
+                if md.model_data.data[mdata].mesh_dict == {}:
+                    triangles = mpl.tri.Triangulation(meshx, meshy)
+                else:
+                    if md.params.param_dict['data'][mdata]['data_path'].endswith('.mat'):
+                        elements = md.model_data.data[mdata].mesh_dict['elements']-1
+                    else:
+                        elements = md.model_data.data[mdata].mesh_dict['elements']
+                    triangles = mpl.tri.Triangulation(meshx, meshy, elements)
+
+            # reference solution
+            ref_sol = np.zeros_like(np.squeeze(sol[:, 0:1]*scale))
+            if type(feature)==list:
+                for feat in feature:
+                    fid = output_names.index(feat)
+                    ref_sol += (np.squeeze(sol[:, fid:fid+1]*scale))**2
+                ref_sol = np.sqrt(ref_sol)
+            else:
+                fid = output_names.index(feature)
+                ref_sol = np.squeeze(sol[:, fid:fid+1]*scale)
+
+        # retrieve predictions
+        pred = md.model.predict(xref)
+
+        # grab feature
+        if idx == 0:
+            pred_avg = np.zeros_like(np.squeeze(pred[:, 0:1]*scale))
+        pred_sol = np.zeros_like(np.squeeze(pred[:, 0:1]*scale))
+        if type(feature)==list:
+            for feat in feature:
+                fid = output_names.index(feat)
+                pred_sol += (np.squeeze(pred[:, fid:fid+1]*scale))**2
+            pred_sol = np.sqrt(pred_sol)
+            pred_avg += pred_sol
+        else:
+            fid = output_names.index(feature)
+            pred_sol = np.squeeze(pred[:, fid:fid+1]*scale)
+            pred_avg += pred_sol
+
+    # average prediction
+    pred_avg = pred_avg/len(pathlist)
+    [cmin, cmax] = [0.9*np.min(np.append(ref_sol, pred_avg)), 1.1*np.max(np.append(ref_sol, pred_avg))]
+    data_list = [ref_sol, pred_avg]
+    title_list = [ feat_title + r"$_{ref}$", feat_title + r"$_{avg}$"]
+
+    for c in range(3):
+        if c == 2:
+            print('Default similarity MAE implemented.')
+            diff = np.abs(ref_sol-pred_avg)
+            diff_val = np.round(np.mean(diff), 2)
+            title = r"|"+feat_title+r"$_{ref} - $"+feat_title+r"$_{avg}$|, MAE="+str(diff_val)
+
+            diff_map = np.squeeze(diff)
+            clim = np.max([np.abs(np.min(diff)*0.9), np.abs(np.max(diff)*1.1)])
+            axes = axs[c].tripcolor(triangles, diff_map, cmap='RdBu', norm=colors.Normalize(vmin=-1*clim, vmax=clim))
+        else:
+            axes = axs[c].tripcolor(triangles, data_list[c], cmap=cmap, norm=colors.Normalize(vmin=cmin, vmax=cmax))
+            title = title_list[c]
+        # common settings
+        axs[c].set_title(title, fontsize=14)
+        axs[c].axis('off')
+        cb = plt.colorbar(axes, ax=axs[c])
+        cb.ax.tick_params(labelsize=12)
+        cb.locator = ticker.MaxNLocator(nbins=colorbar_bins)
+        cb.update_ticks()
+
+    plt.show()
+    return fig, axs
+
