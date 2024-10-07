@@ -37,6 +37,22 @@ def test_new_nn():
     p = pinn.nn.FNN(d)
     assert (p.parameters.__dict__ == d.__dict__)
 
+def test_input_fft_nn():
+    hp={}
+    hp['input_variables'] = ['x']
+    hp['output_variables'] = ['u']
+    hp['num_neurons'] = 1
+    hp['num_layers'] = 1
+    hp['fft'] = True
+    d = NNParameter(hp)
+    d.input_lb = 1.0
+    d.input_ub = 10.0
+    p = pinn.nn.FNN(d)
+    x = bkd.as_tensor(bkd.reshape(np.linspace(d.input_lb, d.input_ub, 100), [100,1]))
+    y = bkd.to_numpy(p.net._input_transform(x))
+    z = y**2
+    assert np.all(abs(z[:,1:10]+z[:,11:20]) <= 1.0+np.finfo(float).eps)
+
 def test_input_scale_nn():
     hp={}
     hp['input_variables'] = ['x']

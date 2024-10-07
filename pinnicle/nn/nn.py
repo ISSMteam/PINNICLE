@@ -1,6 +1,7 @@
 import deepxde as dde
 import deepxde.backend as bkd
-from .helper import minmax_scale, up_scale
+from deepxde.backend import tf
+from .helper import minmax_scale, up_scale, fourier_feature
 from ..parameter import NNParameter
 
 class FNN:
@@ -16,17 +17,24 @@ class FNN:
         else:
             self.net = self.createFNN()
 
-
-        # apply transform
         # by default, use min-max scale for the input
         if self.parameters.is_input_scaling():
-            print(f"add input transform with {self.parameters.input_lb} and {self.parameters.input_ub}")
-            # force the input and output lb and ub to be tensors
-            if bkd.backend_name == "pytorch":
-                self.parameters.input_lb = bkd.as_tensor(self.parameters.input_lb)
-                self.parameters.input_ub = bkd.as_tensor(self.parameters.input_ub)
-            # add input transform
-            self._add_input_transform(minmax_scale)
+            if self.parameters.fft :
+                print(f"add Fourier feature transform to input transform")
+                # TODO: change to general form for pytorch and jax
+                self.B = tf.constant(tf.random.normal([len(self.parameters.input_variables), self.parameters.input_size], dtype=tf.float64)*self.parameters.sigma, dtype=tf.float64)
+                def wrapper(x):
+                    return fourier_feature(x, self.B)
+                # add to input transform
+                self.net.apply_feature_transform(wrapper)
+            else: 
+                print(f"add input transform with {self.parameters.input_lb} and {self.parameters.input_ub}")
+                # force the input and output lb and ub to be tensors
+                if bkd.backend_name == "pytorch":
+                    self.parameters.input_lb = bkd.as_tensor(self.parameters.input_lb)
+                    self.parameters.input_ub = bkd.as_tensor(self.parameters.input_ub)
+                # add input transform
+                self._add_input_transform(minmax_scale)
 
         # upscale the output by min-max
         if self.parameters.is_output_scaling():
@@ -71,16 +79,26 @@ class FNN:
         
     def _add_input_transform(self, func):
         """
-        a function to add scaling at the input
+        a wrapper function to add scaling at the input
         """
         def _wrapper(x):
             return func(x,self.parameters.input_lb, self.parameters.input_ub)
         self.net.apply_feature_transform(_wrapper)
 
+    def _add_fourier_feature_transform(self):
+        """
+        a wrapper function to add fourier feature transform to the input
+        """
+
+        def _wrapper(x):
+            return fourier_feature(x, self.B)
+        self.net.apply_feature_transform(_wrapper)
+
     def _add_output_transform(self, func):
         """
-        a function to add scaling at the output
+        a wrapper function to add scaling at the output
         """
         def _wrapper(dummy, x):
             return  func(x, self.parameters.output_lb, self.parameters.output_ub)
         self.net.apply_output_transform(_wrapper)
+
