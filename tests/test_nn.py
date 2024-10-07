@@ -20,12 +20,11 @@ def test_upscale():
     assert np.all(abs(y- np.linspace(lb, ub, 100)) < np.finfo(float).eps*ub)
 
 def test_fourier_feature():
-    x = bkd.as_tensor(bkd.reshape((np.linspace(1,100, 100)), [50,2]), dtype='float64')
-    if backend_name == "tf":
-        B = tf.constant(tf.random.normal([x.shape[1], 2], 0, 1, dtype=tf.float64)*10, dtype=tf.float64)
-        y = fourier_feature(x, B)
-        z = y**2
-        assert np.all(((z[:,1]+z[:,3]) - 1.) < np.finfo(float).eps*ub)
+    x = bkd.as_tensor(bkd.reshape((np.linspace(1,100, 100)), [50,2]))
+    B = bkd.as_tensor(np.random.normal(0.0, 10.0, [x.shape[1], 2]))
+    y = fourier_feature(x, B)
+    z = y**2
+    assert np.all(((z[:,1]+z[:,3])) < 1.0+np.finfo(float).eps)
 
 def test_new_nn():
     hp={}
