@@ -1,5 +1,6 @@
 import deepxde as dde
 import deepxde.backend as bkd
+import numpy as np
 from deepxde.backend import tf
 from .helper import minmax_scale, up_scale, fourier_feature
 from ..parameter import NNParameter
@@ -22,7 +23,8 @@ class FNN:
             if self.parameters.fft :
                 print(f"add Fourier feature transform to input transform")
                 # TODO: change to general form for pytorch and jax
-                self.B = tf.constant(tf.random.normal([len(self.parameters.input_variables), self.parameters.input_size], dtype=tf.float64)*self.parameters.sigma, dtype=tf.float64)
+         #       self.B = tf.constant(tf.random.normal([len(self.parameters.input_variables), self.parameters.input_size], dtype=tf.float64)*self.parameters.sigma, dtype=tf.float64)
+                self.B = bkd.as_tensor(np.random.normal(0.0, self.parameters.sigma, [len(self.parameters.input_variables), self.parameters.input_size]))
                 def wrapper(x):
                     return fourier_feature(x, self.B)
                 # add to input transform
