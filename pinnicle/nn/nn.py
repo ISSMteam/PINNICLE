@@ -22,10 +22,10 @@ class FNN:
         if self.parameters.is_input_scaling():
             if self.parameters.fft :
                 print(f"add Fourier feature transform to input transform")
-                # TODO: change to general form for pytorch and jax
-         #       self.B = tf.constant(tf.random.normal([len(self.parameters.input_variables), self.parameters.input_size], dtype=tf.float64)*self.parameters.sigma, dtype=tf.float64)
                 self.B = bkd.as_tensor(np.random.normal(0.0, self.parameters.sigma, [len(self.parameters.input_variables), self.parameters.input_size]))
                 def wrapper(x):
+                    """a wrapper function to add fourier feature transform to the input
+                    """
                     return fourier_feature(x, self.B)
                 # add to input transform
                 self.net.apply_feature_transform(wrapper)
@@ -85,15 +85,6 @@ class FNN:
         """
         def _wrapper(x):
             return func(x,self.parameters.input_lb, self.parameters.input_ub)
-        self.net.apply_feature_transform(_wrapper)
-
-    def _add_fourier_feature_transform(self):
-        """
-        a wrapper function to add fourier feature transform to the input
-        """
-
-        def _wrapper(x):
-            return fourier_feature(x, self.B)
         self.net.apply_feature_transform(_wrapper)
 
     def _add_output_transform(self, func):
