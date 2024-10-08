@@ -11,3 +11,11 @@ def up_scale(x, lb, ub, scale=0.5, offset=1.0):
     reverse min-max scale
     """
     return lb + scale*(x + offset)*(ub - lb)
+
+
+def fourier_feature(x, B):
+    return bkd.concat([
+                      bkd.cos(bkd.matmul(x, B)),
+                      bkd.sin(bkd.matmul(x, B))
+                      ], 
+                      1)

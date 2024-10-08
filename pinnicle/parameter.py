@@ -170,6 +170,11 @@ class NNParameter(ParameterBase):
         self.activation = "tanh"
         self.initializer = "Glorot uniform"
 
+        # fourier feature transform
+        self.fft = False
+        self.num_fourier_feature = 10
+        self.sigma = 1.0
+
         # parallel neural network
         self.is_parallel = False
 
@@ -180,9 +185,13 @@ class NNParameter(ParameterBase):
         self.output_ub = None
 
     def check_consistency(self):
-        # input size of nn equals to dependent in physics
-        if self.input_size != len(self.input_variables):
-            raise ValueError("'input_size' does not match the number of 'input_variables'")
+        if self.fft:
+            if self.input_size != self.num_fourier_feature:
+                raise ValueError("'input_size' does not match the number of fourier feature")
+        else:
+            # input size of nn equals to dependent in physics
+            if self.input_size != len(self.input_variables):
+                raise ValueError("'input_size' does not match the number of 'input_variables'")
         # out size of nn equals to variables in physics
         if self.output_size != len(self.output_variables):
             raise ValueError("'output_size' does not match the number of 'output_variables'")
@@ -190,9 +199,9 @@ class NNParameter(ParameterBase):
 
     def is_input_scaling(self):
         """
-        if the input boundaries are provided
+        if the input boundaries are provided, or fourier feature transform is used
         """
-        if (self.input_lb is not None) and (self.input_ub is not None):
+        if ((self.input_lb is not None) and (self.input_ub is not None)) or self.fft:
             return True
         else:
             return False
@@ -214,7 +223,11 @@ class NNParameter(ParameterBase):
         if isinstance(self.num_neurons, list):
             self.num_layers = len(self.num_neurons)
 
-
+    def update(self):
+        """ update the input_size for fourier feature transform
+        """
+        if self.fft:
+            self.input_size = self.num_fourier_feature
 
 class PhysicsParameter(ParameterBase):
     """ parameter of physics

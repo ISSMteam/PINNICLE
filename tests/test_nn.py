@@ -1,8 +1,9 @@
 import pinnicle as pinn
-from pinnicle.nn.helper import minmax_scale, up_scale
+from pinnicle.nn.helper import minmax_scale, up_scale, fourier_feature
 from pinnicle.parameter import NNParameter
 import deepxde.backend as bkd
 from deepxde.backend import backend_name
+import pytest
 import numpy as np
 
 def test_minmax_scale():
@@ -19,6 +20,14 @@ def test_upscale():
     y = up_scale(x, lb, ub)
     assert np.all(abs(y- np.linspace(lb, ub, 100)) < np.finfo(float).eps*ub)
 
+@pytest.mark.skipif(backend_name=="jax", reason="bkd.matmul is not implemented for jax")
+def test_fourier_feature():
+    x = bkd.reshape(bkd.as_tensor((np.linspace(1,100, 100)), dtype=bkd.data_type_dict['float64']), [50,2])
+    B = bkd.as_tensor(np.random.normal(0.0, 10.0, [x.shape[1], 2]), dtype=bkd.data_type_dict['float64'])
+    y = bkd.to_numpy(fourier_feature(x, B))
+    z = y**2
+    assert np.all((z[:,1]+z[:,3]) < 1.0+100**np.finfo(float).eps)
+
 def test_new_nn():
     hp={}
     hp['input_variables'] = ['x']
@@ -28,6 +37,23 @@ def test_new_nn():
     d = NNParameter(hp)
     p = pinn.nn.FNN(d)
     assert (p.parameters.__dict__ == d.__dict__)
+
+@pytest.mark.skipif(backend_name=="jax", reason="bkd.matmul is not implemented for jax")
+def test_input_fft_nn():
+    hp={}
+    hp['input_variables'] = ['x']
+    hp['output_variables'] = ['u']
+    hp['num_neurons'] = 1
+    hp['num_layers'] = 1
+    hp['fft'] = True
+    d = NNParameter(hp)
+    d.input_lb = 1.0
+    d.input_ub = 10.0
+    p = pinn.nn.FNN(d)
+    x = bkd.reshape(bkd.as_tensor(np.linspace(d.input_lb, d.input_ub, 100)), [100,1])
+    y = bkd.to_numpy(p.net._input_transform(x))
+    z = y**2
+    assert np.all(abs(z[:,1:10]+z[:,11:20]) <= 1.0+np.finfo(float).eps)
 
 def test_input_scale_nn():
     hp={}

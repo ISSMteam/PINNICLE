@@ -61,6 +61,10 @@ def test_nn_parameter():
     assert d.is_output_scaling()
     d = NNParameter({"num_neurons":[1,2,3]})
     assert d.num_layers == 3
+    assert d.input_size == 0
+    d = NNParameter({"fft":True})
+    assert d.input_size == 10
+    assert d.is_input_scaling()
     
 def test_parameters():
     p = Parameters()
