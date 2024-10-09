@@ -26,7 +26,7 @@ class FNN:
                 def wrapper(x):
                     """a wrapper function to add fourier feature transform to the input
                     """
-                    return fourier_feature(x, self.B)
+                    return fourier_feature(minmax_scale(x, self.parameters.input_lb, self.parameters.input_ub), self.B)
                 # add to input transform
                 self.net.apply_feature_transform(wrapper)
             else: 
@@ -84,7 +84,7 @@ class FNN:
         a wrapper function to add scaling at the input
         """
         def _wrapper(x):
-            return func(x,self.parameters.input_lb, self.parameters.input_ub)
+            return func(x, self.parameters.input_lb, self.parameters.input_ub)
         self.net.apply_feature_transform(_wrapper)
 
     def _add_output_transform(self, func):
