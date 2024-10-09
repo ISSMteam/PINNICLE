@@ -186,7 +186,7 @@ class NNParameter(ParameterBase):
 
     def check_consistency(self):
         if self.fft:
-            if self.input_size != self.num_fourier_feature:
+            if self.input_size != self.num_fourier_feature*2:
                 raise ValueError("'input_size' does not match the number of fourier feature")
         else:
             # input size of nn equals to dependent in physics
@@ -227,7 +227,7 @@ class NNParameter(ParameterBase):
         """ update the input_size for fourier feature transform
         """
         if self.fft:
-            self.input_size = self.num_fourier_feature
+            self.input_size = self.num_fourier_feature*2
 
 class PhysicsParameter(ParameterBase):
     """ parameter of physics

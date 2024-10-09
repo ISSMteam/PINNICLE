@@ -22,7 +22,7 @@ class FNN:
         if self.parameters.is_input_scaling():
             if self.parameters.fft :
                 print(f"add Fourier feature transform to input transform")
-                self.B = bkd.as_tensor(np.random.normal(0.0, self.parameters.sigma, [len(self.parameters.input_variables), self.parameters.input_size]))
+                self.B = bkd.as_tensor(np.random.normal(0.0, self.parameters.sigma, [len(self.parameters.input_variables), self.parameters.num_fourier_feature]))
                 def wrapper(x):
                     """a wrapper function to add fourier feature transform to the input
                     """
