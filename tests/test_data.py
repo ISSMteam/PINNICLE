@@ -1,3 +1,4 @@
+import pytest
 import os
 from pinnicle.modeldata import ISSMmdData, MatData, Data
 from pinnicle.parameter import DataParameter, SingleDataParameter
@@ -122,3 +123,16 @@ def test_MatData():
 
     icoord = data_loader.get_ice_coordinates()
     assert icoord.shape == (3192, 2)
+
+    hp["X_map"] = {"x":"x"}
+    p = SingleDataParameter(hp)
+    data_loader = MatData(p)
+    data_loader.load_data()
+    data_loader.prepare_training_data()
+    assert(data_loader.X['H'].shape[1] == 1)
+
+    hp["X_map"] = {"x":"t", "y":"y"}
+    p = SingleDataParameter(hp)
+    data_loader = MatData(p)
+    with pytest.raises(Exception):
+        data_loader.load_data()

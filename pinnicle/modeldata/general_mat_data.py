@@ -19,8 +19,8 @@ class MatData(DataBase, Constants):
             called by plotting to generate ice covered region.
         """
         # get the coordinates
-        X_mask = np.hstack((self.X_dict['x'].flatten()[:,None],
-                            self.X_dict['y'].flatten()[:,None]))
+        X_mask = np.hstack([self.X_dict[k].flatten()[:,None] for k in self.parameters.X_map])
+
         return X_mask
 
     def load_data(self):
@@ -29,9 +29,12 @@ class MatData(DataBase, Constants):
         # Reading matlab data
         data = load_mat(self.parameters.data_path)
 
-        # x,y coordinates
-        self.X_dict['x'] = data['x']
-        self.X_dict['y'] = data['y']
+        # load the coordinates
+        for k, v in self.parameters.X_map.items():
+            if v in data:
+                self.X_dict[k] = data[v]
+            else:
+                raise KeyError(f"{v} is not found in the data from {self.parameters.data_path}")
 
         # load all variables from parameters.name_map
         for k in self.parameters.name_map:

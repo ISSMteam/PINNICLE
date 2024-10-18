@@ -59,18 +59,28 @@ def down_sample_core(points, resolution=100):
     """ downsample the given scatter points using `KDtree` with the nearest neighbors on a Cartisian grid
 
     Args:
-        points (np array), 2d coordinates, from get_ice_coordinates
+        points (np array), 1,2 or 3 dimensional coordinates, from get_ice_coordinates
         resolution (Integer): resolution of the downsample grid
     Returns:
         ind: indices of the downsample
     """
-    [Xmin, Ymin] = points.min(axis=0)
-    [Xmax, Ymax] = points.max(axis=0)
-    # create Cartisian grid
-    X, Y = np.meshgrid(np.linspace(Xmin,Xmax,resolution), np.linspace(Ymin,Ymax,resolution))
+    Xmin = points.min(axis=0)
+    Xmax = points.max(axis=0)
 
     kdt = KDTree(points, metric='euclidean')
-    dist, ink = kdt.query(np.c_[X.ravel(), Y.ravel()], k=1)
+
+    # create Cartisian grid
+    if Xmin.shape[0] == 1:
+        X, = np.meshgrid(np.linspace(Xmin,Xmax,resolution))
+        dist, ink = kdt.query(np.c_[X.ravel()], k=1)
+    elif Xmin.shape[0] == 2:
+        X, Y = np.meshgrid(np.linspace(Xmin[0],Xmax[0],resolution), np.linspace(Xmin[1],Xmax[1],resolution))
+        dist, ink = kdt.query(np.c_[X.ravel(), Y.ravel()], k=1)
+    elif Xmin.shape[0] == 3:
+        X, Y, Z = np.meshgrid(np.linspace(Xmin[0],Xmax[0],resolution), np.linspace(Xmin[1],Xmax[1],resolution), np.linspace(Xmin[2],Xmax[2],resolution))
+        dist, ink = kdt.query(np.c_[X.ravel(), Y.ravel(), Z.ravel()], k=1)
+    else:
+        raise ValueError(f"data points in {Xmin.shape[0]} dimensional is not supported")
 
     ind = np.unique(ink)
     return ind
