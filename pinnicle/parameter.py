@@ -128,6 +128,8 @@ class SingleDataParameter(ParameterBase):
         self.data_size = {}
         # name map k->v, k is the variable name in the PINN, v is the variable name in the data file
         self.name_map = {}
+        # X name map k->v, k is the input names in the PINN, v is the coordinates name in the data file
+        self.X_map = {}
         # source of the data
         self.source = "ISSM"
 
@@ -144,6 +146,11 @@ class SingleDataParameter(ParameterBase):
     def update(self):
         """ update name_map according to data_size
         """
+        # if the X coordinates names are not given, then use default: 2D static
+        if not self.X_map:
+            self.X_map["x"] = "x"
+            self.X_map["y"] = "y"
+
         # every variable in data_size need to be loaded from the data loader
         for k in self.data_size:
             # names in data_size, if not given in name_map, then use the same name for key and value

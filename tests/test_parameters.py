@@ -23,12 +23,15 @@ def test_single_data_parameter():
     assert d.name_map["u"] == "u"
     assert d.name_map["v"] == "v"
     assert d.source == "ISSM"
+    assert [d.X_map[k] == k for k in ["x","y"]]
 
-    mat = {"data_path":"./", "data_size":{"u":4000, "v":None}, "source":"mat"}
+    mat = {"data_path":"./", "data_size":{"u":4000, "v":None}, "source":"mat", "X_map":{"x":"y"}}
     d = SingleDataParameter(mat)
     assert d.name_map["u"] == "u"
     assert d.name_map["v"] == "v"
     assert d.source == "mat"
+    assert d.X_map["x"] == "y"
+    assert "y" not in d.X_map
 
     with pytest.raises(Exception):
         unknown = {"source": "unknown"}
