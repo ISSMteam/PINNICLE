@@ -80,9 +80,18 @@ class DomainParameter(ParameterBase):
         self.shapefile = None
         # number of collocation points used in the domain
         self.num_collocation_points = 0
+        # static or time dependent problem
+        self.time_dependent = False
+        # start and end time
+        self.start_time = 0
+        self.end_time = 0
 
     def check_consistency(self):
-        pass
+        """ need to provide start and end time if solving a time dependent problem
+        """
+        if self.time_dependent:
+            if self.start_time >= self.end_time:
+                raise ValueError(f"'start_time' at {self.start_time} is ahead of 'end_time' at {self.end_time}")
 
 
 class DataParameter(ParameterBase):

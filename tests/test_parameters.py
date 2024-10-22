@@ -16,6 +16,14 @@ def test_domain_parameter():
     d._add_parameters(newat)
     assert d.has_keys(newat)
 
+    timedep = {'time_dependent':True, 'start_time':0, 'end_time':10}
+    d = DomainParameter(timedep)
+
+    assert d.end_time == 10
+    with pytest.raises(Exception):
+        timedep = {'time_dependent':True, 'start_time':10, 'end_time':1}
+        d = DomainParameter(timedep)
+
 def test_single_data_parameter():
     issm = {"data_path":"./", "data_size":{"u":4000, "v":None}}
     d = SingleDataParameter(issm)
@@ -68,7 +76,7 @@ def test_nn_parameter():
     d = NNParameter({"fft":True})
     assert d.input_size == 2*d.num_fourier_feature
     assert d.is_input_scaling()
-    
+
 def test_parameters():
     p = Parameters()
     domain = DomainParameter()
@@ -113,7 +121,7 @@ def test_equation_parameters():
     hp = {}
     hp['equations'] = {'SSA': {}}
     p = Parameters(hp)
-    
+
     hp['equations'] = {'NOT DEFINED': {}}
     with pytest.raises(Exception):
         p = Parameters(hp)
