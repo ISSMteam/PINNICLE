@@ -32,6 +32,10 @@ def test_single_data_parameter():
     assert d.name_map["v"] == "v"
     assert d.source == "ISSM"
     assert [d.X_map[k] == k for k in ["x","y"]]
+    assert "t" not in d.X_map
+
+    d = SingleDataParameter({"time_dependent":True})
+    assert [d.X_map[k] == k for k in ["x","y","t"]]
 
     mat = {"data_path":"./", "data_size":{"u":4000, "v":None}, "source":"mat", "X_map":{"x":"y"}}
     d = SingleDataParameter(mat)

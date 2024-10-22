@@ -141,6 +141,8 @@ class SingleDataParameter(ParameterBase):
         self.X_map = {}
         # source of the data
         self.source = "ISSM"
+        # reload time dependent flag from domain, this is only for generating default X_map
+        self.time_dependent = False
 
     def check_consistency(self):
         if self.source not in ["ISSM", "mat"]:
@@ -159,6 +161,8 @@ class SingleDataParameter(ParameterBase):
         if not self.X_map:
             self.X_map["x"] = "x"
             self.X_map["y"] = "y"
+            if self.time_dependent:
+                self.X_map["t"] = "t"
 
         # every variable in data_size need to be loaded from the data loader
         for k in self.data_size:
