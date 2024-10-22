@@ -7,11 +7,20 @@ import deepxde as dde
 class Domain:
     def __init__(self, parameters=DomainParameter()):
         self.parameters = parameters
+        # load space domain from shapefile
         if is_file_ext(self.parameters.shapefile, '.exp'):
+            # create spatial domain
             self.vertices = self.get_polygon_vertices(self.parameters.shapefile)
-            self.geometry = dde.geometry.Polygon(self.vertices)
+            spacedomain = dde.geometry.Polygon(self.vertices)
         else:
             raise TypeError("File type in "+self.parameters.shapefile+" is currently not supported!")
+
+        # create space-time domain
+        if self.parameters.time_dependent:
+            timedomain = dde.geometry.TimeDomain(self.parameters.start_time, self.parameters.end_time)
+            self.geometry = dde.geometry.GeometryXTime(spacedomain, timedomain)
+        else:
+            self.geometry = spacedomain
 
     def get_polygon_vertices(self, filepath):
         """
