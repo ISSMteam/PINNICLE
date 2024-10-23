@@ -1,5 +1,5 @@
 import pinnicle as pinn
-from pinnicle.physics import Physics, SSAEquationParameter, SSA
+from pinnicle.physics import *
 from pinnicle.parameter import PhysicsParameter
 import pytest
 
@@ -68,15 +68,26 @@ def test_Physics_SSAVB():
     assert len(phy.pde_weights) == 2
 
 def test_Physics_MC():
-    MC = {}
-    MC["scalar_variables"] = {"B":1.26802073401e+08}
     hp = {}
-    hp["equations"] = {"MC":MC}
+    hp["equations"] = {"MC":{}}
     phy = Physics(PhysicsParameter(hp))
 
     assert phy.input_var == ['x', 'y']
     assert phy.output_var == ['u', 'v', 'a', 'H']
     assert phy.residuals == ['fMC']
+    assert len(phy.output_lb) == 4
+    assert len(phy.output_ub) == 4
+    assert len(phy.data_weights) == 4
+    assert len(phy.pde_weights) == 1
+
+def test_Physics_Thickness():
+    hp = {}
+    hp["equations"] = {"Thickness":{}}
+    phy = Physics(PhysicsParameter(hp))
+
+    assert phy.input_var == ['x', 'y', 't']
+    assert phy.output_var == ['u', 'v', 'a', 'H']
+    assert phy.residuals == ['fThickness']
     assert len(phy.output_lb) == 4
     assert len(phy.output_ub) == 4
     assert len(phy.data_weights) == 4
@@ -161,13 +172,11 @@ def test_update_Physics_SSA():
         phy = Physics(PhysicsParameter(hp))
 
 def test_operator():
-    MC = {}
-    MC["scalar_variables"] = {"B":1.26802073401e+08}
     SSA = {}
     SSA["scalar_variables"] = {"B":1.26802073401e+08}
 
     hp = {}
-    hp["equations"] = {"MC":MC, "SSA":SSA, "SSA_VB":{}, "MOLHO":{}}
+    hp["equations"] = {"MC":{}, "SSA":SSA, "SSA_VB":{}, "MOLHO":{}, "Thickness":{}}
     phy = Physics(PhysicsParameter(hp))
     
     assert phy.operator('mc')
@@ -178,6 +187,8 @@ def test_operator():
     assert phy.operator('ssa_vb')
     assert phy.operator('molho')
     assert phy.operator('MOLHO')
+    assert phy.operator('THICKNESS')
+    assert phy.operator('thickness')
 
 def test_Physics_dummy():
     dummy = {}

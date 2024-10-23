@@ -90,10 +90,7 @@ class Physics:
         Args:
             pid : pde operator id (string)
         """
-        # convert to upper case
-        pname = pname.upper()
-
         for p in self.equations:
-            if p._EQUATION_TYPE == pname:
+            if p._EQUATION_TYPE.lower() == pname.lower():
                 return p.pde
 
