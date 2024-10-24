@@ -76,18 +76,25 @@ class Data(Constants):
         for k in self.data:
             self.data[k].load_data()
 
-    def prepare_training_data(self):
+    def prepare_training_data(self, transient=False, default_time=0.0):
         """ merge all `X` and `sol` in `self.data` to `self.X` and `self.sol` with the keys
+        Args:
+            transient: if the problem is a time dependent simulation
+            default_time: default value of the third column (time) in `X`, if not provided by the data
         """
         # prepare the training data according to data_size
         for key in self.data:
             self.data[key].prepare_training_data()
             # merge all X and sol
-            for xkey in self.data[key].X:
+            for xkey, xval in self.data[key].X.items():
+                # check if the data has time dimension, if not, append one column with start_time to the end
+                if transient:
+                    if xval.shape[1] < 3:
+                        xval = np.hstack((xval, np.ones([xval.shape[0],1])*default_time))
                 if xkey not in self.X:
-                    self.X[xkey] = self.data[key].X[xkey]
+                    self.X[xkey] = xval
                 else:
-                    self.X[xkey] = np.vstack((self.X[xkey], self.data[key].X[xkey]))
+                    self.X[xkey] = np.vstack((self.X[xkey], xval))
 
             for xkey in self.data[key].sol:
                 if xkey not in self.sol:

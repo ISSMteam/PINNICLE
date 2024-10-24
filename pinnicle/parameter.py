@@ -141,8 +141,6 @@ class SingleDataParameter(ParameterBase):
         self.X_map = {}
         # source of the data
         self.source = "ISSM"
-        # reload time dependent flag from domain, this is only for generating default X_map
-        self.time_dependent = False
 
     def check_consistency(self):
         if self.source not in ["ISSM", "mat"]:
@@ -157,12 +155,11 @@ class SingleDataParameter(ParameterBase):
     def update(self):
         """ update name_map according to data_size
         """
-        # if the X coordinates names are not given, then use default: 2D static
+        # if the X coordinates names are not given, then use default
         if not self.X_map:
             self.X_map["x"] = "x"
             self.X_map["y"] = "y"
-            if self.time_dependent:
-                self.X_map["t"] = "t"
+            self.X_map["t"] = "t"
 
         # every variable in data_size need to be loaded from the data loader
         for k in self.data_size:
@@ -503,5 +500,4 @@ class Parameters(ParameterBase):
             if x not in self.data.datasize:
                 self.data.datasize[x] = None
 
-        # set component id in data according to the order in physics
         pass

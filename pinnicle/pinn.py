@@ -134,12 +134,11 @@ class PINN:
         # domain of the model
         self.domain = Domain(self.params.domain)
         # create an instance of Data
-        #self.model_data = DataBase.create(self.params.data.source, parameters=self.params.data)
         self.model_data = Data(self.params.data)
         # load from data file
         self.model_data.load_data()
-        # update according to the setup: data_size
-        self.model_data.prepare_training_data()
+        # update according to the setup: input_variables defined by the physics
+        self.model_data.prepare_training_data(transient=self.params.domain.time_dependent, default_time=self.params.domain.start_time)
 
         # Step 4: update training data
         self.training_data, self.loss_names, self.params.training.loss_weights, self.params.training.loss_functions = self.update_training_data(self.model_data)
@@ -293,7 +292,11 @@ class PINN:
         """ update input/output scalings parameters for nn
         """
         # automate the input scaling according to the domain
-        self.params.nn.set_parameters({"input_lb": self.domain.geometry.bbox[0,:], "input_ub": self.domain.geometry.bbox[1,:]})
+        if self.params.domain.time_dependent:
+            self.params.nn.set_parameters({"input_lb": np.hstack((self.domain.geometry.geometry.bbox[0,:], self.domain.geometry.timedomain.bbox[0])),
+                "input_ub": np.hstack((self.domain.geometry.geometry.bbox[1,:], self.domain.geometry.timedomain.bbox[1]))})
+        else:
+            self.params.nn.set_parameters({"input_lb": self.domain.geometry.bbox[0,:], "input_ub": self.domain.geometry.bbox[1,:]})
 
         # check if training data exceed the scaling range
         for i,d in enumerate(self.params.nn.output_variables):

@@ -315,7 +315,6 @@ def test_MOLHO_pde_function():
 def test_MC_pde_function():
     hp_local = dict(hp)
     MC = {}
-    MC["n"] = {"n":3}
     hp_local["equations"] = {"MC":MC}
     hp_local["num_collocation_points"] = 10
     issm["data_size"] = {"u":10, "v":10, "s":10, "H":10, "C":None, "vel":10}
@@ -323,5 +322,22 @@ def test_MC_pde_function():
     experiment = pinn.PINN(params=hp_local)
     experiment.compile()
     y = experiment.model.predict(experiment.model_data.X['u'], operator=experiment.physics.operator("MC"))
+    assert len(y) == 1
+    assert y[0].shape == (10,1)
+
+def test_thickness_pde_function():
+    hp_local = dict(hp)
+    thickness = {}
+    hp_local["equations"] = {"Thickness":thickness}
+    hp_local["num_collocation_points"] = 10
+    issm["data_size"] = {"u":10, "v":10, "s":10, "H":10, "C":None, "vel":10}
+    hp_local["data"] = {"ISSM": issm}
+    hp_local["time_dependent"] = True
+    hp_local["start_time"] = 0
+    hp_local["end_time"] = 1
+    experiment = pinn.PINN(params=hp_local)
+    experiment.compile()
+    y = experiment.model.predict(experiment.model_data.X['u'], operator=experiment.physics.operator("thickness"))
+
     assert len(y) == 1
     assert y[0].shape == (10,1)

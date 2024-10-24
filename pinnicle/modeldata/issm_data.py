@@ -20,9 +20,7 @@ class ISSMmdData(DataBase, Constants):
             ice covered region.
         """
         iice = self.get_ice_indices(mask_name=mask_name)
-        # get the coordinates
-        X_mask = np.hstack((self.X_dict['x'][iice].flatten()[:,None],
-                            self.X_dict['y'][iice].flatten()[:,None]))
+        X_mask = np.hstack((self.X_dict['x'][iice].flatten()[:,None], self.X_dict['y'][iice].flatten()[:,None]))
         return X_mask
 
     def get_ice_indices(self, mask_name=""):
@@ -122,13 +120,13 @@ class ISSMmdData(DataBase, Constants):
 
         # prepare x,y coordinates
         iice = self.get_ice_indices()
-        X_temp = np.hstack((self.X_dict['x'][iice].flatten()[:,None], self.X_dict['y'][iice].flatten()[:,None]))
+        X_temp = np.hstack([self.X_dict[k][iice].flatten()[:,None] for k in self.parameters.X_map if k in self.X_dict])
         max_data_size = X_temp.shape[0]
 
         # prepare boundary coordinates
         DBC = self.mask_dict['DBC_mask']
         idbc = np.asarray(DBC>0).nonzero()
-        X_bc = np.hstack((self.X_dict['x'][idbc].flatten()[:,None], self.X_dict['y'][idbc].flatten()[:,None]))
+        X_bc = np.hstack([self.X_dict[k][idbc].flatten()[:,None] for k in self.parameters.X_map if k in self.X_dict])
 
         # go through all keys in data_dict
         for k in self.data_dict:

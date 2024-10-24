@@ -102,6 +102,15 @@ def test_Data_multiple():
     icoord = data_loader.get_ice_coordinates()
     assert icoord.shape == (23049*2, 2)
 
+    p = DataParameter(hp)
+    data_loader = Data(p)
+    data_loader.load_data()
+    data_loader.prepare_training_data(transient=True, default_time=10)
+    assert(data_loader.sol['v'].shape == (4564,1))
+    assert(data_loader.X['u'].shape == (4400,3))
+    icoord = data_loader.get_ice_coordinates()
+    assert icoord.shape == (23049*2, 2)
+
 def test_MatData():
     filename = "flightTracks.mat"
     repoPath = os.path.dirname(__file__) + "/../examples/"
@@ -113,6 +122,7 @@ def test_MatData():
     hp["data_size"] = {"H":100}
     hp["name_map"] = {"H":"thickness"}
     hp["source"] = "mat"
+    hp["X_map"] = {"x1":"x", "x2":"y"}
     p = SingleDataParameter(hp)
     data_loader = MatData(p)
     data_loader.load_data()
@@ -134,5 +144,6 @@ def test_MatData():
     hp["X_map"] = {"x":"t", "y":"y"}
     p = SingleDataParameter(hp)
     data_loader = MatData(p)
-    with pytest.raises(Exception):
-        data_loader.load_data()
+    data_loader.load_data()
+    assert ("y" in data_loader.X_dict)
+    assert ("x" not in data_loader.X_dict)
