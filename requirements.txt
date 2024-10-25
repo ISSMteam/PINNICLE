@@ -1,7 +1,7 @@
 deepxde
 mat73
 matplotlib
-numpy
+numpy==1.26.4  # numpy 2 uses np.inf instead of np.Inf
 pandas
 scikit-learn==1.4.2
 scipy
