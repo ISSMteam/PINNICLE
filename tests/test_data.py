@@ -84,6 +84,7 @@ def test_Data_multiple():
     issm2 = {}
     issm2["data_path"] = path
     issm2["data_size"] = {"u":400, "v":None, "s":1000, "C":1000}
+    issm2["default_time"] = 1
 
     hp = {}
     hp['data'] = {"issm":issm, "issm2":issm2}
@@ -108,6 +109,8 @@ def test_Data_multiple():
     data_loader.prepare_training_data(transient=True, default_time=10)
     assert(data_loader.sol['v'].shape == (4564,1))
     assert(data_loader.X['u'].shape == (4400,3))
+    assert(data_loader.X['u'][1,2] == 10)
+    assert(data_loader.X['u'][-1,2] == 1)
     icoord = data_loader.get_ice_coordinates()
     assert icoord.shape == (23049*2, 2)
 

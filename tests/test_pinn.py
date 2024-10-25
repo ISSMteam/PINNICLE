@@ -336,6 +336,7 @@ def test_thickness_pde_function():
     hp_local["start_time"] = 0
     hp_local["end_time"] = 1
     experiment = pinn.PINN(params=hp_local)
+    assert experiment.model_data.X['u'][1,2] == 0
     experiment.compile()
     y = experiment.model.predict(experiment.model_data.X['u'], operator=experiment.physics.operator("thickness"))
 

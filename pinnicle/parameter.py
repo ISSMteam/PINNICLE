@@ -141,6 +141,8 @@ class SingleDataParameter(ParameterBase):
         self.X_map = {}
         # source of the data
         self.source = "ISSM"
+        # default time point, None means not in used
+        self.default_time = None
 
     def check_consistency(self):
         if self.source not in ["ISSM", "mat"]:

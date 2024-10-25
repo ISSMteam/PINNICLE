@@ -90,6 +90,9 @@ class Data(Constants):
                 # check if the data has time dimension, if not, append one column with start_time to the end
                 if transient:
                     if xval.shape[1] < 3:
+                        # check default_time setting in the data
+                        if self.data[key].parameters.default_time is not None:
+                            default_time = self.data[key].parameters.default_time
                         xval = np.hstack((xval, np.ones([xval.shape[0],1])*default_time))
                 if xkey not in self.X:
                     self.X[xkey] = xval
