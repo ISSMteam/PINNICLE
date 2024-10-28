@@ -87,7 +87,7 @@ class Data(Constants):
             self.data[key].prepare_training_data()
             # merge all X and sol
             for xkey, xval in self.data[key].X.items():
-                # check if the data has time dimension, if not, append one column with start_time to the end
+                # check if the data has time dimension, if not, append one column with default_time to the end
                 if transient:
                     if xval.shape[1] < 3:
                         # check default_time setting in the data
