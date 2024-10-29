@@ -1,6 +1,8 @@
 import deepxde as dde
+from deepxde.backend import jax
 from . import EquationBase, Constants
 from ..parameter import EquationParameter
+from ..utils import slice_column, jacobian, slice_function_jax
 
 # ==========================================================
 # ==========================================================
@@ -8,8 +10,7 @@ from ..parameter import EquationParameter
 # Boundary conditions still need implementation. 
 # ==========================================================
 # ==========================================================
-
-# SiSA constant B {{{
+# SSA constant B {{{
 class SSAShelfEquationParameter(EquationParameter, Constants):
     """ default parameters for SSA on ice shelves
     """
@@ -40,7 +41,7 @@ class SSAShelf(EquationBase): #{{{
     def __init__(self, parameters=SSAShelfEquationParameter()):
         super().__init__(parameters)
 
-    def pde(self, nn_input_var, nn_output_var):
+    def _pde(self, nn_input_var, nn_output_var): #{{{
         """ residual of ice shelf SSA 2D PDEs
 
         Args:
@@ -57,8 +58,10 @@ class SSAShelf(EquationBase): #{{{
         Hid = self.local_output_var["H"]
 
         # unpacking normalized output
-        u, v, H = nn_output_var[:, uid:uid+1], nn_output_var[:, vid:vid+1], nn_output_var[:, Hid:Hid+1]
-    
+        u = slice_column(nn_output_var, uid)
+        v = slice_column(nn_output_var, vid)
+        H = slice_column(nn_output_var, Hid)
+
         # spatial derivatives
         u_x = dde.grad.jacobian(nn_output_var, nn_input_var, i=uid, j=xid)
         v_x = dde.grad.jacobian(nn_output_var, nn_input_var, i=vid, j=xid)
@@ -66,31 +69,79 @@ class SSAShelf(EquationBase): #{{{
         u_y = dde.grad.jacobian(nn_output_var, nn_input_var, i=uid, j=yid)
         v_y = dde.grad.jacobian(nn_output_var, nn_input_var, i=vid, j=yid)
         s_y = dde.grad.jacobian(nn_output_var, nn_input_var, i=sid, j=yid)
-    
+
         eta = 0.5*self.B *(u_x**2.0 + v_y**2.0 + 0.25*(u_y+v_x)**2.0 + u_x*v_y+1.0e-15)**(0.5*(1.0-self.n)/self.n)
         # stress tensor
         etaH = eta * H
         B11 = etaH*(4*u_x + 2*v_y)
         B22 = etaH*(4*v_y + 2*u_x)
         B12 = etaH*(  u_y +   v_x)
-    
+
         # Getting the other derivatives
         sigma11 = dde.grad.jacobian(B11, nn_input_var, i=0, j=xid)
         sigma12 = dde.grad.jacobian(B12, nn_input_var, i=0, j=yid)
-    
+
         sigma21 = dde.grad.jacobian(B12, nn_input_var, i=0, j=xid)
         sigma22 = dde.grad.jacobian(B22, nn_input_var, i=0, j=yid)
-    
-        # compute the basal stress
-        #u_norm = (u**2+v**2)**0.5
-        #alpha = C**2 * (u_norm)**(1.0/self.n)
-    
+
+        # pde residual
         f1 = sigma11 + sigma12 - self.rhoi*self.g*H*s_x
         f2 = sigma21 + sigma22 - self.rhoi*self.g*H*s_y
-    
-        return [f1, f2] #}}}
-#}}}
 
+        return [f1, f2] #}}}
+    def _pde_jax(self, nn_input_var, nn_output_var): #{{{
+        """ residual of ice shelf SSA 2D PDEs
+
+        Args:
+            nn_input_var: global input to the nn
+            nn_output_var: global output from the nn
+        """
+        # get the ids
+        xid = self.local_input_var["x"]
+        yid = self.local_input_var["y"]
+
+        uid = self.local_output_var["u"]
+        vid = self.local_output_var["v"]
+        sid = self.local_output_var["s"]
+        Hid = self.local_output_var["H"]
+
+        # get the spatial derivatives functions
+        u_x = jacobian(nn_output_var, nn_input_var, i=uid, j=xid, val=1)
+        v_x = jacobian(nn_output_var, nn_input_var, i=vid, j=xid, val=1)
+        u_y = jacobian(nn_output_var, nn_input_var, i=uid, j=yid, val=1)
+        v_y = jacobian(nn_output_var, nn_input_var, i=vid, j=yid, val=1)
+
+        # get variable function
+        H_func = lambda x: slice_function_jax(nn_output_var, x, Hid)
+        # stress tensor
+        etaH = lambda x: 0.5*H_func(x)*self.B *(u_x(x)**2.0 + v_y(x)**2.0 + 0.25*(u_y(x)+v_x(x))**2.0 + u_x(x)*v_y(x)+1.0e-15)**(0.5*(1.0-self.n)/self.n)
+
+        B11 = lambda x: etaH(x)*(4*u_x(x) + 2*v_y(x))
+        B22 = lambda x: etaH(x)*(4*v_y(x) + 2*u_x(x))
+        B12 = lambda x: etaH(x)*(  u_y(x) +   v_x(x))
+
+        # Getting the other derivatives
+        sigma11 = jacobian((jax.vmap(B11)(nn_input_var), B11), nn_input_var, i=0, j=xid)
+        sigma12 = jacobian((jax.vmap(B12)(nn_input_var), B12), nn_input_var, i=0, j=yid)
+
+        sigma21 = jacobian((jax.vmap(B12)(nn_input_var), B12), nn_input_var, i=0, j=xid)
+        sigma22 = jacobian((jax.vmap(B22)(nn_input_var), B22), nn_input_var, i=0, j=yid)
+
+        # unpacking normalized output
+        u = slice_column(nn_output_var, uid)
+        v = slice_column(nn_output_var, vid)
+        H = slice_column(nn_output_var, Hid)
+
+        # compute the basal stress
+        s_x = jacobian(nn_output_var, nn_input_var, i=sid, j=xid)
+        s_y = jacobian(nn_output_var, nn_input_var, i=sid, j=yid)
+
+        # pde residual
+        f1 = sigma11 + sigma12 - self.rhoi*self.g*H*s_x
+        f2 = sigma21 + sigma22 - self.rhoi*self.g*H*s_y
+
+        return [f1, f2] #}}}
+#}}} #}}}
 # SSA variable B {{{
 class SSAShelfVariableBEquationParameter(EquationParameter, Constants):
     """ default parameters for SSA, with spatially varying rheology B
@@ -114,14 +165,14 @@ class SSAShelfVariableBEquationParameter(EquationParameter, Constants):
         self.scalar_variables = {
                 'n': 3.0,               # exponent of Glen's flow law
                 }
-class SSAShelfVariableB(EquationBase): 
+class SSAShelfVariableB(EquationBase): # {{{
     """ SSA for ice shelves on 2D problem with spatially varying B
     """
     _EQUATION_TYPE = 'SSA_SHELF_VB' 
     def __init__(self, parameters=SSAShelfVariableBEquationParameter()):
         super().__init__(parameters)
 
-    def pde(self, nn_input_var, nn_output_var):
+    def _pde(self, nn_input_var, nn_output_var): #{{{
         """ residual of SSA 2D PDEs
 
         Args:
@@ -140,8 +191,11 @@ class SSAShelfVariableB(EquationBase):
         Bid = self.local_output_var["B"]
 
         # unpacking normalized output
-        u, v, H, B = nn_output_var[:, uid:uid+1], nn_output_var[:, vid:vid+1], nn_output_var[:, Hid:Hid+1], nn_output_var[:, Bid:Bid+1]
-    
+        u = slice_column(nn_output_var, uid)
+        v = slice_column(nn_output_var, vid)
+        H = slice_column(nn_output_var, Hid)
+        B = slice_column(nn_output_var, Bid)
+
         # spatial derivatives
         u_x = dde.grad.jacobian(nn_output_var, nn_input_var, i=uid, j=xid)
         v_x = dde.grad.jacobian(nn_output_var, nn_input_var, i=vid, j=xid)
@@ -149,28 +203,79 @@ class SSAShelfVariableB(EquationBase):
         u_y = dde.grad.jacobian(nn_output_var, nn_input_var, i=uid, j=yid)
         v_y = dde.grad.jacobian(nn_output_var, nn_input_var, i=vid, j=yid)
         s_y = dde.grad.jacobian(nn_output_var, nn_input_var, i=sid, j=yid)
-    
+
         eta = 0.5*B *(u_x**2.0 + v_y**2.0 + 0.25*(u_y+v_x)**2.0 + u_x*v_y+1.0e-15)**(0.5*(1.0-self.n)/self.n)
         # stress tensor
         etaH = eta * H
         B11 = etaH*(4*u_x + 2*v_y)
         B22 = etaH*(4*v_y + 2*u_x)
         B12 = etaH*(  u_y +   v_x)
-    
+
         # Getting the other derivatives
         sigma11 = dde.grad.jacobian(B11, nn_input_var, i=0, j=xid)
         sigma12 = dde.grad.jacobian(B12, nn_input_var, i=0, j=yid)
-    
+
         sigma21 = dde.grad.jacobian(B12, nn_input_var, i=0, j=xid)
         sigma22 = dde.grad.jacobian(B22, nn_input_var, i=0, j=yid)
-    
-        # compute the basal stress
-        #u_norm = (u**2+v**2)**0.5
-        #alpha = C**2 * (u_norm)**(1.0/self.n)
-    
+
+        # pde residual
         f1 = sigma11 + sigma12 - self.rhoi*self.g*H*s_x
         f2 = sigma21 + sigma22 - self.rhoi*self.g*H*s_y
-    
+
         return [f1, f2] # }}} 
-        # no cover: stop
-#}}}
+    def _pde_jax(self, nn_input_var, nn_output_var): #{{{
+        """ residual of SSA 2D PDEs
+
+        Args:
+            nn_input_var: global input to the nn
+            nn_output_var: global output from the nn
+        """
+        # get the ids
+        xid = self.local_input_var["x"]
+        yid = self.local_input_var["y"]
+
+        uid = self.local_output_var["u"]
+        vid = self.local_output_var["v"]
+        sid = self.local_output_var["s"]
+        Hid = self.local_output_var["H"]
+        Bid = self.local_output_var["B"]
+
+        # get the spatial derivatives functions
+        u_x = jacobian(nn_output_var, nn_input_var, i=uid, j=xid, val=1)
+        v_x = jacobian(nn_output_var, nn_input_var, i=vid, j=xid, val=1)
+        u_y = jacobian(nn_output_var, nn_input_var, i=uid, j=yid, val=1)
+        v_y = jacobian(nn_output_var, nn_input_var, i=vid, j=yid, val=1)
+
+        # get variable function
+        H_func = lambda x: slice_function_jax(nn_output_var, x, Hid)
+        B_func = lambda x: slice_function_jax(nn_output_var, x, Bid)
+
+        # stress tensor
+        etaH = lambda x: 0.5*H_func(x)*B_func(x)*(u_x(x)**2.0 + v_y(x)**2.0 + 0.25*(u_y(x)+v_x(x))**2.0 + u_x(x)*v_y(x)+1.0e-15)**(0.5*(1.0-self.n)/self.n)
+
+        B11 = lambda x: etaH(x)*(4*u_x(x) + 2*v_y(x))
+        B22 = lambda x: etaH(x)*(4*v_y(x) + 2*u_x(x))
+        B12 = lambda x: etaH(x)*(  u_y(x) +   v_x(x))
+
+        # Getting the other derivatives
+        sigma11 = jacobian((jax.vmap(B11)(nn_input_var), B11), nn_input_var, i=0, j=xid)
+        sigma12 = jacobian((jax.vmap(B12)(nn_input_var), B12), nn_input_var, i=0, j=yid)
+
+        sigma21 = jacobian((jax.vmap(B12)(nn_input_var), B12), nn_input_var, i=0, j=xid)
+        sigma22 = jacobian((jax.vmap(B22)(nn_input_var), B22), nn_input_var, i=0, j=yid)
+
+        # unpacking normalized output
+        u = slice_column(nn_output_var, uid)
+        v = slice_column(nn_output_var, vid)
+        H = slice_column(nn_output_var, Hid)
+
+        # compute the basal stress
+        s_x = jacobian(nn_output_var, nn_input_var, i=sid, j=xid)
+        s_y = jacobian(nn_output_var, nn_input_var, i=sid, j=yid)
+
+        # pde residual
+        f1 = sigma11 + sigma12 - self.rhoi*self.g*H*s_x
+        f2 = sigma21 + sigma22 - self.rhoi*self.g*H*s_y
+
+        return [f1, f2] #}}}
+# }}} # }}}

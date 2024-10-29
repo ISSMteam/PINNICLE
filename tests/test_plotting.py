@@ -51,8 +51,11 @@ SSA = {}
 SSA["scalar_variables"] = {"B":1.26802073401e+08}
 hp["equations"] = {"SSA":SSA}
 
+def test_cmap_Rignot():
+    cr = pinn.utils.plotting.cmap_Rignot()
+    assert cr.colors.shape == (128,3)
 
-def test_resplot(tmp_path):
+def test_resplot_basic(tmp_path):
     hp["save_path"] = str(tmp_path)
     hp["is_save"] = False
     issm["data_size"] = {"u":100, "v":100, "s":100, "H":100, "C":None}
