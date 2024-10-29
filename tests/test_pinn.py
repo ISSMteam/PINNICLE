@@ -267,6 +267,19 @@ def test_plot(tmp_path):
     assert len(im_data) == 5
     assert im_data['u'].shape == (10,10) 
 
+    thickness = {}
+    hp_local["equations"] = {"Thickness":thickness}
+    hp_local["num_collocation_points"] = 10
+    hp_local["time_dependent"] = True
+    hp_local["start_time"] = 0
+    hp_local["end_time"] = 1
+    experiment = pinn.PINN(params=hp_local)
+    experiment.compile()
+    y = experiment.model.predict(experiment.model_data.X['u'], operator=experiment.physics.operator("thickness"))
+    assert experiment.plot_predictions(X_ref=experiment.model_data.data["ISSM"].X_dict,
+            sol_ref=experiment.model_data.data["ISSM"].data_dict,
+            resolution=10) is None
+
 def test_SSA_pde_function():
     hp_local = dict(hp)
     SSA = {}
@@ -326,10 +339,9 @@ def test_MC_pde_function():
     assert len(y) == 1
     assert y[0].shape == (10,1)
 
-def test_thickness_pde_function(tmp_path):
+def test_thickness_pde_function():
     hp_local = dict(hp)
     thickness = {}
-    hp_local["save_path"] = str(tmp_path)
     hp_local["equations"] = {"Thickness":thickness}
     hp_local["num_collocation_points"] = 10
     issm["data_size"] = {"u":10, "v":10, "s":10, "H":10, "C":None, "vel":10}
@@ -344,7 +356,3 @@ def test_thickness_pde_function(tmp_path):
 
     assert len(y) == 1
     assert y[0].shape == (10,1)
-
-    assert experiment.plot_predictions(X_ref=experiment.model_data.data["ISSM"].X_dict,
-                                       sol_ref=experiment.model_data.data["ISSM"].data_dict,
-                                       resolution=10) is None
