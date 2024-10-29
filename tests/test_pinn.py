@@ -181,6 +181,7 @@ def test_save_and_load_train(tmp_path):
     hp_local = dict(hp)
     hp_local["save_path"] = str(tmp_path)
     hp_local["is_save"] = True
+    hp_local["is_plot"] = True
     hp_local["num_collocation_points"] = 10
     issm["data_size"] = {"u":10, "v":10, "s":10, "H":10, "C":None, "vel":10}
     hp_local["data"] = {"ISSM": issm}
