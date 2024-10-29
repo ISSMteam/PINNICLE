@@ -22,7 +22,8 @@ def cmap_Rignot():
     cmap = ListedColormap(cmap)
     return cmap
 
-def plot_solutions(pinn, path="", filename="2Dsolution.png", X_ref=None, sol_ref=None, cols=None, resolution=200, absvariable=[], **kwargs):
+
+def plot_solutions(pinn, path="", filename="2Dsolution.png", X_ref=None, sol_ref=None, cols=None, resolution=200, absvariable=[], default_time=None, **kwargs):
     """ plot model predictions
 
     Args:
@@ -35,13 +36,18 @@ def plot_solutions(pinn, path="", filename="2Dsolution.png", X_ref=None, sol_ref
         absvariable (list): Names of variables in the predictions that will need to take abs() before comparison
     """
     # generate Cartisian grid of X, Y
-    # currently only work on 2D
+    # currently only work on 2D static and time dependent slice
     # TODO: add 1D plot
-    if pinn.domain.geometry.dim == 2:
+    if pinn.domain.geometry.dim >= 2:
     # generate 200x200 mesh on the domain
         X, Y = np.meshgrid(np.linspace(pinn.params.nn.input_lb[0], pinn.params.nn.input_ub[0], resolution),
                 np.linspace(pinn.params.nn.input_lb[1], pinn.params.nn.input_ub[1], resolution))
         X_nn = np.hstack((X.flatten()[:,None], Y.flatten()[:,None]))
+
+        if pinn.nn.parameters.input_size == 3:
+            if default_time is None:
+                default_time = pinn.params.domain.start_time
+            X_nn = np.hstack((X_nn, np.ones([X_nn.shape[0],1])*default_time))
 
         grid_size = 2.0*(((pinn.params.nn.input_ub[0] - pinn.params.nn.input_lb[0])/resolution)**2+
                          ((pinn.params.nn.input_ub[1] - pinn.params.nn.input_lb[1])/resolution)**2)**0.5
@@ -68,7 +74,7 @@ def plot_solutions(pinn, path="", filename="2Dsolution.png", X_ref=None, sol_ref
                 plot_data.update({k+"_ref":griddata(X_ref, sol_ref[k].flatten(), (X, Y), method='cubic') for k in pinn.params.nn.output_variables if k in sol_ref})
             else:
                 raise TypeError(f"Type of sol_ref ({type(sol_ref)}) is not supported ")
-            
+
             vranges.update({k+"_ref":vranges[k+"_pred"] for k in pinn.params.nn.output_variables})
             plot_data.update({k+"_diff":(plot_data[k+"_pred"] - plot_data[k+"_ref"]) for k in pinn.params.nn.output_variables if k in sol_ref})
             vranges.update({k+"_diff":[-0.1*max(np.abs(vranges[k+"_pred"])), 0.1*max(np.abs(vranges[k+"_pred"]))] for k in pinn.params.nn.output_variables if k in sol_ref})
@@ -101,7 +107,8 @@ def plot_solutions(pinn, path="", filename="2Dsolution.png", X_ref=None, sol_ref
             plt.savefig(path+filename)
 
     else:
-        raise ValueError("Plot is only implemented for 2D problem")
+        raise ValueError("Plot is only implemented for 2D/3D problem")
+
 
 def plot_nn(pinn, data_names=None, X_mask=None, axs=None, vranges={}, resolution=200, **kwargs):
     """ plot the prediction of the nerual network in pinn, according to the data_names
