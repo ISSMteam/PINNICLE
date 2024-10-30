@@ -384,3 +384,38 @@ def test_ssashelfB_pde_function():
     assert len(y) == 2
     assert y[0].shape == (10,1)
     assert y[1].shape == (10,1)
+
+def test_user_defined_func():
+    hp_local = dict(hp)
+    hp_local["equations"] = {"SSA": {}}
+    hp_local["num_collocation_points"] = 10
+    issm["data_size"] = {"u":10, "v":10, "s":10, "H":10, "C":None, "vel":10}
+    hp_local["data"] = {"ISSM": issm}
+    experiment = pinn.PINN(params=hp_local)
+    experiment.compile()
+
+    def op(i,o):
+        return experiment.physics.vel_mag(i,o,None)
+    vel = experiment.model.predict(experiment.model_data.X['u'], operator=op)
+    assert np.all(vel >=0)
+    assert vel.shape == (10,1)
+
+    def op2(i,o):
+        return experiment.physics.surf_x(i,o,None)
+    surfx = experiment.model.predict(experiment.model_data.X['u'], operator=op2)
+    assert surfx.shape == (10,1)
+
+    def op3(i,o):
+        return experiment.physics.surf_y(i,o,None)
+    surfy = experiment.model.predict(experiment.model_data.X['u'], operator=op3)
+    assert surfy.shape == (10,1)
+
+    def op4(i,o):
+        return experiment.physics.user_defined_gradient('s','x')(i, o, None)
+    surfx1 = experiment.model.predict(experiment.model_data.X['u'], operator=op4)
+    assert np.all(surfx == surfx1)
+
+    def op5(i,o):
+        return experiment.physics.user_defined_gradient('s','y')(i, o, None)
+    surfy1 = experiment.model.predict(experiment.model_data.X['u'], operator=op5)
+    assert np.all(surfy == surfy1)

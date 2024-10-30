@@ -35,8 +35,11 @@ class Physics:
         self.pde_weights = list(itertools.chain.from_iterable([p.pde_weights for p in self.equations]))
 
     def _update_global_variables(self, local_var_list):
-        """ Update global variables based on a list of local varialbes,
+        """ Update global variables based on a list of local variables,
             find all unqiue keys, then put in one single List
+
+        Args: 
+            local_var_list: list of local variables in the equation
         """
         # merge all dict, get all unique keys
         global_var = {}
@@ -46,7 +49,11 @@ class Physics:
         return list(global_var.keys())
 
     def pdes(self, nn_input_var, nn_output_var):
-        """ a wrapper of all the equations used in the PINN
+        """ a wrapper of all the equations used in the PINN, Args need to follow the requirment by deepxde
+
+        Args: 
+            nn_input_var:  input tensor to the nn
+            nn_output_var: output tensor from the nn
         """
         eq = []
         for p in self.equations:
@@ -54,12 +61,12 @@ class Physics:
         return eq
 
     def vel_mag(self, nn_input_var, nn_output_var, X):
-        """ a wrapper for PointSetOperatorBC func call
+        """ a wrapper for PointSetOperatorBC func call, Args need to follow the requirment by deepxde
 
         Args: 
             nn_input_var:  input tensor to the nn
             nn_output_var: output tensor from the nn
-            X:  NumPy array of the inputs
+            X:  NumPy array of the collocation points defined on the boundary, required by deepxde
         """
         uid = self.output_var.index('u')
         vid = self.output_var.index('v')
@@ -84,11 +91,26 @@ class Physics:
         dsdy = dde.grad.jacobian(nn_output_var, nn_input_var, i=sid, j=yid)
         return dsdy
 
+    def user_defined_gradient(self, output_var, input_var):
+        """ compute the gradient of output_var with respect to the input_var, return a function wrapper for PointSetOperatorBC
+
+        Args: 
+            input_var: string name of input variable (independent variable)
+            output_var: string name of output variable (dependent variable)
+        """
+        def _wrapper(nn_input_var, nn_output_var, X):
+            yid = self.output_var.index(output_var)
+            xid = self.input_var.index(input_var)
+            dydx = dde.grad.jacobian(nn_output_var, nn_input_var, i=yid, j=xid)
+            return dydx
+
+        return _wrapper
+
     def operator(self, pname):
-        """ grab the pde operator
+        """ grab the pde operator, used for testing the pdes and plotting
 
         Args:
-            pid : pde operator id (string)
+            pname : pde operator name (string), case insensitive
         """
         for p in self.equations:
             if p._EQUATION_TYPE.lower() == pname.lower():
