@@ -385,7 +385,7 @@ def test_ssashelfB_pde_function():
     assert y[0].shape == (10,1)
     assert y[1].shape == (10,1)
 
-def test_user_defined_func():
+def test_vel_mag():
     hp_local = dict(hp)
     hp_local["equations"] = {"SSA": {}}
     hp_local["num_collocation_points"] = 10
@@ -393,13 +393,24 @@ def test_user_defined_func():
     hp_local["data"] = {"ISSM": issm}
     experiment = pinn.PINN(params=hp_local)
     experiment.compile()
-
+    sol = experiment.model.predict(experiment.model_data.X['u'])
+    vel_sol = np.sqrt(sol[:,0]**2+sol[:,1]**2)
     def op(i,o):
         return experiment.physics.vel_mag(i,o,None)
     vel = experiment.model.predict(experiment.model_data.X['u'], operator=op)
     assert np.all(vel >=0)
     assert vel.shape == (10,1)
+    assert np.all(vel.flatten() == vel_sol.flatten())
 
+@pytest.mark.skipif(backend_name=="jax", reason="jacobian function implemented for jax uses different syntax, skip from test for now")
+def test_user_defined_grad():
+    hp_local = dict(hp)
+    hp_local["equations"] = {"SSA": {}}
+    hp_local["num_collocation_points"] = 10
+    issm["data_size"] = {"u":10, "v":10, "s":10, "H":10, "C":None, "vel":10}
+    hp_local["data"] = {"ISSM": issm}
+    experiment = pinn.PINN(params=hp_local)
+    experiment.compile()
     def op2(i,o):
         return experiment.physics.surf_x(i,o,None)
     surfx = experiment.model.predict(experiment.model_data.X['u'], operator=op2)
