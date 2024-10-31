@@ -13,7 +13,7 @@ class TimeInvariantConstraintParameter(EquationParameter, Constants):
         super().__init__(param_dict)
 
     def set_default(self):
-        self.input = ['t']
+        self.input = ['x', 'y', 't']
         self.output = ['H', 's', 'C']
         self.output_lb = [self.variable_lb[k] for k in self.output]
         self.output_ub = [self.variable_ub[k] for k in self.output]
