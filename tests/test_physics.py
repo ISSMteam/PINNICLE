@@ -176,7 +176,7 @@ def test_operator():
     SSA["scalar_variables"] = {"B":1.26802073401e+08}
 
     hp = {}
-    hp["equations"] = {"MC":{}, "SSA":SSA, "SSA_VB":{}, "MOLHO":{}, "Thickness":{}}
+    hp["equations"] = {"MC":{}, "SSA":SSA, "SSA_VB":{}, "MOLHO":{}, "Thickness":{}, "Time_Invariant":{}}
     phy = Physics(PhysicsParameter(hp))
     
     assert phy.operator('mc')
@@ -189,6 +189,8 @@ def test_operator():
     assert phy.operator('MOLHO')
     assert phy.operator('THICKNESS')
     assert phy.operator('thickness')
+    assert phy.operator('Time_Invariant')
+    assert phy.operator('TIME_INVARIANT')
 
 def test_Physics_dummy():
     dummy = {}

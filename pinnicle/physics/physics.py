@@ -80,7 +80,7 @@ class Physics:
         """
         sid = self.output_var.index('s')
         xid = self.input_var.index('x')
-        dsdx = dde.grad.jacobian(nn_output_var, nn_input_var, i=sid, j=xid)
+        dsdx = jacobian(nn_output_var, nn_input_var, i=sid, j=xid)
         return dsdx
 
     def surf_y(self, nn_input_var, nn_output_var, X):
@@ -88,11 +88,12 @@ class Physics:
         """
         sid = self.output_var.index('s')
         yid = self.input_var.index('y')
-        dsdy = dde.grad.jacobian(nn_output_var, nn_input_var, i=sid, j=yid)
+        dsdy = jacobian(nn_output_var, nn_input_var, i=sid, j=yid)
         return dsdy
 
     def user_defined_gradient(self, output_var, input_var):
         """ compute the gradient of output_var with respect to the input_var, return a function wrapper for PointSetOperatorBC
+            TODO: implement jax version
 
         Args: 
             input_var: string name of input variable (independent variable)
@@ -101,7 +102,7 @@ class Physics:
         def _wrapper(nn_input_var, nn_output_var, X):
             yid = self.output_var.index(output_var)
             xid = self.input_var.index(input_var)
-            dydx = dde.grad.jacobian(nn_output_var, nn_input_var, i=yid, j=xid)
+            dydx = jacobian(nn_output_var, nn_input_var, i=yid, j=xid)
             return dydx
 
         return _wrapper

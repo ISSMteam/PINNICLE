@@ -385,6 +385,23 @@ def test_ssashelfB_pde_function():
     assert y[0].shape == (10,1)
     assert y[1].shape == (10,1)
 
+def test_time_invariant_func():
+    hp_local = dict(hp)
+    hp_local["equations"] = {"Time_Invariant": {}}
+    hp_local["num_collocation_points"] = 10
+    issm["data_size"] = {"u":10, "v":10, "s":10, "H":10, "C":None, "vel":10}
+    hp_local["data"] = {"ISSM": issm}
+    hp_local["time_dependent"] = True
+    hp_local["start_time"] = 0
+    hp_local["end_time"] = 1
+    experiment = pinn.PINN(params=hp_local)
+    experiment.compile()
+    y = experiment.model.predict(experiment.model_data.X['u'], operator=experiment.physics.operator("Time_Invariant"))
+
+    assert len(y) == 2
+    assert y[0].shape == (10,1)
+    assert y[1].shape == (10,1)
+
 def test_vel_mag():
     hp_local = dict(hp)
     hp_local["equations"] = {"SSA": {}}
