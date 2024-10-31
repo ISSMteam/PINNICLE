@@ -6,3 +6,4 @@ from .continuity import *
 from .dummy import *
 from .stressbalance import *
 from .iceshelf import *
+from .timeinvariant import *

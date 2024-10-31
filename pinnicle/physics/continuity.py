@@ -98,7 +98,7 @@ class Thickness(EquationBase): #{{{
     """ 2D time depenent thickness evolution
     """
     _EQUATION_TYPE = 'Thickness' 
-    def __init__(self, parameters=MCEquationParameter()):
+    def __init__(self, parameters=ThicknessEquationParameter()):
         super().__init__(parameters)
 
     def _pde(self, nn_input_var, nn_output_var): #{{{

@@ -52,12 +52,12 @@ class SSA(EquationBase): #{{{
         Cid = self.local_output_var["C"]
 
         # spatial derivatives
-        u_x = dde.grad.jacobian(nn_output_var, nn_input_var, i=uid, j=xid)
-        v_x = dde.grad.jacobian(nn_output_var, nn_input_var, i=vid, j=xid)
-        u_y = dde.grad.jacobian(nn_output_var, nn_input_var, i=uid, j=yid)
-        v_y = dde.grad.jacobian(nn_output_var, nn_input_var, i=vid, j=yid)
-        s_x = dde.grad.jacobian(nn_output_var, nn_input_var, i=sid, j=xid)
-        s_y = dde.grad.jacobian(nn_output_var, nn_input_var, i=sid, j=yid)
+        u_x = jacobian(nn_output_var, nn_input_var, i=uid, j=xid)
+        v_x = jacobian(nn_output_var, nn_input_var, i=vid, j=xid)
+        u_y = jacobian(nn_output_var, nn_input_var, i=uid, j=yid)
+        v_y = jacobian(nn_output_var, nn_input_var, i=vid, j=yid)
+        s_x = jacobian(nn_output_var, nn_input_var, i=sid, j=xid)
+        s_y = jacobian(nn_output_var, nn_input_var, i=sid, j=yid)
 
         # unpacking normalized output
         u = slice_column(nn_output_var, uid)
@@ -73,11 +73,11 @@ class SSA(EquationBase): #{{{
         B12 = etaH*(  u_y +   v_x)
 
         # Getting the other derivatives
-        sigma11 = dde.grad.jacobian(B11, nn_input_var, i=0, j=xid)
-        sigma12 = dde.grad.jacobian(B12, nn_input_var, i=0, j=yid)
+        sigma11 = jacobian(B11, nn_input_var, i=0, j=xid)
+        sigma12 = jacobian(B12, nn_input_var, i=0, j=yid)
 
-        sigma21 = dde.grad.jacobian(B12, nn_input_var, i=0, j=xid)
-        sigma22 = dde.grad.jacobian(B22, nn_input_var, i=0, j=yid)
+        sigma21 = jacobian(B12, nn_input_var, i=0, j=xid)
+        sigma22 = jacobian(B22, nn_input_var, i=0, j=yid)
 
 
         # compute the basal stress

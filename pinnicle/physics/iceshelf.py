@@ -63,12 +63,12 @@ class SSAShelf(EquationBase): #{{{
         H = slice_column(nn_output_var, Hid)
 
         # spatial derivatives
-        u_x = dde.grad.jacobian(nn_output_var, nn_input_var, i=uid, j=xid)
-        v_x = dde.grad.jacobian(nn_output_var, nn_input_var, i=vid, j=xid)
-        s_x = dde.grad.jacobian(nn_output_var, nn_input_var, i=sid, j=xid)
-        u_y = dde.grad.jacobian(nn_output_var, nn_input_var, i=uid, j=yid)
-        v_y = dde.grad.jacobian(nn_output_var, nn_input_var, i=vid, j=yid)
-        s_y = dde.grad.jacobian(nn_output_var, nn_input_var, i=sid, j=yid)
+        u_x = jacobian(nn_output_var, nn_input_var, i=uid, j=xid)
+        v_x = jacobian(nn_output_var, nn_input_var, i=vid, j=xid)
+        s_x = jacobian(nn_output_var, nn_input_var, i=sid, j=xid)
+        u_y = jacobian(nn_output_var, nn_input_var, i=uid, j=yid)
+        v_y = jacobian(nn_output_var, nn_input_var, i=vid, j=yid)
+        s_y = jacobian(nn_output_var, nn_input_var, i=sid, j=yid)
 
         eta = 0.5*self.B *(u_x**2.0 + v_y**2.0 + 0.25*(u_y+v_x)**2.0 + u_x*v_y+1.0e-15)**(0.5*(1.0-self.n)/self.n)
         # stress tensor
@@ -78,11 +78,11 @@ class SSAShelf(EquationBase): #{{{
         B12 = etaH*(  u_y +   v_x)
 
         # Getting the other derivatives
-        sigma11 = dde.grad.jacobian(B11, nn_input_var, i=0, j=xid)
-        sigma12 = dde.grad.jacobian(B12, nn_input_var, i=0, j=yid)
+        sigma11 = jacobian(B11, nn_input_var, i=0, j=xid)
+        sigma12 = jacobian(B12, nn_input_var, i=0, j=yid)
 
-        sigma21 = dde.grad.jacobian(B12, nn_input_var, i=0, j=xid)
-        sigma22 = dde.grad.jacobian(B22, nn_input_var, i=0, j=yid)
+        sigma21 = jacobian(B12, nn_input_var, i=0, j=xid)
+        sigma22 = jacobian(B22, nn_input_var, i=0, j=yid)
 
         # pde residual
         f1 = sigma11 + sigma12 - self.rhoi*self.g*H*s_x
@@ -197,12 +197,12 @@ class SSAShelfVariableB(EquationBase): # {{{
         B = slice_column(nn_output_var, Bid)
 
         # spatial derivatives
-        u_x = dde.grad.jacobian(nn_output_var, nn_input_var, i=uid, j=xid)
-        v_x = dde.grad.jacobian(nn_output_var, nn_input_var, i=vid, j=xid)
-        s_x = dde.grad.jacobian(nn_output_var, nn_input_var, i=sid, j=xid)
-        u_y = dde.grad.jacobian(nn_output_var, nn_input_var, i=uid, j=yid)
-        v_y = dde.grad.jacobian(nn_output_var, nn_input_var, i=vid, j=yid)
-        s_y = dde.grad.jacobian(nn_output_var, nn_input_var, i=sid, j=yid)
+        u_x = jacobian(nn_output_var, nn_input_var, i=uid, j=xid)
+        v_x = jacobian(nn_output_var, nn_input_var, i=vid, j=xid)
+        s_x = jacobian(nn_output_var, nn_input_var, i=sid, j=xid)
+        u_y = jacobian(nn_output_var, nn_input_var, i=uid, j=yid)
+        v_y = jacobian(nn_output_var, nn_input_var, i=vid, j=yid)
+        s_y = jacobian(nn_output_var, nn_input_var, i=sid, j=yid)
 
         eta = 0.5*B *(u_x**2.0 + v_y**2.0 + 0.25*(u_y+v_x)**2.0 + u_x*v_y+1.0e-15)**(0.5*(1.0-self.n)/self.n)
         # stress tensor
@@ -212,11 +212,11 @@ class SSAShelfVariableB(EquationBase): # {{{
         B12 = etaH*(  u_y +   v_x)
 
         # Getting the other derivatives
-        sigma11 = dde.grad.jacobian(B11, nn_input_var, i=0, j=xid)
-        sigma12 = dde.grad.jacobian(B12, nn_input_var, i=0, j=yid)
+        sigma11 = jacobian(B11, nn_input_var, i=0, j=xid)
+        sigma12 = jacobian(B12, nn_input_var, i=0, j=yid)
 
-        sigma21 = dde.grad.jacobian(B12, nn_input_var, i=0, j=xid)
-        sigma22 = dde.grad.jacobian(B22, nn_input_var, i=0, j=yid)
+        sigma21 = jacobian(B12, nn_input_var, i=0, j=xid)
+        sigma22 = jacobian(B22, nn_input_var, i=0, j=yid)
 
         # pde residual
         f1 = sigma11 + sigma12 - self.rhoi*self.g*H*s_x
