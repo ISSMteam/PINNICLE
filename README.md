@@ -32,6 +32,7 @@ A Python library for solving ice sheet modeling problems using a unified framewo
 - Coupuling:
   - stress balance + mass balance
 
+- Time dependent problems
 
 ## Data format
 
@@ -42,7 +43,5 @@ A Python library for solving ice sheet modeling problems using a unified framewo
 ## More
 
 - [Install and Setup](https://pinnicle.readthedocs.io/en/latest/installation.html#installation)
-- [An example of stress balance](https://pinnicle.readthedocs.io/en/latest/examples/pinn.ssa.html)
-- [An example of mass balance](https://pinnicle.readthedocs.io/en/latest/examples/pinn.mc.html)
-- [An example of coupling stress balance with mass balance](https://pinnicle.readthedocs.io/en/latest/examples/pinn.mcssa.html)
+- [An example of stress balance](https://pinnicle.readthedocs.io/en/latest/examples/ssa.html)
 
