@@ -1,4 +1,5 @@
 import pytest
+import numpy as np
 import pinnicle as pinn
 from pinnicle.parameter import DataParameter, SingleDataParameter, NNParameter, DomainParameter, PhysicsParameter, Parameters, EquationParameter, TrainingParameter
 from pinnicle.physics import SSAEquationParameter, DummyEquationParameter
@@ -67,17 +68,26 @@ def test_nn_parameter():
     d.input_lb = 1
     d.input_ub = 10
     assert d.is_input_scaling()
-
     assert not d.is_output_scaling()
+
     d.output_lb = 1
     d.output_ub = 10
     assert d.is_output_scaling()
+
     d = NNParameter({"num_neurons":[1,2,3]})
     assert d.num_layers == 3
     assert d.input_size == 0
+
     d = NNParameter({"fft":True})
     assert d.input_size == 2*d.num_fourier_feature
     assert d.is_input_scaling()
+    assert d.B is None
+
+    d = NNParameter({"fft":True, "num_fourier_feature":4, "B":[[1,2,3,4]]})
+    assert d.B is not None
+    with pytest.raises(Exception):
+        d = NNParameter({"fft":True, "num_fourier_feature":4, "B":1})
+        d = NNParameter({"fft":True, "num_fourier_feature":4, "B":[[1,2]]})
 
 def test_parameters():
     p = Parameters()

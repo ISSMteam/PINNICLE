@@ -146,6 +146,24 @@ def test_train(tmp_path):
     experiment.train()
     assert experiment.loss_names == ['fSSA1', 'fSSA2', 'u', 'v', 's', 'H', 'C']
 
+def test_fft_training(tmp_path):
+    hp_local = dict(hp)
+    hp_local['fft'] = True
+    hp_local["is_save"] = False
+    hp_local["num_collocation_points"] = 10
+    issm["data_size"] = {"u":10, "v":10, "s":10, "H":10, "C":None}
+    hp_local["data"] = {"ISSM": issm}
+    hp_local["equations"] = {"SSA":SSA}
+    experiment = pinn.PINN(params=hp_local)
+    experiment.save_setting(path=tmp_path)
+    assert experiment.params.param_dict == experiment.load_setting(path=tmp_path)
+    assert experiment.params.nn.B is None
+    assert os.path.isdir(f"{tmp_path}/pinn/")
+    experiment2 = pinn.PINN(loadFrom=tmp_path)
+    assert experiment.params.param_dict == experiment2.params.param_dict
+    assert len(experiment2.params.nn.B) == 2
+    assert len(experiment2.params.nn.B[1]) == 10    
+
 @pytest.mark.skipif(backend_name in ["jax"], reason="save model is not implemented in deepxde for jax")
 def test_train_PFNN(tmp_path):
     hp_local = dict(hp)
