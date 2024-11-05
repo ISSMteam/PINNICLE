@@ -55,6 +55,12 @@ def test_input_fft_nn():
     z = y**2
     assert np.all(abs(z[:,1:10]+z[:,11:20]) <= 1.0+np.finfo(float).eps)
 
+    hp['B'] = np.array([[1,2,3]])
+    hp['num_fourier_feature'] = 3
+    d = NNParameter(hp)
+    p = pinn.nn.FNN(d)
+    assert np.all(hp['B'] == bkd.to_numpy(p.B))
+
 def test_input_scale_nn():
     hp={}
     hp['input_variables'] = ['x']
