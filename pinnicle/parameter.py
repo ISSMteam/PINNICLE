@@ -193,6 +193,7 @@ class NNParameter(ParameterBase):
         self.fft = False
         self.num_fourier_feature = 10
         self.sigma = 1.0
+        self.B = None
 
         # parallel neural network
         self.is_parallel = False
@@ -207,6 +208,9 @@ class NNParameter(ParameterBase):
         if self.fft:
             if self.input_size != self.num_fourier_feature*2:
                 raise ValueError("'input_size' does not match the number of fourier feature")
+            if self.B is not None:
+                if self.B.shape[1] != self.num_fourier_feature:
+                    raise ValueError("Number of columns of 'B' matrix does not match the number of fourier feature")
         else:
             # input size of nn equals to dependent in physics
             if self.input_size != len(self.input_variables):
