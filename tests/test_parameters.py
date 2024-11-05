@@ -83,11 +83,11 @@ def test_nn_parameter():
     assert d.is_input_scaling()
     assert d.B is None
 
-    d = NNParameter({"fft":True, "num_fourier_feature":4, "B":np.array([[1,2,3,4]])})
+    d = NNParameter({"fft":True, "num_fourier_feature":4, "B":[[1,2,3,4]]})
     assert d.B is not None
     with pytest.raises(Exception):
-        d = NNParameter({"fft":True, "num_fourier_feature":4, "B":np.array([[1,2]])})
         d = NNParameter({"fft":True, "num_fourier_feature":4, "B":1})
+        d = NNParameter({"fft":True, "num_fourier_feature":4, "B":[[1,2]]})
 
 def test_parameters():
     p = Parameters()

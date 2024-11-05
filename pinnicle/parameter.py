@@ -209,7 +209,9 @@ class NNParameter(ParameterBase):
             if self.input_size != self.num_fourier_feature*2:
                 raise ValueError("'input_size' does not match the number of fourier feature")
             if self.B is not None:
-                if self.B.shape[1] != self.num_fourier_feature:
+                if not isinstance(self.B, list):
+                    raise TypeError("'B' matrix need to be input in a list")
+                if len(self.B[0]) != self.num_fourier_feature:
                     raise ValueError("Number of columns of 'B' matrix does not match the number of fourier feature")
         else:
             # input size of nn equals to dependent in physics
