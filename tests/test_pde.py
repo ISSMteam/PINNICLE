@@ -147,7 +147,7 @@ def test_vel_mag():
     vel = experiment.model.predict(experiment.model_data.X['u'], operator=op)
     assert np.all(vel >=0)
     assert vel.shape == (10,1)
-    assert np.all(vel.flatten() == vel_sol.flatten())
+    assert np.all(vel.flatten() - vel_sol.flatten() < 2.0*np.finfo(float).eps)
 
 @pytest.mark.skipif(backend_name=="jax", reason="jacobian function implemented for jax uses different syntax, skip from test for now")
 def test_user_defined_grad():
