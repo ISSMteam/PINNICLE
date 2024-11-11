@@ -1,5 +1,5 @@
 import pinnicle as pinn
-from pinnicle.nn.helper import minmax_scale, up_scale, fourier_feature
+from pinnicle.nn.helper import minmax_scale, up_scale, fourier_feature, default_float_type
 from pinnicle.parameter import NNParameter
 import deepxde as dde
 import deepxde.backend as bkd
@@ -25,11 +25,16 @@ def test_upscale():
 
 @pytest.mark.skipif(backend_name=="jax", reason="bkd.matmul is not implemented for jax")
 def test_fourier_feature():
-    x = bkd.reshape(bkd.as_tensor((np.linspace(1,100, 100)), dtype=dde.config.default_float()), [50,2])
-    B = bkd.as_tensor(np.random.normal(0.0, 10.0, [x.shape[1], 2]), dtype=dde.config.default_float())
+    x = bkd.reshape(bkd.as_tensor((np.linspace(1,100, 100)), dtype=default_float_type()), [50,2])
+    B = bkd.as_tensor(np.random.normal(0.0, 10.0, [x.shape[1], 2]), dtype=default_float_type())
     y = bkd.to_numpy(fourier_feature(x, B))
     z = y**2
     assert np.all((z[:,1]+z[:,3]) < 1.0+100**np.finfo(float).eps)
+
+def test_default_float_type():
+    assert default_float_type() is not None
+    assert default_float_type() in bkd.data_type_dict.values()
+    assert default_float_type() == bkd.data_type_dict['float64']
 
 def test_new_nn():
     hp={}
@@ -53,7 +58,7 @@ def test_input_fft_nn():
     d.input_lb = 1.0
     d.input_ub = 10.0
     p = pinn.nn.FNN(d)
-    x = bkd.reshape(bkd.as_tensor(np.linspace(d.input_lb, d.input_ub, 100), dtype=dde.config.default_float()), [100,1])
+    x = bkd.reshape(bkd.as_tensor(np.linspace(d.input_lb, d.input_ub, 100), dtype=default_float_type()), [100,1])
     y = bkd.to_numpy(p.net._input_transform(x))
     z = y**2
     assert np.all(abs(z[:,1:10]+z[:,11:20]) <= 1.0+np.finfo(float).eps)
@@ -74,7 +79,7 @@ def test_input_scale_nn():
     d.input_lb = 1.0
     d.input_ub = 10.0
     p = pinn.nn.FNN(d)
-    x = bkd.as_tensor(np.linspace(d.input_lb, d.input_ub, 100), dtype=dde.config.default_float())
+    x = bkd.as_tensor(np.linspace(d.input_lb, d.input_ub, 100), dtype=default_float_type())
     y = bkd.to_numpy(p.net._input_transform(x))
     assert np.all(abs(y) <= 1.0+np.finfo(float).eps)
 
@@ -88,7 +93,7 @@ def test_output_scale_nn():
     d.output_lb = 1.0
     d.output_ub = 10.0
     p = pinn.nn.FNN(d)
-    x = bkd.as_tensor(np.linspace(-1.0, 1.0, 100), dtype=dde.config.default_float())
+    x = bkd.as_tensor(np.linspace(-1.0, 1.0, 100), dtype=default_float_type())
     y = [0.0]
     out = bkd.to_numpy(p.net._output_transform(y,x))
     assert np.all(out >= 1.0 - 1.0*np.finfo(float).eps) 

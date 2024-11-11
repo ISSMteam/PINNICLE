@@ -2,7 +2,7 @@ import deepxde as dde
 import deepxde.backend as bkd
 import numpy as np
 from deepxde.backend import tf
-from .helper import minmax_scale, up_scale, fourier_feature
+from .helper import minmax_scale, up_scale, fourier_feature, default_float_type
 from ..parameter import NNParameter
 
 class FNN:
@@ -23,9 +23,9 @@ class FNN:
             if self.parameters.fft :
                 print(f"add Fourier feature transform to input transform")
                 if self.parameters.B is not None: 
-                    self.B = bkd.as_tensor(self.parameters.B, dtype=dde.config.default_float())
+                    self.B = bkd.as_tensor(self.parameters.B, dtype=default_float_type())
                 else:
-                    self.B = bkd.as_tensor(np.random.normal(0.0, self.parameters.sigma, [len(self.parameters.input_variables), self.parameters.num_fourier_feature]), dtype=dde.config.default_float())
+                    self.B = bkd.as_tensor(np.random.normal(0.0, self.parameters.sigma, [len(self.parameters.input_variables), self.parameters.num_fourier_feature]), dtype=default_float_type())
                 def wrapper(x):
                     """a wrapper function to add fourier feature transform to the input
                     """
@@ -36,8 +36,8 @@ class FNN:
                 print(f"add input transform with {self.parameters.input_lb} and {self.parameters.input_ub}")
                 # force the input and output lb and ub to be tensors
                 if bkd.backend_name == "pytorch":
-                    self.parameters.input_lb = bkd.as_tensor(self.parameters.input_lb, dtype=dde.config.default_float())
-                    self.parameters.input_ub = bkd.as_tensor(self.parameters.input_ub, dtype=dde.config.default_float())
+                    self.parameters.input_lb = bkd.as_tensor(self.parameters.input_lb, dtype=default_float_type())
+                    self.parameters.input_ub = bkd.as_tensor(self.parameters.input_ub, dtype=default_float_type())
                 # add input transform
                 self._add_input_transform(minmax_scale)
 
@@ -46,8 +46,8 @@ class FNN:
             print(f"add output transform with {self.parameters.output_lb} and {self.parameters.output_ub}")
             # force the input and output lb and ub to be tensors
             if bkd.backend_name == "pytorch":
-                self.parameters.output_lb = bkd.as_tensor(self.parameters.output_lb, dtype=dde.config.default_float())
-                self.parameters.output_ub = bkd.as_tensor(self.parameters.output_ub, dtype=dde.config.default_float())
+                self.parameters.output_lb = bkd.as_tensor(self.parameters.output_lb, dtype=default_float_type())
+                self.parameters.output_ub = bkd.as_tensor(self.parameters.output_ub, dtype=default_float_type())
             # add output transform
             self._add_output_transform(up_scale)
 
