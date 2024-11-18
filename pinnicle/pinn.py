@@ -136,7 +136,7 @@ class PINN:
         # create an instance of Data
         self.model_data = Data(self.params.data)
         # load from data file
-        self.model_data.load_data()
+        self.model_data.load_data(self.domain, self.physics)
         # update according to the setup: input_variables defined by the physics
         self.model_data.prepare_training_data(transient=self.params.domain.time_dependent, default_time=self.params.domain.start_time)
 

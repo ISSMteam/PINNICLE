@@ -34,7 +34,7 @@ class ISSMmdData(DataBase, Constants):
         iice = np.asarray(icemask<0).nonzero()
         return iice
 
-    def load_data(self, domain=None):
+    def load_data(self, domain=None, physics=None):
         """ load ISSM model from a `.mat` file
         """
         # Reading matlab data

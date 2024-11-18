@@ -1,6 +1,7 @@
 deepxde
 mat73
 matplotlib
+h5py
 numpy
 pandas
 scikit-learn==1.4.2

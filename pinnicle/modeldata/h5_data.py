@@ -1,14 +1,15 @@
 from . import DataBase
 from ..parameter import SingleDataParameter
 from ..physics import Constants
-from ..utils import plot_dict_data, load_mat, down_sample
+from ..utils import down_sample
 import numpy as np
+import h5py
 
 
-class MatData(DataBase, Constants):
-    """ data loaded from a `.mat` file
+class H5Data(DataBase, Constants):
+    """ data loaded from a `.h5` file
     """
-    _DATA_TYPE = "mat"
+    _DATA_TYPE = "h5"
     def __init__(self, parameters=SingleDataParameter()):
         Constants.__init__(self)
         super().__init__(parameters)
@@ -24,21 +25,41 @@ class MatData(DataBase, Constants):
         return X_mask
 
     def load_data(self, domain=None, physics=None):
-        """ load scatter data from a `.mat` file, return a dict with the required data
+        """ load grid data from a `.h5` file, based on the domain, return a dict with the required data
         """
-        # Reading matlab data
-        data = load_mat(self.parameters.data_path)
+        # Reading .h5 data handler
+        data = h5py.File(self.parameters.data_path, 'r')
 
-        # load the coordinates
+        # pre load x, y, then use inside() to further get the inflag
+        X = {}
         for k, v in self.parameters.X_map.items():
-            if v in data:
-                self.X_dict[k] = data[v]
+            if v in data.keys():
+                X[k] = data[v]
             else:
                 print(f"{v} is not found in the data from {self.parameters.data_path}, please specify the mapping in 'X_map'")
 
+        # get the bbox from domain, set the rectangle 
+        if domain:
+            bbox = domain.bbox()
+        
+        # use the order in physics.input_var to determine x and y names
+        if physics:
+            xkey = physics.input_var[0]
+            ykey = physics.input_var[1]
+        else:
+            xkey = 'x'
+            ykey = 'y'
+
+        # set the flag based on the bbox region
+        boxflag = (X[xkey]>=bbox[0][0]) & (X[xkey]<=bbox[1][0]) & (X[ykey]>=bbox[0][1]) & (X[ykey]<=bbox[1][1])
+
+        # load the coordinates
+        for k in self.parameters.X_map.keys():
+            self.X_dict[k] = X[k][boxflag].flatten()[:,None]
+
         # load all variables from parameters.name_map
         for k in self.parameters.name_map:
-            self.data_dict[k] = data[self.parameters.name_map[k]]
+            self.data_dict[k] = data[self.parameters.name_map[k]][boxflag].flatten()[:,None]
 
     def plot(self, data_names=[], vranges={}, axs=None, **kwargs):
         """ TODO: scatter plot of the selected data from data_names
