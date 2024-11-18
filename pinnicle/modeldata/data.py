@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from ..parameter import DataParameter, SingleDataParameter
 from ..physics import Constants
 import numpy as np
+import deepxde as dde
 
 
 class DataBase(ABC):
@@ -95,12 +96,12 @@ class Data(Constants):
                             default_time = self.data[key].parameters.default_time
                         xval = np.hstack((xval, np.ones([xval.shape[0],1])*default_time))
                 if xkey not in self.X:
-                    self.X[xkey] = xval
+                    self.X[xkey] = xval.astype(dde.config.default_float())
                 else:
-                    self.X[xkey] = np.vstack((self.X[xkey], xval))
+                    self.X[xkey] = np.vstack((self.X[xkey], xval.astype(dde.config.default_float())))
 
             for xkey in self.data[key].sol:
                 if xkey not in self.sol:
-                    self.sol[xkey] = self.data[key].sol[xkey]
+                    self.sol[xkey] = self.data[key].sol[xkey].astype(dde.config.default_float())
                 else:
-                    self.sol[xkey] = np.vstack((self.sol[xkey], self.data[key].sol[xkey]))
+                    self.sol[xkey] = np.vstack((self.sol[xkey], self.data[key].sol[xkey].astype(dde.config.default_float())))
