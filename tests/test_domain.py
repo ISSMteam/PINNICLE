@@ -20,10 +20,21 @@ def test_domain():
     d2 = pinn.domain.Domain(p2)
     assert type(d2.geometry) == dde.geometry.Polygon
 
+    # inside
     c = np.array([0.5*(d2.geometry.bbox[0]+d2.geometry.bbox[1])])
     assert d2.inside(c)
     o = np.array([d2.geometry.bbox[0]-[100,100] ,d2.geometry.bbox[1]+[100,100]])
     assert not np.any(d2.inside(o))
+
+    # bbox
+    assert np.all(d2.bbox() == d2.geometry.bbox)
+
+
+def test_time_dependent_domain():
+    expFileName = "fastflow_CF.exp"
+    repoPath = os.path.dirname(__file__) + "/../examples/"
+    hp = {}
+    hp["shapefile"] = os.path.join(repoPath, "dataset", expFileName)
 
     hp["time_dependent"] = True
     hp["start_time"] = 0
@@ -38,3 +49,6 @@ def test_domain():
     assert d2.inside(c)
     o = np.array([d2.geometry.geometry.bbox[1]-[100,100] ,d2.geometry.geometry.bbox[1]+[100,100]])
     assert not np.any(d2.inside(o))
+
+    # bbox
+    assert np.all(d2.bbox() == d2.geometry.geometry.bbox)

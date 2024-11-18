@@ -49,3 +49,14 @@ class Domain:
             return self.geometry.geometry.inside(x)
         else:
             return self.geometry.inside(x)
+
+    def bbox(self):
+        """
+        return the bbox of the domain
+        """
+        if self.parameters.time_dependent:
+            # only check the spatial domain
+            # TODO: add time domain
+            return self.geometry.geometry.bbox
+        else:
+            return self.geometry.bbox
