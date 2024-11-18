@@ -38,3 +38,14 @@ class Domain:
             domain_list.append(vertex_list)
 
         return domain_list
+
+    def inside(self, x):
+        """
+        return if given points are inside the domain
+        """
+        if self.parameters.time_dependent:
+            # only check the spatial domain
+            # TODO: add time domain
+            return self.geometry.geometry.inside(x)
+        else:
+            return self.geometry.inside(x)

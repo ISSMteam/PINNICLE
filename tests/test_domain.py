@@ -2,6 +2,7 @@ import pinnicle as pinn
 import pytest
 import deepxde as dde
 import os
+import numpy as np
 
 
 def test_domain():
@@ -19,6 +20,11 @@ def test_domain():
     d2 = pinn.domain.Domain(p2)
     assert type(d2.geometry) == dde.geometry.Polygon
 
+    c = np.array([0.5*(d2.geometry.bbox[0]+d2.geometry.bbox[1])])
+    assert d2.inside(c)
+    o = np.array([d2.geometry.bbox[0]-[100,100] ,d2.geometry.bbox[1]+[100,100]])
+    assert not np.any(d2.inside(o))
+
     hp["time_dependent"] = True
     hp["start_time"] = 0
     hp["end_time"] = 1
@@ -27,3 +33,8 @@ def test_domain():
     assert type(d2.geometry) != dde.geometry.Polygon
     assert type(d2.geometry) == dde.geometry.GeometryXTime
     assert (d2.geometry.random_points(5)).shape == (5, 3)
+
+    c = np.array([0.5*(d2.geometry.geometry.bbox[0]+d2.geometry.geometry.bbox[1])])
+    assert d2.inside(c)
+    o = np.array([d2.geometry.geometry.bbox[1]-[100,100] ,d2.geometry.geometry.bbox[1]+[100,100]])
+    assert not np.any(d2.inside(o))
