@@ -1,6 +1,7 @@
 import pytest
 import os
-from pinnicle.modeldata import ISSMmdData, MatData, Data
+import pinnicle as pinn
+from pinnicle.modeldata import ISSMmdData, MatData, Data, H5Data
 from pinnicle.parameter import DataParameter, SingleDataParameter
 
 def test_ISSMmdData():
@@ -150,3 +151,76 @@ def test_MatData():
     data_loader.load_data()
     assert ("y" in data_loader.X_dict)
     assert ("x" not in data_loader.X_dict)
+
+def test_h5Data():
+    filename = "subdomain_data.h5"
+    repoPath = os.path.dirname(__file__) + "/../examples/"
+    appDataPath = os.path.join(repoPath, "dataset")
+    path = os.path.join(appDataPath, filename)
+
+    hp = {}
+    hp["data_path"] = path
+    hp["data_size"] = {"u":300, "v":100, "s":2, "b":100, "a":10}
+    hp["X_map"] = {"x":"surf_x", "y":"surf_y" }
+    hp["name_map"] = {"s":"surf_elv", "u":"surf_vx", "v":"surf_vy", "a":"surf_SMB", "b":"bed_BedMachine"}
+    hp["source"] = "h5"
+    
+    p = SingleDataParameter(hp)
+    data_loader = H5Data(p)
+    data_loader.load_data()
+    data_loader.prepare_training_data()
+    assert(data_loader.sol['u'].shape == (300,1))
+    assert(data_loader.X['v'].shape == (100,2))
+    icoord = data_loader.get_ice_coordinates()
+    assert icoord.shape == (60000, 2)
+
+def test_h5Data_domain():
+    filename = "subdomain_data.h5"
+    expFileName = "fastflow_CF.exp"
+    repoPath = os.path.dirname(__file__) + "/../examples/"
+    appDataPath = os.path.join(repoPath, "dataset")
+    path = os.path.join(appDataPath, filename)
+
+    hp = {}
+    hp["data_path"] = path
+    hp["data_size"] = {"u":300, "v":100, "s":2, "b":100, "a":10}
+    hp["X_map"] = {"x":"surf_x", "y":"surf_y" }
+    hp["name_map"] = {"s":"surf_elv", "u":"surf_vx", "v":"surf_vy", "a":"surf_SMB", "b":"bed_BedMachine"}
+    hp["source"] = "h5"
+    hp["shapefile"] = os.path.join(repoPath, "dataset", expFileName)
+
+    d = pinn.domain.Domain( pinn.parameter.DomainParameter(hp))
+    p = SingleDataParameter(hp)
+    data_loader = H5Data(p)
+    data_loader.load_data(d)
+    data_loader.prepare_training_data()
+    assert(data_loader.X['b'].shape == (100,2))
+    assert(data_loader.sol['a'].shape == (10,1))
+    icoord = data_loader.get_ice_coordinates()
+    assert icoord.shape == (51800,2)
+
+def test_h5Data_physics():
+    filename = "subdomain_data.h5"
+    expFileName = "fastflow_CF.exp"
+    repoPath = os.path.dirname(__file__) + "/../examples/"
+    appDataPath = os.path.join(repoPath, "dataset")
+    path = os.path.join(appDataPath, filename)
+
+    hp = {}
+    hp["data_path"] = path
+    hp["data_size"] = {"u":300, "v":100, "s":2, "b":100, "a":10}
+    hp["X_map"] = {"x":"surf_x", "y":"surf_y" }
+    hp["name_map"] = {"s":"surf_elv", "u":"surf_vx", "v":"surf_vy", "a":"surf_SMB", "b":"bed_BedMachine"}
+    hp["source"] = "h5"
+    hp["shapefile"] = os.path.join(repoPath, "dataset", expFileName)
+    hp["equations"] = {"SSA":{}}
+
+    phy = pinn.physics.Physics(pinn.parameter.PhysicsParameter(hp))
+    p = SingleDataParameter(hp)
+    data_loader = H5Data(p)
+    data_loader.load_data(physics=phy)
+    data_loader.prepare_training_data()
+    assert(data_loader.X['b'].shape == (100,2))
+    assert(data_loader.sol['a'].shape == (10,1))
+    icoord = data_loader.get_ice_coordinates()
+    assert icoord.shape == (60000,2)

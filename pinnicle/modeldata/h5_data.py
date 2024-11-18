@@ -38,10 +38,6 @@ class H5Data(DataBase, Constants):
             else:
                 print(f"{v} is not found in the data from {self.parameters.data_path}, please specify the mapping in 'X_map'")
 
-        # get the bbox from domain, set the rectangle 
-        if domain:
-            bbox = domain.bbox()
-        
         # use the order in physics.input_var to determine x and y names
         if physics:
             xkey = physics.input_var[0]
@@ -50,8 +46,13 @@ class H5Data(DataBase, Constants):
             xkey = 'x'
             ykey = 'y'
 
-        # set the flag based on the bbox region
-        boxflag = (X[xkey]>=bbox[0][0]) & (X[xkey]<=bbox[1][0]) & (X[ykey]>=bbox[0][1]) & (X[ykey]<=bbox[1][1])
+        # get the bbox from domain, set the rectangle 
+        if domain:
+            bbox = domain.bbox()
+            # set the flag based on the bbox region
+            boxflag = (X[xkey]>=bbox[0][0]) & (X[xkey]<=bbox[1][0]) & (X[ykey]>=bbox[0][1]) & (X[ykey]<=bbox[1][1])
+        else:
+            boxflag = np.ones_like(X[xkey], dtype=bool)
 
         # load the coordinates
         for k in self.parameters.X_map.keys():
