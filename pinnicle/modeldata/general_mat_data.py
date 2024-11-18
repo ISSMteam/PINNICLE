@@ -23,7 +23,7 @@ class MatData(DataBase, Constants):
 
         return X_mask
 
-    def load_data(self):
+    def load_data(self, domain=None):
         """ load scatter data from a `.mat` file, return a dict with the required data
         """
         # Reading matlab data

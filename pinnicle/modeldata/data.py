@@ -39,8 +39,8 @@ class DataBase(ABC):
         pass
 
     @abstractmethod
-    def load_data(self):
-        """ load data from `self.path`
+    def load_data(self, domain):
+        """ load data from `self.parameters.data_path`, within the given `domain`
         """
         pass
 
@@ -70,11 +70,11 @@ class Data(Constants):
         """
         return np.vstack([self.data[k].get_ice_coordinates(mask_name=mask_name) for k in self.data])
 
-    def load_data(self):
+    def load_data(self, domain=None):
         """ laod all the data in `self.data`
         """
         for k in self.data:
-            self.data[k].load_data()
+            self.data[k].load_data(domain)
 
     def prepare_training_data(self, transient=False, default_time=0.0):
         """ merge all `X` and `sol` in `self.data` to `self.X` and `self.sol` with the keys
