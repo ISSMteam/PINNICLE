@@ -9,11 +9,11 @@ dde.config.set_random_seed(1234)
 
 # General parameters
 hp = {}
-hp["epochs"] = 1000
+hp["epochs"] = 800000
 hp["learning_rate"] = 0.001
 hp["loss_function"] = "MSE"
-hp["save_path"] = "./Models/Helheim_test"
-hp["is_save"] = False
+hp["save_path"] = "./Models/Helheim_test/"
+hp["is_save"] = True
 hp["is_plot"] = True
 
 # NN
@@ -23,8 +23,8 @@ hp["num_neurons"] = 20
 hp["num_layers"] = 6
 
 # domain
-hp["shapefile"] = "./dataset/Helheim_Big.exp"
-hp["num_collocation_points"] = 5000
+hp["shapefile"] = "./dataset/fastflow_CF.exp"
+hp["num_collocation_points"] = 9000
 
 # physics
 SSA = {}
@@ -33,7 +33,7 @@ hp["equations"] = {"SSA":SSA}
 
 # data
 issm = {}
-issm["data_size"] = {"u":1000, "v":1000, "s":1000, "H":1000, "C":None, "vel":1000}
+issm["data_size"] = {"u":4000, "v":4000, "s":4000, "H":4000, "C":None, "vel":4000}
 issm["data_path"] = "./dataset/Helheim_fastflow.mat"
 hp["data"] = {"ISSM":issm}
 
