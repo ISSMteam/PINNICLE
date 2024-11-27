@@ -19,7 +19,7 @@ class TimeInvariantConstraintParameter(EquationParameter, Constants):
         self.output_ub = [self.variable_ub[k] for k in self.output]
         self.data_weights = [1.0e-6, 1.0e-6, 1.0e-8]
         self.residuals = ["db/dt", "dC/dt"]
-        self.pde_weights = [1.0e8, 1.0e8]
+        self.pde_weights = [1.0e6, 1.0e6]
         # scalar variables: name:value
         self.scalar_variables = {}
 

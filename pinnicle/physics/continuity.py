@@ -87,7 +87,7 @@ class ThicknessEquationParameter(EquationParameter, Constants):
         self.output = ['u', 'v', 'a', 'H']
         self.output_lb = [self.variable_lb[k] for k in self.output]
         self.output_ub = [self.variable_ub[k] for k in self.output]
-        self.data_weights = [1.0e-8*self.yts**2, 1.0e-8*self.yts**2, 1.0*self.yts**2, 1.0e-6]
+        self.data_weights = [1.0e-8*self.yts**2, 1.0e-8*self.yts**2, 1.0e-2*self.yts**2, 1.0e-6]
         self.residuals = ["f"+self._EQUATION_TYPE]
         self.pde_weights = [1.0e8]
 
