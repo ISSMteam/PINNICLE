@@ -40,22 +40,20 @@ class H5Data(DataBase, Constants):
 
         # use the order in physics.input_var to determine x and y names
         if physics:
-            xkey = physics.input_var[0]
-            ykey = physics.input_var[1]
+            xkeys = physics.input_var[0:2]
         else:
-            xkey = 'x'
-            ykey = 'y'
+            xkeys = list(X.keys()) 
 
-        # get the bbox from domain, set the rectangle 
+        # get the bbox from domain, set the rectangle, works for both static and time dependent domain
         if domain:
             bbox = domain.bbox()
             # set the flag based on the bbox region
-            boxflag = (X[xkey]>=bbox[0][0]) & (X[xkey]<=bbox[1][0]) & (X[ykey]>=bbox[0][1]) & (X[ykey]<=bbox[1][1])
+            boxflag = (X[xkeys[0]]>=bbox[0][0]) & (X[xkeys[0]]<=bbox[1][0]) & (X[xkeys[1]]>=bbox[0][1]) & (X[xkeys[1]]<=bbox[1][1])
         else:
-            boxflag = np.ones_like(X[xkey], dtype=bool)
+            boxflag = np.ones_like(X[xkeys[0]], dtype=bool)
 
         # load the coordinates
-        for k in self.parameters.X_map.keys():
+        for k in X.keys():
             self.X_dict[k] = X[k][boxflag].flatten()[:,None]
 
         # load all variables from parameters.name_map

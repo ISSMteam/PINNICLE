@@ -140,19 +140,64 @@ def test_MatData():
     icoord = data_loader.get_ice_coordinates()
     assert icoord.shape == (3192, 2)
 
-    hp["X_map"] = {"x":"x"}
-    p = SingleDataParameter(hp)
-    data_loader = MatData(p)
-    data_loader.load_data()
-    data_loader.prepare_training_data()
-    assert(data_loader.X['H'].shape[1] == 1)
-
-    hp["X_map"] = {"x":"t", "y":"y"}
+    hp["X_map"] = {"notload":"t", "y":"y"}
     p = SingleDataParameter(hp)
     data_loader = MatData(p)
     data_loader.load_data()
     assert ("y" in data_loader.X_dict)
-    assert ("x" not in data_loader.X_dict)
+    assert ("t" not in data_loader.X_dict)
+    assert ("notload" not in data_loader.X_dict)
+
+def test_MatData_domain():
+    filename = "flightTracks.mat"
+    expFileName = "fastflow_CF.exp"
+    repoPath = os.path.dirname(__file__) + "/../examples/"
+    appDataPath = os.path.join(repoPath, "dataset")
+    path = os.path.join(appDataPath, filename)
+    
+    hp = {}
+    hp["data_path"] = path
+    hp["data_size"] = {"H":100}
+    hp["name_map"] = {"H":"thickness"}
+    hp["source"] = "mat"
+    hp["X_map"] = {"x1":"x", "x2":"y"}
+    hp["shapefile"] = os.path.join(repoPath, "dataset", expFileName)
+
+    d = pinn.domain.Domain( pinn.parameter.DomainParameter(hp))
+    p = SingleDataParameter(hp)
+    data_loader = MatData(p)
+    data_loader.load_data(d)
+    data_loader.prepare_training_data()
+    assert(data_loader.X['H'].shape == (100,2))
+    assert(data_loader.sol['H'].shape == (100,1))
+    icoord = data_loader.get_ice_coordinates()
+    assert icoord.shape == (673,2)
+
+def test_MatData_physics():
+    filename = "flightTracks.mat"
+    expFileName = "fastflow_CF.exp"
+    repoPath = os.path.dirname(__file__) + "/../examples/"
+    appDataPath = os.path.join(repoPath, "dataset")
+    path = os.path.join(appDataPath, filename)
+
+    hp = {}
+    hp["data_path"] = path
+    hp["data_size"] = {"H":100}
+    hp["name_map"] = {"H":"thickness"}
+    hp["source"] = "mat"
+    hp["X_map"] = {"x1":"x", "x2":"y"}
+    hp["shapefile"] = os.path.join(repoPath, "dataset", expFileName)
+    hp["equations"] = {"SSA":{"input":["x1", "x2"]}}
+
+    phy = pinn.physics.Physics(pinn.parameter.PhysicsParameter(hp))
+    p = SingleDataParameter(hp)
+    data_loader = MatData(p)
+    data_loader.load_data(physics=phy)
+    data_loader.prepare_training_data()
+    assert(data_loader.X['H'].shape == (100,2))
+    assert(data_loader.sol['H'].shape == (100,1))
+    icoord = data_loader.get_ice_coordinates()
+    assert icoord.shape == (3192,2)
 
 def test_h5Data():
     filename = "subdomain_data.h5"

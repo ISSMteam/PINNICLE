@@ -29,16 +29,37 @@ class MatData(DataBase, Constants):
         # Reading matlab data
         data = load_mat(self.parameters.data_path)
 
+        # pre load x, y, then use domain.bbox to further get the inflag
+        X = {}
+
         # load the coordinates
         for k, v in self.parameters.X_map.items():
             if v in data:
-                self.X_dict[k] = data[v]
+                X[k] = data[v]
             else:
                 print(f"{v} is not found in the data from {self.parameters.data_path}, please specify the mapping in 'X_map'")
 
+        # use the order in physics.input_var to determine x and y names
+        if physics:
+            xkeys = physics.input_var[0:2]
+        else:
+            xkeys = list(X.keys())
+
+        # get the bbox from domain, set the rectangle, works for both static and time dependent domain
+        if domain:
+            bbox = domain.bbox()
+            # set the flag based on the bbox region
+            boxflag = (X[xkeys[0]]>=bbox[0][0]) & (X[xkeys[0]]<=bbox[1][0]) & (X[xkeys[1]]>=bbox[0][1]) & (X[xkeys[1]]<=bbox[1][1])
+        else:
+            boxflag = np.ones_like(X[xkeys[0]], dtype=bool)
+
+        # load the coordinates
+        for k in X.keys():
+            self.X_dict[k] = X[k][boxflag].flatten()[:,None]
+
         # load all variables from parameters.name_map
         for k in self.parameters.name_map:
-            self.data_dict[k] = data[self.parameters.name_map[k]]
+            self.data_dict[k] = data[self.parameters.name_map[k]][boxflag].flatten()[:,None]
 
     def plot(self, data_names=[], vranges={}, axs=None, **kwargs):
         """ TODO: scatter plot of the selected data from data_names
