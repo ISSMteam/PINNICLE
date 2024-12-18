@@ -34,7 +34,7 @@ class PINN:
             os.makedirs(path, exist_ok=True)
         return path
 
-    def compile(self, opt=None, loss=None, lr=None, loss_weights=None):
+    def compile(self, opt=None, loss=None, lr=None, loss_weights=None, decay=None):
         """ compile the model  
         """
         # load from params
@@ -47,11 +47,14 @@ class PINN:
         if lr is None:
             lr = self.params.training.learning_rate
 
+        if (decay is None) and (self.params.training.decay_steps > 0) and (self.params.training.decay_rate>0.0):
+            decay = ("inverse time", self.params.training.decay_steps, self.params.training.decay_rate)
+
         if loss_weights is None:
             loss_weights = self.params.training.loss_weights
 
         # compile the model
-        self.model.compile(opt, loss=loss, lr=lr, loss_weights=loss_weights)
+        self.model.compile(opt, loss=loss, lr=lr, decay=decay, loss_weights=loss_weights)
 
     def load_model(self, path="", epochs=-1, subfolder="pinn", name="model", fileformat=""):
         """laod the neural network from saved model

@@ -142,6 +142,20 @@ def test_train(tmp_path):
     hp_local["data"] = {"ISSM": issm}
     hp_local["equations"] = {"SSA":SSA}
     experiment = pinn.PINN(params=hp_local)
+    experiment.compile(decay=("inverse time", 5, 0.3))
+    experiment.train()
+    assert experiment.loss_names == ['fSSA1', 'fSSA2', 'u', 'v', 's', 'H', 'C']
+
+def test_train_decay(tmp_path):
+    hp_local = dict(hp)
+    hp_local["is_save"] = False
+    hp_local["num_collocation_points"] = 100
+    issm["data_size"] = {"u":None, "v":100, "s":100, "H":100, "C":None}
+    hp_local["data"] = {"ISSM": issm}
+    hp_local["equations"] = {"SSA":SSA}
+    hp_local["decay_steps"] = 5
+    hp_local["decay_rate"]= 0.3
+    experiment = pinn.PINN(params=hp_local)
     experiment.compile()
     experiment.train()
     assert experiment.loss_names == ['fSSA1', 'fSSA2', 'u', 'v', 's', 'H', 'C']

@@ -156,7 +156,11 @@ def test_dummy_equation_parameters():
 
 def test_training_parameters():
     hp =  {}
+    hp['decay_steps'] = 10
+    hp['decay_rate'] = 0.3
     p = TrainingParameter(hp)
+    assert p.decay_steps == 10
+    assert p.decay_rate == 0.3
     assert p.additional_loss == {}
     u_loss = {}
     u_loss['name'] = "vel log"

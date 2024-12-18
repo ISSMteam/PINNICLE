@@ -372,6 +372,10 @@ class TrainingParameter(ParameterBase):
         self.additional_loss = {} 
         # learning rate
         self.learning_rate = 0
+        # decay steps
+        self.decay_steps = 0
+        # decay rate
+        self.decay_rate = 0.0
         # list of the weights
         self.loss_weights = []
         # setting the callbacks
