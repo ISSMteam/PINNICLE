@@ -1,11 +1,11 @@
 [build-system]
-requires = ["setuptools>=65", "setuptools_scm[toml]>=6.2"]
+requires = ["setuptools>=65", "setuptools_scm>=8"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "PINNICLE"
 dynamic = ["version"]
-description = "A Python library for solving ice sheet modeling problems using Physics Informed Neural Network"
+description = "A Python library for solving ice sheet modeling problems using Physics Informed Neural Networks"
 readme = "README.md"
 license = {file = "LICENSE.txt"}
 authors = [
@@ -73,3 +73,4 @@ exclude_also = [
 ]
 
 ignore_errors = true
+[tool.setuptools_scm]
