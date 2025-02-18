@@ -5,11 +5,13 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "PINNICLE"
 dynamic = ["version"]
-description = "A library for solving ice sheet modeling problems using a unified framework with Physics Informed Neural Networks"
+description = "A Python library for solving ice sheet modeling problems using Physics Informed Neural Network"
 readme = "README.md"
 license = {file = "LICENSE.txt"}
 authors = [
-{ name = "Cheng Gong", email = "enigne@gmail.com" },
+{ name = "Cheng Gong", email = "gong.cheng@dartmouth.edu" },
+{ name = "Mansa Krishna", email = "mansa.krishna.gr@dartmouth.edu" },
+{ name = "Mathieu Morlighem", email = "Mathieu.Morlighem@dartmouth.edu" },
 ]
 requires-python = ">=3.9"
 keywords = [
@@ -26,6 +28,7 @@ classifiers = [
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
 ]
 dependencies = [
   "numpy",
@@ -40,9 +43,9 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/enigne/PINNICLE"
+Homepage = "https://github.com/ISSMteam/PINNICLE"
 Documentation = "https://pinnicle.readthedocs.io"
-"Bug Tracker" = "https://github.com/enigne/PINNICLE/issues"
+"Bug Tracker" = "https://github.com/ISSMteam/PINNICLE/issues"
 
 [tool.setuptools.packages.find]
 where = ["."]
