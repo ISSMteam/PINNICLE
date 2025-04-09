@@ -87,14 +87,14 @@ def test_MC_pde_function():
 
 def test_thickness_pde_function():
     hp_local = dict(hp)
-    hp_local["equations"] = {"Thickness":{}}
+    hp_local["equations"] = {"Mass transport":{}}
     hp_local["time_dependent"] = True
     hp_local["start_time"] = 0
     hp_local["end_time"] = 1
     experiment = pinn.PINN(params=hp_local)
     assert experiment.model_data.X['u'][1,2] == 0
     experiment.compile()
-    y = experiment.model.predict(experiment.model_data.X['u'], operator=experiment.physics.operator("thickness"))
+    y = experiment.model.predict(experiment.model_data.X['u'], operator=experiment.physics.operator("mass transport"))
 
     assert len(y) == 1
     assert y[0].shape == (10,1)

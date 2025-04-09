@@ -76,7 +76,7 @@ class MC(EquationBase): #{{{
 class ThicknessEquationParameter(EquationParameter, Constants):
     """ default parameters for mass conservation
     """
-    _EQUATION_TYPE = 'Thickness' 
+    _EQUATION_TYPE = 'Mass transport'
     def __init__(self, param_dict={}):
         # load necessary constants
         Constants.__init__(self)
@@ -97,7 +97,7 @@ class ThicknessEquationParameter(EquationParameter, Constants):
 class Thickness(EquationBase): #{{{
     """ 2D time depenent thickness evolution
     """
-    _EQUATION_TYPE = 'Thickness' 
+    _EQUATION_TYPE = 'Mass transport'
     def __init__(self, parameters=ThicknessEquationParameter()):
         super().__init__(parameters)
 

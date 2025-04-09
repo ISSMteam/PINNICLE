@@ -82,12 +82,12 @@ def test_Physics_MC():
 
 def test_Physics_Thickness():
     hp = {}
-    hp["equations"] = {"Thickness":{}}
+    hp["equations"] = {"Mass transport":{}}
     phy = Physics(PhysicsParameter(hp))
 
     assert phy.input_var == ['x', 'y', 't']
     assert phy.output_var == ['u', 'v', 'a', 'H']
-    assert phy.residuals == ['fThickness']
+    assert phy.residuals == ['fMass transport']
     assert len(phy.output_lb) == 4
     assert len(phy.output_ub) == 4
     assert len(phy.data_weights) == 4
@@ -176,7 +176,7 @@ def test_operator():
     SSA["scalar_variables"] = {"B":1.26802073401e+08}
 
     hp = {}
-    hp["equations"] = {"MC":{}, "SSA":SSA, "SSA_VB":{}, "MOLHO":{}, "Thickness":{}, "Time_Invariant":{}}
+    hp["equations"] = {"MC":{}, "SSA":SSA, "SSA_VB":{}, "MOLHO":{}, "Mass transport":{}, "Time_Invariant":{}}
     phy = Physics(PhysicsParameter(hp))
     
     assert phy.operator('mc')
@@ -187,8 +187,8 @@ def test_operator():
     assert phy.operator('ssa_vb')
     assert phy.operator('molho')
     assert phy.operator('MOLHO')
-    assert phy.operator('THICKNESS')
-    assert phy.operator('thickness')
+    assert phy.operator('MASS TRANSPORT')
+    assert phy.operator('mass transport')
     assert phy.operator('Time_Invariant')
     assert phy.operator('TIME_INVARIANT')
 

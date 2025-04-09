@@ -300,14 +300,14 @@ def test_plot(tmp_path):
     assert im_data['u'].shape == (10,10) 
 
     thickness = {}
-    hp_local["equations"] = {"Thickness":thickness}
+    hp_local["equations"] = {"Mass transport":thickness}
     hp_local["num_collocation_points"] = 10
     hp_local["time_dependent"] = True
     hp_local["start_time"] = 0
     hp_local["end_time"] = 1
     experiment = pinn.PINN(params=hp_local)
     experiment.compile()
-    y = experiment.model.predict(experiment.model_data.X['u'], operator=experiment.physics.operator("thickness"))
+    y = experiment.model.predict(experiment.model_data.X['u'], operator=experiment.physics.operator("mass transport"))
     assert experiment.plot_predictions(X_ref=experiment.model_data.data["ISSM"].X_dict,
             sol_ref=experiment.model_data.data["ISSM"].data_dict,
             resolution=10) is None
