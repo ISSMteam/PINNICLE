@@ -371,7 +371,7 @@ class TrainingParameter(ParameterBase):
         # additional loss functions, specified as a dict
         self.additional_loss = {} 
         # learning rate
-        self.learning_rate = 0
+        self.learning_rate = 0.001
         # decay steps
         self.decay_steps = 0
         # decay rate
@@ -388,7 +388,7 @@ class TrainingParameter(ParameterBase):
         # dde.callbacks.ModelCheckpoint(filepath, verbose=1, save_better_only=True)
         self.checkpoint = False
         # path to save the results
-        self.save_path = ""
+        self.save_path = "./"
         # if save the results and history
         self.is_save = True
         # if plot the results and history, and save figures
