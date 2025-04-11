@@ -1,0 +1,116 @@
+.. _h5_data:
+
+Using HDF5 (.h5) Data
+=====================
+
+PINNICLE supports reading observational or model data stored in the HDF5 (`.h5`) format, a widely used standard in Earth science and machine learning for managing large, hierarchical datasets. This enables seamless integration with data generated from remote sensing platforms, high-performance simulations, or neural network models.
+
+Overview
+--------
+
+HDF5 files store data in a hierarchical format using datasets and groups. PINNICLE can navigate these structures and extract relevant fields for use in physics-informed neural networks. It supports both structured gridded data and scattered point data stored in `.h5` containers.
+
+Common use cases include:
+- Remote sensing products (e.g., MEaSUREs, ICESat-2)
+- Preprocessed gridded glacier fields
+- Deep learning outputs (e.g., weights, embeddings)
+
+Structure Requirements
+----------------------
+
+HDF5 files must contain datasets that map to one or more of the following physical variables used in glaciology:
+
+- Ice velocity components: `u`, `v`
+- Ice thickness: `H`
+- Surface elevation: `s`
+- Mass balance: `a`
+- Friction coefficient: `C`
+- Rheology pre-factor: `B`
+- Coordinates: `x`, `y`, and optionally `t` for time-dependent data
+
+Each dataset should be either:
+- 1D arrays representing scattered points (with corresponding `x`, `y`)
+- 2D arrays on a structured grid
+
+Example File Structure
+----------------------
+
+.. code-block::
+
+   /x         → 1D array of x coordinates
+   /y         → 1D array of y coordinates
+   /u         → ice velocity in x-direction
+   /v         → ice velocity in y-direction
+   /H         → ice thickness
+   /s         → surface elevation
+
+PINNICLE assumes that coordinate datasets (`x`, `y`) are present and aligned with the variable dimensions.
+
+Configuration
+-------------
+
+To use `.h5` data in PINNICLE, add a new data source with `"source": "h5"` in your configuration:
+
+.. code-block:: python
+
+   hp["data"] = {
+       "RemoteSensing": {
+           "data_path": "glacier_observations.h5",
+           "data_size": {"u": 5000, "v": 5000, "H": 5000, "s": 5000},
+           "source": "h5"
+       }
+   }
+
+You may omit variables you want to solve for in an inverse problem:
+
+.. code-block:: python
+
+   "C": None  # PINNICLE will infer basal friction
+
+Time-Dependent HDF5 Data
+------------------------
+
+For transient modeling, each time step should be stored in a separate `.h5` file (e.g., `glacier_2008.h5`, `glacier_2009.h5`), or grouped in a higher-level structure like `/2008/`, `/2009/`. Then, use:
+
+.. code-block:: python
+
+   hp["time_dependent"] = True
+   hp["data"] = {
+       "t2008": {
+           "data_path": "glacier_2008.h5",
+           "data_size": {"u": 4000, "v": 4000, "H": 4000, "a": 4000},
+           "default_time": 2008,
+           "source": "h5"
+       },
+       "t2009": {
+           "data_path": "glacier_2009.h5",
+           "data_size": {"u": 4000, "v": 4000, "H": None, "a": 4000},
+           "default_time": 2009,
+           "source": "h5"
+       }
+   }
+
+Data Sampling and Alignment
+---------------------------
+
+- PINNICLE automatically samples the number of points specified in `data_size`.
+- If the data is gridded (2D), it will flatten the array and align with coordinates.
+- Missing values (e.g., NaNs or masked data) are ignored.
+
+Tips and Best Practices
+-----------------------
+
+- Always store coordinate datasets (`x`, `y`) explicitly.
+- Ensure all values are in SI units (e.g., m/s, m, Pa).
+- Use `h5py` in Python or `hdf5write` in MATLAB to generate compatible files.
+- For large files, sample fewer points to reduce memory overhead during training.
+
+Applications
+------------
+
+- Use `.h5` files to incorporate satellite data or reanalysis fields into PINNICLE.
+- Easily combine `.h5` data with ISSM or `.mat` sources for hybrid experiments.
+- Ideal for high-resolution observational products or outputs from HPC simulations.
+
+See the `Examples <examples.html>`_ page for workflows that incorporate `.h5` datasets.
+

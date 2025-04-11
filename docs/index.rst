@@ -10,9 +10,9 @@ PINNICLE
 .. image:: https://badge.fury.io/py/PINNICLE.svg
     :target: https://badge.fury.io/py/PINNICLE
 
-`PINNICLE <https://github.com/ISSMteam/PINNICLE>`_ ((Physics-Informed Neural Networks for Ice and CLimatE) is a Python library for solving ice sheet modeling problems using a unified framework with Physics Informed Neural Networks.
+`PINNICLE <https://github.com/ISSMteam/PINNICLE>`_ (Physics-Informed Neural Networks for Ice and CLimatE) is a Python library for solving ice sheet modeling problems using a unified framework with Physics Informed Neural Networks.
 It is designed to integrate physical laws with observational data to solve both forward and inverse problems in glaciology.
-The library currently supports stress balance approximations (SSA, MOLHO), mass conservation, and time-dependent simulations, etc. Built on top of `DeepXDE <https://github.com/lululxvi/deepxde>`_, it supports TensorFlow, PyTorch, and JAX backends.
+The library currently supports stress balance approximations, mass conservation, and time-dependent simulations, etc. Built on top of `DeepXDE <https://github.com/lululxvi/deepxde>`_, it supports TensorFlow, PyTorch, and JAX backends.
 
 
 .. note::
@@ -21,56 +21,48 @@ The library currently supports stress balance approximations (SSA, MOLHO), mass 
 
 .. image:: images/pinn.png
 
-Overview
---------
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Physics
+
+   physics/mass
+   physics/momentum
+   physics/time
 
 
+.. toctree::
+   :maxdepth: 1
+   :caption: Data
+
+   data/issm
+   data/scatter
+   data/h5
 
 
+.. toctree::
+   :maxdepth: 1
+   :caption: Training
 
+   training/nn
+   training/fft
+   training/lossfunctions
+   training/weights
+   training/learningratedecay
 
-Physics
--------
-
-- Momentum Conservation (stress balance):
-  - Shelfy Stream Approximation (SSA)
-  - MOno-Layer Higher-Order (MOLHO) ice flow model  
-
-- Mass Conservation (mass balance):
-  - Thickness evolution
-
-- Coupuling:
-  - stress balance + mass balance
-
-
-Data format
------------
-
-- `ISSM <https://issm.jpl.nasa.gov>`_ ``model()`` type, directly saved from ISSM by ``saveasstruct(md, filename)``
-- Scattered data 
-
-
-Check out the :doc:`Usage` section for further information, including how to install the project.
-
-User guide
-----------
 
 .. toctree::
    :maxdepth: 2
-   :caption: Usage
+   :caption: User Guide
 
    installation
 
 .. toctree::
    :maxdepth: 1
 
-   data
    advanced
    pinnicle_examples
 
-
-API reference
--------------
 
 .. toctree::
    :maxdepth: 2
