@@ -9,9 +9,14 @@ Basic
 .. toctree::
    :maxdepth: 1
 
-   examples/ssa
-..   examples/mc 
-..   examples/couple
+   examples/Helheim_inverse_SSA.rst
+   examples/PIG_rheology_friction_inversion.rst
+   examples/Helheim_Transient.rst
+
+..
+   examples/ssa.rst
+   examples/mc.rst
+   examples/couple.rst
 
 Advanced
 --------
