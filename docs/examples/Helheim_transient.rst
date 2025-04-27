@@ -5,6 +5,11 @@ Time-Dependent Forward Modeling of Helheim Glacier
 
 This example demonstrates how to use PINNICLE for solving a **time-dependent forward problem**, simulating the evolution of ice thickness over time using the mass conservation equation. The case study focuses on **Helheim Glacier, Greenland**, over the period **2008–2009**.
 
+.. image:: ../images/Helheim_transient_framework.png
+   :width: 90%
+   :align: center
+   :alt: PINNICLE framework for Helheim transient model
+
 Problem Description
 -------------------
 
@@ -76,37 +81,19 @@ where:
 Results
 -------
 
-After training for 800,000 epochs:
+After training for 800,000 epochs, the solution at the initial and final time steps are
 
-- RMSE (2008–2009 average):
-  - Velocity: 186.18 m/year
-  - Mass balance: 0.03 m/year
-  - Ice thickness: 53.11 m
-
-These values are comparable to those from full numerical models, demonstrating PINNICLE's ability to accurately reproduce glacier dynamics in a time-dependent setting.
-
-Visualization
-~~~~~~~~~~~~~
-
-.. image:: _static/example3_t2008.png
+.. image:: ../images/compareTransient2008.png
    :width: 80%
    :align: center
-   :alt: Helheim predictions at 2008
+   :alt: Helheim transient solution at 2008
 
-.. image:: _static/example3_t2009.png
+.. image:: ../images/compareTransient2009.png
    :width: 80%
    :align: center
-   :alt: Helheim predictions at 2009
+   :alt: Helheim transient solution at 2009
 
 The top rows show the “true” simulation output from ISSM, the middle rows show PINNICLE predictions, and the bottom rows show misfits.
-
-Highlights
-----------
-
-- Demonstrates transient modeling with PINNs
-- Automatic construction of a 3D spatiotemporal domain
-- Integrates time-series data without interpolation
-- High agreement with reference solutions
 
 References
 ----------
