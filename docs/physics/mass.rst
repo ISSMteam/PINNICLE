@@ -43,7 +43,7 @@ The mass conservation equation contributes to the physical loss term :math:`L_\p
 
 .. math::
 
-    L_{\phi(MC)} = \frac{\gamma_{H/t}}{N_\phi} \sum_{i=1}^{N_\phi} \left| \frac{\partial H}{\partial t} + \nabla \cdot (\bar{\mathbf{u}} H) - a \right|^2
+    L_{\phi(MC)} = \frac{\gamma_{H/t}}{N_\phi} \sum^{N_\phi}_{i=1} \left| \frac{\partial H}{\partial t} + \nabla \cdot (\bar{\mathbf{u}} H) - a \right|^2
 
 where:
 

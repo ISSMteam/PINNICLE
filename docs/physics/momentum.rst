@@ -3,34 +3,40 @@
 Momentum Conservation
 =====================
 
-In glaciology, the conservation of momentum governs the mechanical behavior of ice flow under the influence of gravity, internal deformation, and basal resistance. PINNICLE supports two widely used approximations of the momentum equations:
+The conservation of momentum governs the mechanical behavior of ice flow under the influence of gravity, internal deformation, and basal resistance. PINNICLE currently supports two widely used approximations of the momentum balance equations:
 
 1. **Shelfy-Stream Approximation (SSA)**
 2. **Mono-Layer Higher-Order (MOLHO) Model**
 
-These models allow users to simulate fast-flowing ice streams, floating ice shelves, and inland deformation zones.
+Other momentum conservation equations can be implemented in the similar way as these two equations.
 
 Shelfy-Stream Approximation (SSA)
 ---------------------------------
 
-The SSA simplifies the full-Stokes equations by neglecting vertical shear stresses, making it particularly suitable for modeling fast-sliding regions like ice streams and ice shelves.
-
-The SSA momentum balance equations are:
+The SSA simplifies the full-Stokes equations by neglecting vertical shear stresses, making it particularly suitable for modeling fast-flowing regions like ice streams and ice shelves.
+The SSA equations are:
 
 .. math::
 
-   \nabla \cdot \sigma_{\text{SSA}} - \boldsymbol{\tau}_b = \rho_i g H \nabla s
+   \nabla \cdot \sigma_{\text{SSA}} - {\tau}_b = \rho_i g H \nabla s
 
 where:
 
-- :math:`\sigma_{\text{SSA}}` is the vertically integrated stress tensor,
-- :math:`\boldsymbol{\tau}_b` is the basal shear stress,
+- :math:`\sigma_{\text{SSA}}` is the stress tensor,
+- :math:`{\tau}_b` is the basal shear stress,
 - :math:`\rho_i` is the ice density,
 - :math:`g` is gravitational acceleration,
 - :math:`H` is ice thickness,
 - :math:`s` is surface elevation.
 
-The viscosity :math:`\mu` follows Glen's flow law:
+
+Particularly, the stress tensor is
+
+.. math::
+
+   \sigma_{\text{SSA}}=2\mu H(\frac{1}{2}\left(\nabla \mathbf{u}+ \nabla \mathbf{u}^T\right)+\nabla\cdot\mathbf{u} \mathbf{I})
+   
+with the viscosity :math:`\mu` follows Glen's flow law:
 
 .. math::
 
@@ -42,12 +48,13 @@ The basal shear stress is modeled using Weertman's friction law:
 
 .. math::
 
-   \boldsymbol{\tau}_b = C^2 |\mathbf{u}|^m \cdot \hat{\mathbf{u}}
+   {\tau}_b = C^2 {|\mathbf{u}|}^{m-1} \cdot {\mathbf{u}}
 
 where:
+
 - :math:`C` is the friction coefficient,
 - :math:`m` is the sliding exponent,
-- :math:`\hat{\mathbf{u}}` is the unit vector of velocity direction.
+- :math:`{\mathbf{u}}` is the basal velocity
 
 Mono-Layer Higher-Order (MOLHO) Model
 -------------------------------------
@@ -61,6 +68,7 @@ The velocity field is decomposed as:
    \mathbf{u}(z) = \mathbf{u}_b + \mathbf{u}_{sh} (1 - \zeta^{n+1})
 
 where:
+
 - :math:`\mathbf{u}_b` is basal velocity,
 - :math:`\mathbf{u}_{sh}` is shear velocity component,
 - :math:`\zeta = \frac{s - z}{H}` is the normalized vertical coordinate.
@@ -68,6 +76,7 @@ where:
 The MOLHO equations introduce additional vertically integrated viscosity terms :math:`\bar{\mu}_1, \bar{\mu}_2, \bar{\mu}_3, \bar{\mu}_4` to capture depth-dependent stress and strain.
 
 These extensions allow for:
+
 - Capturing deformation-dominated flow
 - Improved modeling of interior flow regimes
 - More accurate inverse problems involving ice rheology
@@ -75,40 +84,49 @@ These extensions allow for:
 Loss Function Contribution
 --------------------------
 
-Momentum conservation contributes to the physical loss term in the total loss function:
+Momentum conservation contributes to the total loss function by evaluating the residual of the PDEs at some randomly select collocation points within the domain of interests.
+An example of the SSA residual is as follows:
 
 .. math::
 
-   L_\phi = \frac{\gamma_{\tau}}{N_\phi} \sum_{i=1}^{N_\phi} \left| \nabla \cdot \sigma - \boldsymbol{\tau}_b - \rho_i g H \nabla s \right|^2
+   L_\phi = \frac{\gamma_{\tau}}{N_\phi} \sum_{i=1}^{N_\phi} \left| \nabla \cdot \sigma - {\tau}_b - \rho_i g H \nabla s \right|^2
 
 where:
+
 - :math:`N_\phi` is the number of collocation points,
 - :math:`\gamma_{\tau}` is the weight for the momentum residual term.
 
 Implementation Notes
 --------------------
 
-To activate momentum conservation models in PINNICLE, use one of the following in the configuration dictionary:
+To activate momentum conservation models in PINNICLE, use one of the following in the hyper-parameter dictionary:
 
 .. code-block:: python
 
    # For SSA
    hp["equations"] = {"SSA": {}}
 
+.. code-block:: python
+
    # For SSA with rheology (SSA_VB)
    hp["equations"] = {"SSA_VB": {}}
+
+.. code-block:: python
 
    # For MOLHO
    hp["equations"] = {"MOLHO": {}}
 
-These models can be customized and combined with different data inputs and inverse targets (e.g., basal friction, viscosity).
-
 Applications
 ------------
 
-- **Example 1:** SSA inverse problem on Helheim Glacier
-- **Example 2:** SSA with spatially varying rheology and basal drag on Pine Island Glacier
 
-See the `Examples <examples.html>`_ page for full details.
+This equation is demonstrated in:
 
+.. toctree::
+   :maxdepth: 1
 
+   ../examples/Helheim_inverse_SSA.rst
+   ../examples/PIG_rheology_friction_inversion.rst
+..
+
+For more details, see the `Examples <../pinnicle_examples.html>`_ section.
