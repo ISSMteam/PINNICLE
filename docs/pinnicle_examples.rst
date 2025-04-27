@@ -11,7 +11,7 @@ Basic
 
    examples/Helheim_inverse_SSA.rst
    examples/PIG_rheology_friction_inversion.rst
-   examples/Helheim_Transient.rst
+   examples/Helheim_transient.rst
 
 ..
    examples/ssa.rst

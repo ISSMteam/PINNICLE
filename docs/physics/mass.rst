@@ -108,7 +108,7 @@ This equation is demonstrated in:
 .. toctree::
    :maxdepth: 1
 
-   ../examples/Helheim_Transient.rst
+   ../examples/Helheim_transient.rst
 ..
    A forward simulation using real velocity and mass balance time series to track ice thickness evolution.
 
