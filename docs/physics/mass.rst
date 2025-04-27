@@ -25,8 +25,14 @@ where:
 - :math:`\bar{\mathbf{u}} = (u, v)^T` is the depth-averaged horizontal velocity,
 - :math:`a` is the net surface mass balance, representing the difference between accumulation (e.g., snowfall) and ablation (e.g., surface melting or basal melt).
 
+Steady-State
+~~~~~~~~~~~~
+
+The steady-state simulate assumes no time dependent in the mass conservation equation by simply moving :math:`\frac{\partial H}{\partial t}` to the right-hand-side of the equation, and considering that as a forcing term (dynamical thinning).
+
+
 Time-Dependent Modeling
------------------------
+~~~~~~~~~~~~~~~~~~~~~~~
 
 To simulate transient behavior, PINNICLE will automatically expands the network input to include time :math:`t` along with spatial coordinates :math:`x, y`. This equation describes the evolution of ice thickness over time, and will be evaluated at a set of spatio-temporal collocation points.
 
@@ -35,6 +41,8 @@ This is useful for:
 - Simulating seasonal or interannual ice sheet changes
 - Predicting future glacier evolution
 - Assimilating time series data into models
+
+To enable transient simulations, set the following keys in your configuration dictionary:
 
 Loss Function Contribution
 --------------------------
@@ -53,17 +61,44 @@ where:
 Implementation Notes
 --------------------
 
-- The user must set :code:`"Mass transport"` or :code:`"MC"` as the equation in the configuration file:
+To activate mass conservation models in PINNICLE, use one of the following in the hyper-parameter dictionary:
 
-  .. code-block:: python
+.. code-block:: python
 
-     hp["equations"] = {"Mass transport": {}}
+   # For steady-state
+   hp["equations"] = {"MC": {}}
 
-- Data inputs may include time series of:
+.. code-block:: python
 
-  - :code:`"u", "v"`: Horizontal velocity components
-  - :code:`"a"`: Surface mass balance
-  - :code:`"H"`: Ice thickness, only initial ice thickness need to be provided if sovling a forward problem.
+   # For time dependent
+   hp["equations"] = {"Mass transport": {}}
+
+Time-Dependent Problems
+~~~~~~~~~~~~~~~~~~~~~~~
+
+To solve time dependent problems in PINNICLE, just set the following in the hyper-parameter dictionary:
+
+.. code-block:: python
+
+   hp["time_dependent"] = True
+   hp["start_time"] = 2008
+   hp["end_time"] = 2009
+
+And, the time series data can be added as:
+
+.. code-block:: python
+
+   for t in np.linspace(2008, 2009, 11):
+       issm = {}
+       if t == 2008:
+           issm["data_size"] = {"u": 3000, "v": 3000, "a": 3000, "H": 3000}
+       else:
+           issm["data_size"] = {"u": 3000, "v": 3000, "a": 3000, "H": None}
+
+       issm["data_path"] = f"Helheim_Transient_{t}.mat"
+       issm["default_time"] = t
+       issm["source"] = "ISSM"
+       hp["data"][f"ISSM{t}"] = issm
 
 Applications
 ------------
