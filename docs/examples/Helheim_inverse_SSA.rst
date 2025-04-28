@@ -12,6 +12,7 @@ The case study is based on **Helheim Glacier**, located in Southeast Greenland.
    :align: center
    :alt: Helheim inversion
 
+|
 
 Problem Description
 -------------------
@@ -81,6 +82,7 @@ Results
    :align: center
    :alt: Helheim inversion prediction and misfit
 
+|
 - First row: PINNICLE predictions
 - Second row: misfit compared to the data and eference solution
 

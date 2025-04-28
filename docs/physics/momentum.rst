@@ -34,17 +34,29 @@ Particularly, the stress tensor is
 
 .. math::
 
-   \sigma_{\text{SSA}}=2\mu H(\frac{1}{2}\left(\nabla \mathbf{u}+ \nabla \mathbf{u}^T\right)+\nabla\cdot\mathbf{u} \mathbf{I})
+   \sigma_{\text{SSA}} = \mu H\begin{bmatrix}
+   4 \frac{\partial u}{\partial x} + 2\frac{\partial v}{\partial y} &  \frac{\partial u}{\partial y} +  \frac{\partial v}{\partial x} \\
+     \frac{\partial u}{\partial y} +  \frac{\partial v}{\partial x} & 2\frac{\partial u}{\partial x} + 4\frac{\partial v}{\partial y}
+   \end{bmatrix}
    
 with the viscosity :math:`\mu` follows Glen's flow law:
 
 .. math::
 
-   \mu = \frac{B}{2} \left( \dot{\varepsilon}_{\text{eff}} \right)^{\frac{1-n}{n}}
+   \mu = \frac{B}{2}
+   \left[
+   \left( \frac{\partial u}{\partial x} \right)^2
+   +
+   \left( \frac{\partial v}{\partial y} \right)^2
+   +
+   \frac{1}{4} \left( \frac{\partial u}{\partial y} + \frac{\partial v}{\partial x} \right)^2
+   +
+   \frac{\partial u}{\partial x} \frac{\partial v}{\partial y}
+   \right]^{\frac{1-n}{2n}}
 
 where :math:`B` is a temperature-dependent rheological parameter and :math:`n` is the flow-law exponent (typically 3).
 
-The basal shear stress is modeled using Weertman's friction law:
+The basal shear stress can be modeled, for example, using Weertman's friction law:
 
 .. math::
 
@@ -103,12 +115,12 @@ To activate momentum conservation models in PINNICLE, use one of the following i
 
 .. code-block:: python
 
-   # For SSA
+   # For SSA with a constant B
    hp["equations"] = {"SSA": {}}
 
 .. code-block:: python
 
-   # For SSA with rheology (SSA_VB)
+   # For SSA with spatially varying rheology B 
    hp["equations"] = {"SSA_VB": {}}
 
 .. code-block:: python
@@ -116,7 +128,9 @@ To activate momentum conservation models in PINNICLE, use one of the following i
    # For MOLHO
    hp["equations"] = {"MOLHO": {}}
 
-TODO: input data 
+
+..
+   TODO: input data 
 
 Applications
 ------------
@@ -131,3 +145,9 @@ This equation is demonstrated in:
 ..
 
 For more details, see the `Examples <../pinnicle_examples.html>`_ section.
+
+References
+----------
+
+- Cheng et al. (2024). "Forward and Inverse Modeling of Ice Sheet Flow Using Physics-Informed Neural Networks"
+- dos Santos et al. (2022). "A new vertically integrated, Mono-Layer Higher-Order ice flow model"

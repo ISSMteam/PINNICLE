@@ -10,6 +10,8 @@ This example demonstrates how to use PINNICLE for solving a **time-dependent for
    :align: center
    :alt: PINNICLE framework for Helheim transient model
 
+|
+
 Problem Description
 -------------------
 
@@ -92,6 +94,8 @@ After training for 800,000 epochs, the solution at the initial and final time st
    :width: 80%
    :align: center
    :alt: Helheim transient solution at 2009
+
+|
 
 The top rows show the “true” simulation output from ISSM, the middle rows show PINNICLE predictions, and the bottom rows show misfits.
 
