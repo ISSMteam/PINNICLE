@@ -3,23 +3,30 @@
 Using ISSM Model Data
 =====================
 
-PINNICLE is fully compatible with output from the Ice-sheet and Sea-level System Model (ISSM). ISSM is a widely used finite-element ice sheet model that generates structured, mesh-based data in `.mat` format. PINNICLE includes dedicated functionality to parse, align, and sample ISSM-generated datasets for both forward and inverse simulations.
+PINNICLE is fully compatible with output from the `Ice-sheet and Sea-level System Model (ISSM) <https://github.com/ISSMteam/ISSM>`_. ISSM is a widely used finite-element ice sheet model that can generate structured, mesh-based data in `.mat` format. PINNICLE includes dedicated functionality to automatically parse, align, and sample ISSM-generated model datasets.
 
 Overview
 --------
 
 ISSM model output typically includes spatial fields such as:
 
-- Ice velocity components (:math:`u`, :math:`v`)
-- Ice thickness (:math:`H`)
-- Surface elevation (:math:`s`)
-- Bed elevation (:math:`b`)
-- Basal friction coefficient (:math:`C`)
-- Ice rheology (e.g., Glen’s flow-law pre-factor :math:`B`)
+- Mesh information: :code:`md.mesh.x`, :code:`md.mesh.y`
+- Ice velocity components: :code:`md.inversion.vx_obs`, :code:`md.inversion.vy_obs`
+- Ice thickness: :code:`md.geometry.thickness`
+- Surface elevation: :code:`md.geometry.surface`
+- Bed elevation: :code:`md.geometry.base`
+- Basal friction coefficient: :code:`md.friction.C`
+- Ice rheology factor: :code:`md.materials.rheology_B`
+- Ice mask: :code:`md.mask.ice_levelset`
 
-These variables are stored in MATLAB `.mat` files as structured arrays (e.g., `md.mesh`, `md.results`, `md.inversion`).
+PINNICLE automatically reads, processes, and extracts relevant fields for training and model initialization, and assigns them to the corresponding variables.
 
-PINNICLE automatically reads and processes these fields, extracting relevant variables for training and model initialization.
+Preprocessing Recommendations
+-----------------------------
+
+- Export variables from ISSM with consistent units (SI system: m, s, Pa).
+- Save structured data using :code:`saveasstruct(md, filename)` in MATLAB to export the ISSM model to a nested struct.
+- Use mesh files (:code:`.exp`) from ISSM as shapefile input to define simulation domain.
 
 Configuration
 -------------
@@ -35,22 +42,15 @@ To use ISSM data, specify a dataset block in the configuration dictionary:
        }
    }
 
-- `data_path`: Path to the ISSM `.mat` file
-- `data_size`: Number of data points to randomly sample for each variable
-- Set a variable to `None` to infer it (e.g., `"C": None` for basal friction inversion)
+- :code:`"data_path"`: Path to the :code:`.mat` file containing ISSM model
+- :code:`"data_size"`: Number of data points to randomly sample for each variable
+- Set a variable to :code:`"None"` to infer it is only used as a Dirichlet boundary condition
+- If the key is not mentioned in :code:`"data_size"`, then the corresponding field will not use data from this file
 
-ISSM Compatibility Notes
--------------------------
+Time-Dependent Data
+-------------------
 
-- PINNICLE can read both node-based and element-based fields from ISSM.
-- It automatically identifies variables within the ISSM `model struct`.
-- Mesh geometry (e.g., coordinates, connectivity) is used to generate collocation points and define domain boundaries.
-- Works seamlessly with time-dependent ISSM simulations if each time step is exported separately.
-
-Time-Dependent ISSM Data
-------------------------
-
-For transient modeling, provide a dictionary of time-stamped ISSM datasets:
+For transient modeling, provide a time series of ISSM datasets:
 
 .. code-block:: python
 
@@ -66,36 +66,7 @@ For transient modeling, provide a dictionary of time-stamped ISSM datasets:
        issm["source"] = "ISSM"
        hp["data"][f"ISSM{t}"] = issm
 
-PINNICLE will align and sample the time series accordingly, allowing for smooth transient modeling from ISSM outputs.
+PINNICLE will align and sample the time series accordingly.
 
-Preprocessing Recommendations
------------------------------
 
-- Export variables from ISSM with consistent units (SI system: m, s, Pa).
-- Save structured data using `save -v7.3` in MATLAB to ensure compatibility with Python’s `h5py`.
-- Confirm field names (e.g., `md.results.Vx`, `md.mesh.x`) align with PINNICLE expectations.
-- Use mesh files (`.exp`) from ISSM as shapefile input to define simulation domain.
-
-Inverse Modeling from ISSM
---------------------------
-
-You can infer unobserved parameters (e.g., basal friction or rheology) by using ISSM-generated synthetic observations and omitting the target from the input:
-
-.. code-block:: python
-
-   "C": None  # PINNICLE will solve for basal friction to match other fields
-
-This is demonstrated in:
-- **Example 1:** Helheim inverse problem
-- **Example 2:** Joint inference on Pine Island Glacier
-
-Summary
--------
-
-ISSM integration in PINNICLE allows for:
-- Direct reuse of model output for PINN training
-- High-fidelity benchmarking and inversion
-- Seamless transition from traditional models to PINNs
-
-See the `Examples <examples.html>`_ section for full demonstrations using ISSM input.
-
+See the `Examples <../pinnicle_examples.html>`_ section for full demonstrations using ISSM input.
