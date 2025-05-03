@@ -10,14 +10,34 @@ Overview
 
 ISSM model output typically includes spatial fields such as:
 
-- Mesh information: :code:`md.mesh.x`, :code:`md.mesh.y`
-- Ice velocity components: :code:`md.inversion.vx_obs`, :code:`md.inversion.vy_obs`
-- Ice thickness: :code:`md.geometry.thickness`
-- Surface elevation: :code:`md.geometry.surface`
-- Bed elevation: :code:`md.geometry.base`
-- Basal friction coefficient: :code:`md.friction.C`
-- Ice rheology factor: :code:`md.materials.rheology_B`
-- Ice mask: :code:`md.mask.ice_levelset`
+.. list-table:: 
+   :widths: 25 50 30
+   :header-rows: 1
+
+   * - **Field**
+     - **Name in ISSM**
+     - **Key in PINNICLE**
+   * - Mesh information
+     - :code:`md.mesh.x`, :code:`md.mesh.y`
+     - :code:`"x"`, :code:`"y"`
+   * - Ice velocity components
+     - :code:`md.inversion.vx_obs`, :code:`md.inversion.vy_obs`
+     - :code:`"u"`, :code:`"v"`
+   * - Ice thickness
+     - :code:`md.geometry.thickness`
+     - :code:`"H"`
+   * - Surface elevation
+     - :code:`md.geometry.surface`
+     - :code:`"s"`
+   * - Basal friction coefficient
+     - :code:`md.friction.C`
+     - :code:`"C"`
+   * - Ice rheology factor
+     - :code:`md.materials.rheology_B``
+     - :code:`"B"`
+   * - Surface mass balance
+     - :code:`md.smb.mass_balance-md.balancethickness.thickening_rate`
+     - :code:`"a"`
 
 PINNICLE automatically reads, processes, and extracts relevant fields for training and model initialization, and assigns them to the corresponding variables.
 
