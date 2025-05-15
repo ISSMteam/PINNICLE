@@ -3,11 +3,6 @@
 Neural Network Architecture
 ===========================
 
-PINNICLE is built on fully connected neural networks (FNNs) tailored for solving partial differential equations (PDEs) with physics-informed learning. Its architecture is modular and highly configurable to support both simple and complex glaciological modeling tasks.
-
-Architecture Overview
----------------------
-
 PINNICLE supports two types of neural network architectures:
 
 1. **Fully Connected Neural Network (FNN)**  
@@ -19,9 +14,9 @@ PINNICLE supports two types of neural network architectures:
 FNN (Default)
 ~~~~~~~~~~~~~
 
-.. image:: _static/fnn_architecture.png
+.. image:: ../images/NN_time.png
    :align: center
-   :width: 60%
+   :width: 80%
 
 - One input layer (e.g., :math:`x, y, t`)
 - Multiple hidden layers with activation functions
@@ -44,28 +39,38 @@ The neural network is configured using the following parameters in the `hp` dict
    hp["num_layers"] = 6             # Number of hidden layers
    hp["num_neurons"] = 32           # Number of neurons per layer
    hp["activation"] = "tanh"        # Activation function (default is tanh)
-   hp["architecture"] = "FNN"       # or "PFNN"
+   hp["architecture"] = "FNN"
 
-You can also set:
+You can also set each layers with different number of neurons:
 
-- `fft = True` to activate Fourier Feature Transform
-- `input_normalization = True` (enabled by default) to apply min–max scaling
+.. code-block:: python
+
+   hp["num_layers"] = 6
+   hp["num_neurons"] = [128, 128, 64, 32, 32, 32, 16]
+
+For PFNN, :code:`"num_layers"` is the total number of layers, **including** the input and output layer, therefore, to have different number of neurons, you only need to define for the hidden layers
+
+.. code-block:: python
+
+   hp["architecture"] = "PFNN"
+   hp["num_layers"] = 6
+   hp["num_neurons"] = [64, 32, 32, 16]   # only 6-2=4 hidden layers each
 
 Activation Functions
 --------------------
 
-The default activation is the hyperbolic tangent (`tanh`), which works well in many physical applications. You can change it to:
+The default activation is the hyperbolic tangent (:code:`"tanh"`), which works well in many physical applications. You can change it to:
 
-- `relu`
-- `sine`
-- `sigmoid`
-- `swish`
+- :code:`"ReLU"`
+- :code:`"sin"`
+- :code:`"Sigmoid"`
+- :code:`"Swish"`
 - or custom activations from TensorFlow, PyTorch, or JAX
 
 Input/Output Mapping
 --------------------
 
-- **Inputs**: spatial (:math:`x, y`) and temporal (:math:`t`) coordinates
+- **Inputs**: spatial (:math:`x, y`) and temporal (:math:`t`) coordinates ( if :code:`hp["time_dependent"] = True`)
 - **Outputs**: dependent PDE variables (e.g., :math:`u, v, H, s, C, B`)
 
 PINNICLE automatically constructs the mapping between inputs and outputs based on the specified physics model and user data.
@@ -74,43 +79,19 @@ Normalization
 -------------
 
 By default:
+
 - Inputs are min–max normalized
-- Outputs are de-normalized to original units
-- This avoids scaling issues in PDE residuals and improves training stability
+- Outputs are de-normalized to original units based on the data and typical values. The typical values of the lower and upper bounds of the variables are pre-defined in :py:mod:`pinnicle.physics.constants`
 
 You do not need to manually scale physical quantities; PINNICLE handles this automatically.
 
 Parallelization and Backends
 ----------------------------
 
-PINNICLE is built on **DeepXDE**, which supports the following ML frameworks:
+PINNICLE is built on **DeepXDE**: `https://github.com/lululxvi/deepxde <https://github.com/lululxvi/deepxde>`_, which supports the following ML frameworks:
 
 - **TensorFlow**
 - **PyTorch**
 - **JAX**
 
-You can choose a backend by setting the environment variable `BACKEND` or directly in code.
-
-Performance Tips
-----------------
-
-- For complex inverse problems, increase `num_neurons` to 64 or 128
-- Use `PFNN` when solving multiple loosely coupled variables (e.g., friction + rheology)
-- Deeper networks may require more epochs to converge
-- Use FFT if training stagnates or if the solution contains high-frequency features
-
-Example
--------
-
-.. code-block:: python
-
-   hp["num_layers"] = 6
-   hp["num_neurons"] = 40
-   hp["architecture"] = "PFNN"
-   hp["fft"] = True
-   hp["sigma"] = 10
-   hp["num_fourier_feature"] = 30
-
-This setup was used successfully in Example 2 (Pine Island Glacier) for joint inversion.
-
-
+You can choose a backend following the instruction in :ref:`installation<backends>`.
