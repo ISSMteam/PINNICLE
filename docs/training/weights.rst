@@ -25,18 +25,46 @@ Default Weights
 
 PINNICLE uses empirically derived default weights that normalize each term to be approximately order 1 based on typical values in glaciological applications:
 
-+--------------------------+--------------------+-------------------------+-----------------------------+
-| **Component**            | **Weight Symbol**  | **Default Value**       | **Typical Variable Value**  |
-+==========================+====================+=========================+=============================+
-| Ice velocity             | :math:`\gamma_u`   | :math:`10^{-8} \cdot T^2` | :math:`10^4 \ \text{m/yr}` |
-| Ice thickness            | :math:`\gamma_H`   | :math:`10^{-6}`         | :math:`10^3 \ \text{m}`     |
-| Surface elevation        | :math:`\gamma_s`   | :math:`10^{-6}`         | :math:`10^3 \ \text{m}`     |
-| Mass balance             | :math:`\gamma_a`   | :math:`T^2`             | :math:`1 \ \text{m/yr}`     |
-| Friction coefficient     | :math:`\gamma_C`   | :math:`10^{-8}`         | :math:`10^4 \ \text{Pa}^{1/2} \text{m}^{-1/6} \text{s}^{1/6}` |
-| Rheology pre-factor      | :math:`\gamma_B`   | :math:`10^{-18}`        | :math:`10^9 \ \text{Pa s}^{1/3}` |
-| Driving stress (PDE)     | :math:`\gamma_{\tau}`| :math:`10^{-10}`        | :math:`10^5 \ \text{Pa}`    |
-| Dynamic thinning         | :math:`\gamma_{H/t}`| :math:`10^{10}`        | :math:`10^3 \ \text{m/year}`|
-+--------------------------+--------------------+-------------------------+-----------------------------+
+.. list-table:: Default Weights and Typical Values
+   :widths: 30 30 30 40
+   :header-rows: 1
+
+   * - **Component**
+     - **Weight Symbol**
+     - **Default Value**
+     - **Typical Variable Value**
+   * - Ice velocity
+     - :math:`\gamma_u`
+     - :math:`10^{-8} \cdot T^2`
+     - :math:`10^4\ \text{m/yr}`
+   * - Ice thickness
+     - :math:`\gamma_H`
+     - :math:`10^{-6}`
+     - :math:`10^3\ \text{m}`
+   * - Surface elevation
+     - :math:`\gamma_s`
+     - :math:`10^{-6}`
+     - :math:`10^3\ \text{m}`
+   * - Mass balance
+     - :math:`\gamma_a`
+     - :math:`T^2`
+     - :math:`1\ \text{m/yr}`
+   * - Friction coefficient
+     - :math:`\gamma_C`
+     - :math:`10^{-8}`
+     - :math:`10^4\ \text{Pa}^{1/2}\ \text{m}^{-1/6}\ \text{s}^{1/6}`
+   * - Rheology pre-factor
+     - :math:`\gamma_B`
+     - :math:`10^{-18}`
+     - :math:`10^9\ \text{Pa·s}^{1/3}`
+   * - Driving stress (PDE)
+     - :math:`\gamma_{\tau}`
+     - :math:`10^{-10}`
+     - :math:`10^5\ \text{Pa}`
+   * - Dynamic thinning
+     - :math:`\gamma_{H/t}`
+     - :math:`10^{10}`
+     - :math:`10^3\ \text{m/year}`
 
 :math:`T = 31536000` seconds in one year, used to convert time-based quantities to SI units.
 

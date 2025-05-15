@@ -21,20 +21,27 @@ where:
 
 Both components can include multiple variables, each with a customizable weight.
 
-Data Misfit Loss
-----------------
+Data Misfit
+-----------
 
 This term compares predicted quantities to ground-truth data using predefined error metrics. PINNICLE supports the following data misfit functions:
 
-+----------------------+-----------------------------------------------------------+
-| **Key**              | **Formula**                                               |
-+======================+===========================================================+
-| `MAE`               | :math:`\frac{1}{n} \sum |d_i - \hat{d}_i|`                |
-| `MSE`               | :math:`\frac{1}{n} \sum (d_i - \hat{d}_i)^2`              |
-| `MAPE`              | :math:`\frac{100}{n} \sum \left| \frac{d_i - \hat{d}_i}{d_i} \right|` |
-| `VEL_LOG`           | :math:`\frac{1}{n} \sum \log(|\hat{u}_i| + \epsilon) / \log(|u_i| + \epsilon)` |
-| `MEAN_SQUARE_LOG`   | :math:`\frac{1}{n} \sum \left( \log(|d_i| + 1) - \log(|\hat{d}_i| + 1) \right)^2` |
-+----------------------+-----------------------------------------------------------+
+.. list-table::
+   :widths: 30 65
+   :header-rows: 1
+
+   * - **Key**
+     - **Formula**
+   * - ``"MAE"``
+     - :math:`\frac{1}{n}\sum_{i=1}^N|d_i-\hat{d}_i|`
+   * - ``"MSE"``
+     - :math:`\frac{1}{n} \sum_{i=1}^N (d_i - \hat{d}_i)^2`
+   * - ``"MAPE"``
+     - :math:`\frac{100}{n} \sum_{i=1}^N \left| \frac{d_i - \hat{d}_i}{d_i} \right|`
+   * - ``"MEAN_SQUARE_LOG"``
+     - :math:`\frac{1}{n} \sum_{i=1}^N \left( \log(|d_i| + 1) - \log(|\hat{d}_i| + 1) \right)^2`
+   * - ``"VEL_LOG"``
+     - :math:`\frac{1}{n} \sum_{i=1}^N \log(|\hat{u}_i| + \epsilon) / \log(|u_i| + \epsilon)`
 
 Here, :math:`d_i` is the ground truth, :math:`\hat{d}_i` is the predicted value, and :math:`\epsilon` is a small constant to avoid divide-by-zero.
 
@@ -43,15 +50,16 @@ These metrics are selected automatically based on variable type or can be custom
 Physics-Based Loss
 ------------------
 
-This term ensures that the neural network outputs satisfy the governing PDEs. It is computed at a set of collocation points in the domain:
+This term ensures that the neural network outputs satisfy the governing PDEs. It is computed at a set of randomly choosen collocation points in the domain defined in ``hp["shapefile"]``:
 
 .. math::
 
-   L_\phi = \frac{1}{N_\phi} \sum_{i=1}^{N_\phi} |\mathcal{R}(\hat{u})|^2
+   L_\phi = \frac{1}{N_\phi} \sum_{i=1}^{N_\phi}|\mathcal{R}(\hat{u})|^2
 
 where:
-- :math:`N_\phi` is the number of collocation points
-- :math:`\mathcal{R}` is the PDE residual (e.g., momentum balance, mass transport)
+
+- :math:`N_\phi` is the number of collocation points defined in ``hp["num_collocation_points"]``
+- :math:`\mathcal{R}` is the PDE residual (e.g., :ref:`momentum_conservation`, :ref:`mass_conservation`)
 
 Each PDE residual is evaluated using automatic differentiation on the network outputs.
 
@@ -59,19 +67,6 @@ Weighting
 ---------
 
 Different terms in the total loss function are scaled to ensure balanced contribution. Default weights are based on empirical values from over 15,000 experiments and are listed below:
-
-+--------------------------+----------------------+---------------------------+
-| **Variable**             | **Weight Symbol**    | **Typical Value**         |
-+==========================+======================+===========================+
-| Ice velocity             | :math:`\gamma_u`     | :math:`10^{-8} \cdot T^2` |
-| Ice thickness            | :math:`\gamma_H`     | :math:`10^{-6}`           |
-| Surface elevation        | :math:`\gamma_s`     | :math:`10^{-6}`           |
-| Mass balance             | :math:`\gamma_a`     | :math:`T^2`               |
-| Friction coefficient     | :math:`\gamma_C`     | :math:`10^{-8}`           |
-| Rheology pre-factor      | :math:`\gamma_B`     | :math:`10^{-18}`          |
-| Driving stress (PDE)     | :math:`\gamma_\tau`  | :math:`10^{-10}`          |
-| Time derivative of H     | :math:`\gamma_{H/t}` | :math:`10^{10}`           |
-+--------------------------+----------------------+---------------------------+
 
 :math:`T = 31536000` is the number of seconds in a year.
 
