@@ -36,4 +36,4 @@ To use :code:`.h5` data in PINNICLE, add a new data source with :code:`"source":
 - If the key is not mentioned in :code:`"data_size"`, then the corresponding field will not use data from this file
 
 
-See the `Examples <../pinnicle_examples.html>`_ section for workflows that incorporate `.h5` datasets.
+See the :ref:`examples` section for workflows that incorporate `.h5` datasets.

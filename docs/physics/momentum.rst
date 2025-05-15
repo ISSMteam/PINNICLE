@@ -144,7 +144,7 @@ This equation is demonstrated in:
    ../examples/PIG_rheology_friction_inversion.rst
 ..
 
-For more details, see the `Examples <../pinnicle_examples.html>`_ section.
+For more details, see the :ref:`examples` section.
 
 References
 ----------

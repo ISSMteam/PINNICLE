@@ -57,5 +57,5 @@ To add multiple data sources in PINNICLE, you can put them in the same dict in :
        }
    }
 
-See the `Examples <../pinnicle_examples.html>`_ section for full demonstrations using Matlab data.
+See the :ref:`examples` section for full demonstrations using Matlab data.
 

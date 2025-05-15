@@ -89,4 +89,4 @@ For transient modeling, provide a time series of ISSM datasets:
 PINNICLE will align and sample the time series accordingly.
 
 
-See the `Examples <../pinnicle_examples.html>`_ section for full demonstrations using ISSM input.
+See the :ref:`examples` section for full demonstrations using ISSM input.
