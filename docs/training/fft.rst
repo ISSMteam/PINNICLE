@@ -3,14 +3,11 @@
 Fourier Feature Transform
 =========================
 
-PINNICLE includes an optional Fourier Feature Transform (FFT) module to improve the neural network’s ability to learn complex, high-frequency patterns—such as sharp surface variations, abrupt ice front transitions, or localized velocity gradients. This technique helps the neural network overcome limitations associated with traditional fully connected layers.
+PINNICLE includes an optional Fourier Feature Transform (FFT) module to improve the neural network’s ability to learn complex, high-frequency patterns, such as sharp surface variations, abrupt ice front transitions, or localized velocity gradients. This technique helps the neural network overcome limitations associated with traditional fully connected layers.
 
-Motivation
-----------
 
-Standard neural networks struggle to approximate high-frequency signals due to their spectral bias toward low frequencies. This limitation affects the model's ability to capture rapid changes in glaciological fields like surface topography or ice velocity near grounding lines.
-
-Fourier Feature Transform addresses this by embedding the input coordinates into a higher-dimensional space using sinusoidal projections, allowing the network to learn fine-scale variations more effectively.
+.. note::
+   The Fourier Feature Transform is still an experimental feature in PINNICLE, use with cautions.
 
 Mathematical Formulation
 -------------------------
@@ -37,31 +34,18 @@ To activate Fourier features in your model, modify the neural network section of
 
 .. code-block:: python
 
-   hp["fft"] = True            # Enable Fourier Feature Transform
-   hp["sigma"] = 10            # Standard deviation of Gaussian projection
-   hp["num_fourier_feature"] = 30  # Number of frequency components (m)
+   hp["fft"] = True                 # Enable Fourier Feature Transform
+   hp["sigma"] = 10                 # Standard deviation of Gaussian projection
+   hp["num_fourier_feature"] = 30   # Number of frequency components (m)
 
 PINNICLE will automatically embed the input coordinates using the specified settings before passing them to the first layer of the network.
 
 Typical Parameter Guidelines
 ----------------------------
 
-- **sigma**: A larger :math:`\sigma` increases the frequency range. Common values range from 5 to 30.
+- **sigma**: A larger :math:`\sigma` increases the frequency range. Common values for glaciology application range from 5 to 30.
 - **num_fourier_feature**: Use 10–100 depending on problem size. More features capture finer details but increase computation.
-- Inputs are normalized using min–max scaling before Fourier embedding.
-
-When to Use
------------
-
-Use Fourier features when:
-- Your data exhibits sharp or oscillatory behavior
-- Standard PINNs struggle to converge or underfit
-- You're solving inverse problems with fine-scale structure (e.g., basal friction inference)
-
-They are especially helpful for:
-- Ice front regions
-- High-frequency mass balance patterns
-- Time-dependent modeling with abrupt seasonal shifts
+- Inputs are automatically normalized using min–max scaling before Fourier embedding.
 
 Performance Considerations
 ---------------------------
@@ -74,15 +58,13 @@ Performance Considerations
 Example
 -------
 
-In **Example 2** (Pine Island Glacier), Fourier features are used to infer both basal friction and spatially varying rheology. The configuration included:
+In :ref:`example2`, Fourier features are used to infer both basal friction and spatially varying rheology. The configuration included:
 
 .. code-block:: python
 
    hp["fft"] = True
    hp["sigma"] = 10
    hp["num_fourier_feature"] = 30
-
-This improved the network’s ability to reconstruct high-frequency variations in the basal and rheological fields.
 
 References
 ----------
