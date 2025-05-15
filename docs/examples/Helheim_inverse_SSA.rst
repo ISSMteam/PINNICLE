@@ -83,6 +83,7 @@ Results
    :alt: Helheim inversion prediction and misfit
 
 |
+
 - First row: PINNICLE predictions
 - Second row: misfit compared to the data and eference solution
 
@@ -92,4 +93,10 @@ References
 - Cheng et al. (2024). "Forward and Inverse Modeling of Ice Sheet Flow Using Physics-Informed Neural Networks"
 - MacAyeal, D. R. (1989). "Large-scale ice flow over a viscous basal sediment"
 - Weertman, J. (1957). "On the sliding of glaciers"
+
+Complete code
+-------------
+
+.. literalinclude:: ../../examples/example1_Helheim_inverse/example1.py
+  :language: python
 

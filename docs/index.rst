@@ -28,7 +28,6 @@ The library currently supports stress balance approximations, mass conservation,
 
    physics/mass
    physics/momentum
-   physics/time
 
 
 .. toctree::

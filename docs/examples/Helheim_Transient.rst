@@ -104,3 +104,11 @@ References
 
 - Cheng et al. (2022). "Helheim Glacier’s Terminus Position Controls Its Seasonal and Inter-Annual Ice Flow Variability"
 - Cheng et al. (2024). "Forward and Inverse Modeling of Ice Sheet Flow Using Physics-Informed Neural Networks"
+
+
+Complete code
+-------------
+
+.. literalinclude:: ../../examples/example3_Helheim_Transient/example3.py
+  :language: python
+

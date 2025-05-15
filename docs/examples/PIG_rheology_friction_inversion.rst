@@ -118,6 +118,7 @@ After 1,000,000 epochs, PINNICLE infers the following:
    :alt: Predictions and misfits for PIG inversion
 
 |
+
 - First row: reference "true solution" (from ISSM)
 - Second row: PINNICLE predictions
 - Third row: misfit between prediction and reference
@@ -126,3 +127,9 @@ References
 ----------
 
 - Cheng et al. (2024). "Forward and Inverse Modeling of Ice Sheet Flow Using Physics-Informed Neural Networks"
+
+Complete code
+-------------
+
+.. literalinclude:: ../../examples/example2_PIG/example2.py
+  :language: python
