@@ -28,8 +28,7 @@ pinnicle.modeldata.issm_data module
 pinnicle.modeldata.h5_data module
 ---------------------------------
 
-   .. automodule:: pinnicle.modeldata.h5_data
+.. automodule:: pinnicle.modeldata.h5_data
    :members:
    :undoc-members:
    :show-inheritance:
-
