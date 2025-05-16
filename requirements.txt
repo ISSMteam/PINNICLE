@@ -6,5 +6,3 @@ numpy
 pandas
 scikit-learn==1.4.2
 scipy
-tensorflow>=2.11.0
-tensorflow-probability[tf]>=0.19.0      # to use tensorflow 2

@@ -2,7 +2,7 @@ import os
 import pinnicle as pinn
 import numpy as np
 import deepxde as dde
-from deepxde.backend import backend_name
+from deepxde.backend import backend_name, jax
 from pinnicle.utils import data_misfit, plot_nn
 import pytest
 
@@ -44,6 +44,8 @@ if backend_name == "tensorflow":
     extension = "weights.h5"
 elif backend_name == "pytorch":
     extension = "pt"
+elif backend_name == "jax":
+    jax.config.update("jax_enable_x64", True) # force jax to use float64
 
 def test_SSA_pde_function():
     hp_local = dict(hp)
@@ -144,6 +146,7 @@ def test_vel_mag():
     vel_sol = np.sqrt(sol[:,0]**2+sol[:,1]**2)
     def op(i,o):
         return experiment.physics.vel_mag(i,o,None)
+
     vel = experiment.model.predict(experiment.model_data.X['u'], operator=op)
     assert np.all(vel >=0)
     assert vel.shape == (10,1)
