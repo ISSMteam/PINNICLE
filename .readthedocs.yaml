@@ -28,5 +28,5 @@ build:
     python: "3.12"
   jobs:
     pre_build:
-      - export DDE_BACKEND=tensorflow 
-      - echo $DDE_BACKEND
+      - python -m deepxde.backend.set_default_backend tensorflow
+      - cat ~/.deepxde/config.json
