@@ -15,6 +15,7 @@ The total loss in PINNICLE is composed of multiple terms:
    L = \sum_i \gamma_i \cdot L_i
 
 Where:
+
 - :math:`L_i` is the loss for a specific variable or physics term
 - :math:`\gamma_i` is the corresponding weight
 
@@ -35,7 +36,7 @@ PINNICLE uses empirically derived default weights that normalize each term to be
      - **Typical Variable Value**
    * - Ice velocity
      - :math:`\gamma_u`
-     - :math:`10^{-8} \cdot T^2`
+     - :math:`10^{-8} \cdot 31536000^2`
      - :math:`10^4\ \text{m/yr}`
    * - Ice thickness
      - :math:`\gamma_H`
@@ -66,57 +67,23 @@ PINNICLE uses empirically derived default weights that normalize each term to be
      - :math:`10^{10}`
      - :math:`10^3\ \text{m/year}`
 
-:math:`T = 31536000` seconds in one year, used to convert time-based quantities to SI units.
 
 Customization
 -------------
 
-You can override any default weight in your configuration dictionary:
+You can override these defaults in your hyper-parameter configuration by setting it in each equation, for example:
 
-.. code-block:: python
+.. code::
 
-   hp["weights"] = {
-       "u": 1e-8 * (31536000 ** 2),
-       "H": 1e-6,
-       "C": 1e-9,
-       "tau": 1e-10
+   hp["equations"] = {
+      "SSA": {
+         "data_weight": [1.0e-8*31536000**2.0, 1.0e-8*31536000**2.0, 1.0e-6, 1.0e-6, 1.0e-8],
+      }
    }
 
-Each key corresponds to the variable name or PDE term used in the experiment.
-
-When to Adjust Weights
------------------------
-
-Consider tuning weights if:
-
-- One loss term dominates training (e.g., velocity converges but thickness doesn't)
-- A variable is noisy or has sparse data (downweight it)
-- You’re adding a new physical constraint and need to balance it with existing terms
+- ``"data_weight"`` follows the same order as the ``output`` defined in the PDEs
 
 Use lower weights to **reduce influence**, higher weights to **emphasize** a particular term.
 
-Tips
-----
 
-- Always keep weights dimensionally consistent
-- Try matching the order of magnitude of each loss component
-- Monitor individual loss terms during training for imbalance
-
-Advanced: Auto-balancing
-------------------------
-
-Though PINNICLE uses fixed weights by default, you can implement custom logic for **dynamic reweighting**:
-
-- Normalize loss terms during training
-- Use adaptive schemes (e.g., SoftAdapt, uncertainty-based weighting)
-- Log loss values and manually adjust over multiple runs
-
-Applications
-------------
-
-- **Example 1**: Uses default weights for velocity, elevation, and friction inversion
-- **Example 2**: Adds custom weight for ice rheology pre-factor
-- **Example 3**: Applies a large weight to dynamic thinning to prioritize PDE accuracy
-
-See the `Examples <examples.html>`_ page to view how weights influence different training scenarios.
-
+See the :ref:`examples` page to view how weights influence different training scenarios.
