@@ -33,18 +33,26 @@ pinnicle.physics.continuity module
    :undoc-members:
    :show-inheritance:
 
-pinnicle.physics.dummy module
------------------------------
-
-.. automodule:: pinnicle.physics.dummy
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 pinnicle.physics.stressbalance module
 -------------------------------------
 
 .. automodule:: pinnicle.physics.stressbalance
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pinnicle.physics.timeinvariant module
+-------------------------------------
+
+.. automodule:: pinnicle.physics.timeinvariant
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pinnicle.physics.dummy module
+-----------------------------
+
+.. automodule:: pinnicle.physics.dummy
    :members:
    :undoc-members:
    :show-inheritance:

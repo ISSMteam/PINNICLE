@@ -1,6 +1,14 @@
 pinnicle.utils
 ==============
 
+pinnicle.utils.backends_specified module
+----------------------------------------
+
+.. automodule:: pinnicle.utils.backends_specified
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 pinnicle.utils.data_misfit module
 ---------------------------------
 

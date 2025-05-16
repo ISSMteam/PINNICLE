@@ -24,3 +24,12 @@ pinnicle.modeldata.issm_data module
    :members:
    :undoc-members:
    :show-inheritance:
+
+pinnicle.modeldata.h5_data module
+---------------------------------
+
+   .. automodule:: pinnicle.modeldata.h5_data
+   :members:
+   :undoc-members:
+   :show-inheritance:
+

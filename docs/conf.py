@@ -4,12 +4,12 @@ from importlib.metadata import version
 # -- Project information
 
 project = 'PINNICLE'
-copyright = '2024, Cheng Gong'
+copyright = '2025, Cheng Gong'
 author = 'Cheng Gong'
 
 # The short X.Y version
 version = version("pinnicle")
-version = '0.2'
+
 # The full version, including alpha/beta/rc tags
 release = version
 
