@@ -137,12 +137,8 @@ Applications
 
 This equation is demonstrated in:
 
-.. toctree::
-   :maxdepth: 1
-
-   ../examples/Helheim_inverse_SSA.rst
-   ../examples/PIG_rheology_friction_inversion.rst
-..
+- :ref:`example1`
+- :ref:`example2`
 
 For more details, see the :ref:`examples` section.
 

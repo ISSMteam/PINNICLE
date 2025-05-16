@@ -152,7 +152,6 @@ def test_vel_mag():
     assert vel.shape == (10,1)
     assert np.all(vel.flatten() - vel_sol.flatten() < 2.0*np.finfo(float).eps)
 
-@pytest.mark.skipif(backend_name=="jax", reason="jacobian function implemented for jax uses different syntax, skip from test for now")
 def test_user_defined_grad():
     hp_local = dict(hp)
     hp_local["equations"] = {"SSA": {}}

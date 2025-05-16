@@ -2,12 +2,14 @@ import pinnicle as pinn
 from pinnicle.nn.helper import minmax_scale, up_scale, fourier_feature, default_float_type
 from pinnicle.parameter import NNParameter
 import deepxde as dde
-import deepxde.backend as bkd
+import deepxde.backend as bkd, jax
 from deepxde.backend import backend_name
 import pytest
 import numpy as np
 
 dde.config.set_default_float('float64')
+if backend_name == "jax":
+    jax.config.update("jax_enable_x64", True) # force jax to use float64
 
 def test_minmax_scale():
     lb = 1.0
@@ -23,7 +25,6 @@ def test_upscale():
     y = up_scale(x, lb, ub)
     assert np.all(abs(y- np.linspace(lb, ub, 100)) < np.finfo(float).eps*ub)
 
-@pytest.mark.skipif(backend_name=="jax", reason="bkd.matmul is not implemented for jax")
 def test_fourier_feature():
     x = bkd.reshape(bkd.as_tensor((np.linspace(1,100, 100)), dtype=default_float_type()), [50,2])
     B = bkd.as_tensor(np.random.normal(0.0, 10.0, [x.shape[1], 2]), dtype=default_float_type())
@@ -46,7 +47,6 @@ def test_new_nn():
     p = pinn.nn.FNN(d)
     assert (p.parameters.__dict__ == d.__dict__)
 
-@pytest.mark.skipif(backend_name=="jax", reason="bkd.matmul is not implemented for jax")
 def test_input_fft_nn():
     hp={}
     hp['input_variables'] = ['x']

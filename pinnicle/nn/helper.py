@@ -1,5 +1,6 @@
 import deepxde as dde
 import deepxde.backend as bkd
+from ..utils import matmul
 
 def minmax_scale(x, lb, ub, scale=2.0, offset=1.0):
     """
@@ -19,8 +20,8 @@ def fourier_feature(x, B):
     Apply Fourier Feature Transform
     """
     return bkd.concat([
-                      bkd.cos(bkd.matmul(x, B)),
-                      bkd.sin(bkd.matmul(x, B))
+                      bkd.cos(matmul(x, B)),
+                      bkd.sin(matmul(x, B))
                       ], 
                       1)
 

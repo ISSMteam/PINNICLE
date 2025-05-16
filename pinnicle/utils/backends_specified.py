@@ -1,5 +1,5 @@
 import deepxde as dde
-import deepxde.backend as bkd
+import deepxde.backend as bkd, jax
 from deepxde.backend import backend_name
 
 def slice_column_tf(variable, i):
@@ -35,11 +35,19 @@ def jacobian_jax(output_var, input_var, i, j, val=0):
     J = dde.grad.jacobian(output_var, input_var, i, j)
     return J[val]
 
+def matmul_tf(A, B):
+    return bkd.matmul(A,B)
+
+def matmul_jax(A, B):
+    return jax.numpy.matmul(A,B)
+
 if backend_name in ["tensorflow", "pytorch"]:
     slice_column = slice_column_tf
     jacobian = jacobian_tf
+    matmul = matmul_tf
 elif backend_name == "jax":
     slice_column = slice_column_jax
     jacobian = jacobian_jax
+    matmul = matmul_jax
 else:
     raise ValueError(f"{backend_name} is not supported by PINNICLE")

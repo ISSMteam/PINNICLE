@@ -105,10 +105,7 @@ Applications
 
 This equation is demonstrated in:
 
-.. toctree::
-   :maxdepth: 1
-
-   ../examples/Helheim_transient.rst
+- :ref:`example3`
 ..
    A forward simulation using real velocity and mass balance time series to track ice thickness evolution.
 
