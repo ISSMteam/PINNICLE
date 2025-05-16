@@ -29,9 +29,10 @@ build:
   jobs:
     build:
       html:
-        - echo "Building HTML"
         - mkdir -p $READTHEDOCS_OUTPUT/html/
         - export DDE_BACKEND=tensorflow 
+        - echo "Building HTML for $READTHEDOCS_REPOSITORY_PATH"
+        - cd $READTHEDOCS_REPOSITORY_PATH/docs
         - python -m sphinx -T -b html -d _build/doctrees -D language=en . $READTHEDOCS_OUTPUT/html 
 
 
