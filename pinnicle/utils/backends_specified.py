@@ -1,6 +1,6 @@
 import deepxde as dde
-import deepxde.backend as bkd, jax
-from deepxde.backend import backend_name
+import deepxde.backend as bkd
+from deepxde.backend import backend_nam, jax
 
 def slice_column_tf(variable, i):
     """ slice the column i:i+1 of variable, tensorflow version

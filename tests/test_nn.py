@@ -2,8 +2,8 @@ import pinnicle as pinn
 from pinnicle.nn.helper import minmax_scale, up_scale, fourier_feature, default_float_type
 from pinnicle.parameter import NNParameter
 import deepxde as dde
-import deepxde.backend as bkd, jax
-from deepxde.backend import backend_name
+import deepxde.backend as bkd
+from deepxde.backend import backend_name, jax
 import pytest
 import numpy as np
 
