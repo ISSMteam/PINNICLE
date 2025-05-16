@@ -145,7 +145,7 @@ class SingleDataParameter(ParameterBase):
         self.default_time = None
 
     def check_consistency(self):
-        if self.source not in ["ISSM", "mat", "h5"]:
+        if self.source not in ["ISSM", "ISSM Light", "mat", "h5"]:
             raise ValueError(f"Data loader of {self.source} is not implemented")
 
     def __str__(self):

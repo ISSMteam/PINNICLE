@@ -51,14 +51,18 @@ def test_single_data_parameter():
 def test_data_parameter():
     hp = {}
     issm = {"data_path":"./", "data_size":{"u":4000, "v":None}}
+    issmlight = {"data_path":"./", "data_size":{"u":4000, "v":None}, "source":"ISSM Light"}
     mat = {"data_path":"./", "data_size":{"u":4000, "v":None}, "source":"mat"}
-    hp["data"] = {"mymat": mat, "myISSM": issm}
+    h5 = {"data_path":"./", "data_size":{"u":4000, "v":None}, "source":"h5"}
+    hp["data"] = {"mymat": mat, "myISSM": issm, "myh5":h5, "myISSMLight":issmlight}
 
     d = DataParameter(hp)
     assert hasattr(d, "param_dict"), "Default attribute 'param_dict' not found"
     assert hasattr(d, "data"), "attribute 'data' not found" 
     assert d.data["myISSM"].source == "ISSM"
+    assert d.data["myISSMLight"].source == "ISSM Light"
     assert d.data["mymat"].source == "mat"
+    assert d.data["myh5"].source == "h5"
 
 def test_nn_parameter():
     d = NNParameter()

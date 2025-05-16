@@ -1,10 +1,10 @@
 import pytest
 import os
 import pinnicle as pinn
-from pinnicle.modeldata import ISSMmdData, MatData, Data, H5Data
+from pinnicle.modeldata import ISSMLightData, ISSMmdData, MatData, Data, H5Data
 from pinnicle.parameter import DataParameter, SingleDataParameter
 
-def test_ISSMmdData():
+def test_ISSMLightData():
     filename = "Helheim_fastflow.mat"
     repoPath = os.path.dirname(__file__) + "/../examples/"
     appDataPath = os.path.join(repoPath, "dataset")
@@ -12,23 +12,89 @@ def test_ISSMmdData():
     
     hp = {}
     hp["data_path"] = path
-    hp["data_size"] = {"u":4000, "v":4000, "s":4000, "H":4000, "C":None, "a":500}
+    hp["data_size"] = {"u":400, "v":400, "s":400, "H":400, "a":300}
+    hp["source"] = "ISSM Light"
     p = SingleDataParameter(hp)
-    data_loader = ISSMmdData(p)
+    data_loader = ISSMLightData(p)
     data_loader.load_data()
     data_loader.prepare_training_data()
 
-    assert(data_loader.sol['u'].shape == (4000,1))
-    assert(data_loader.X['v'].shape == (4000,2))
-    assert(data_loader.sol['s'].shape == (4000,1))
-    assert(data_loader.X['H'].shape == (4000,2))
-    assert(data_loader.sol['C'].shape == (278,1))
-    assert(data_loader.sol['a'].shape == (500,1))
+    assert(data_loader.sol['u'].shape == (400,1))
+    assert(data_loader.X['v'].shape == (400,2))
+    assert(data_loader.sol['s'].shape == (400,1))
+    assert(data_loader.X['H'].shape == (400,2))
+    assert(data_loader.sol['a'].shape == (300,1))
 
     iice = data_loader.get_ice_indices()
     assert iice[0].shape == (11874,)
     icoord = data_loader.get_ice_coordinates()
     assert icoord.shape == (11874, 2)
+    assert(data_loader.X_dict['x'].shape == (12722,1))
+
+    with pytest.raises(Exception):
+        hp["data_size"] = {"C":None, "v":400}
+        p = SingleDataParameter(hp)
+        data_loader = ISSMLightData(p)
+        data_loader.load_data()
+        data_loader.prepare_training_data()
+
+def test_ISSMLightData_domain():
+    filename = "Helheim_fastflow.mat"
+    expFileName = "subdomain.exp"
+    repoPath = os.path.dirname(__file__) + "/../examples/"
+    appDataPath = os.path.join(repoPath, "dataset")
+    path = os.path.join(appDataPath, filename)
+    
+    hp = {}
+    hp["data_path"] = path
+    hp["data_size"] = {"u":400, "v":4000, "H":40000}
+    hp["source"] = "ISSM Light"
+    hp["shapefile"] = os.path.join(repoPath, "dataset", expFileName)
+    
+    d = pinn.domain.Domain( pinn.parameter.DomainParameter(hp))
+    p = SingleDataParameter(hp)
+    data_loader = ISSMLightData(p)
+    data_loader.load_data(d)
+    data_loader.prepare_training_data()
+    assert(data_loader.X['u'].shape == (400,2))
+    assert(data_loader.sol['u'].shape == (400,1))
+    assert(data_loader.X['v'].shape == (4000,2))
+    assert(data_loader.sol['v'].shape == (4000,1))
+    assert(data_loader.X['H'].shape == (5841,2))
+    assert(data_loader.sol['H'].shape == (5841,1))
+    icoord = data_loader.get_ice_coordinates()
+    assert icoord.shape == (5841,2)
+    assert(data_loader.X_dict['x'].shape == (5841,1))
+    
+def test_ISSMLIghtData_physics():
+    filename = "Helheim_fastflow.mat"
+    expFileName = "subdomain.exp"
+    repoPath = os.path.dirname(__file__) + "/../examples/"
+    appDataPath = os.path.join(repoPath, "dataset")
+    path = os.path.join(appDataPath, filename)
+    
+    hp = {}
+    hp["data_path"] = path
+    hp["data_size"] = {"u":400, "v":4000, "s":10000}
+    hp["shapefile"] = os.path.join(repoPath, "dataset", expFileName)
+    hp["source"] = "ISSM Light"
+    hp["equations"] = {"SSA":{"input":["x1", "x2"]}}
+    hp["X_map"] = {"x1":"x", "x2":"y"}
+    
+    phy = pinn.physics.Physics(pinn.parameter.PhysicsParameter(hp))
+    p = SingleDataParameter(hp)
+    data_loader = ISSMLightData(p)
+    data_loader.load_data(physics=phy)
+    data_loader.prepare_training_data()
+    assert("x1" in data_loader.X_dict.keys())
+    assert("x2" in data_loader.X_dict.keys())
+    assert("x" not in data_loader.X_dict.keys())
+    assert(data_loader.X['s'].shape == (10000,2))
+    iice = data_loader.get_ice_indices()
+    assert iice[0].shape == (11874,)
+    icoord = data_loader.get_ice_coordinates()
+    assert icoord.shape == (11874, 2)
+    assert(data_loader.X_dict['x1'].shape == (12722,1))
 
 def test_ISSMmdData_plot():
     filename = "Helheim_fastflow.mat"
@@ -271,3 +337,29 @@ def test_h5Data_physics():
     assert(data_loader.sol['a'].shape == (10,1))
     icoord = data_loader.get_ice_coordinates()
     assert icoord.shape == (60000,2)
+
+def test_ISSMmdData():
+    filename = "Helheim_fastflow.mat"
+    repoPath = os.path.dirname(__file__) + "/../examples/"
+    appDataPath = os.path.join(repoPath, "dataset")
+    path = os.path.join(appDataPath, filename)
+
+    hp = {}
+    hp["data_path"] = path
+    hp["data_size"] = {"u":4000, "v":4000, "s":4000, "H":4000, "C":None, "a":500}
+    p = SingleDataParameter(hp)
+    data_loader = ISSMmdData(p)
+    data_loader.load_data()
+    data_loader.prepare_training_data()
+
+    assert(data_loader.sol['u'].shape == (4000,1))
+    assert(data_loader.X['v'].shape == (4000,2))
+    assert(data_loader.sol['s'].shape == (4000,1))
+    assert(data_loader.X['H'].shape == (4000,2))
+    assert(data_loader.sol['C'].shape == (278,1))
+    assert(data_loader.sol['a'].shape == (500,1))
+
+    iice = data_loader.get_ice_indices()
+    assert iice[0].shape == (11874,)
+    icoord = data_loader.get_ice_coordinates()
+    assert icoord.shape == (11874, 2)
