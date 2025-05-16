@@ -26,3 +26,9 @@ python:
     - requirements: docs/requirements.txt
     - method: pip
       path: .
+  build:
+    html:
+      - echo "Building HTML"
+      - mkdir -p $READTHEDOCS_OUTPUT/html/
+      - export DDE_BACKEND=tensorflow 
+      - python -m sphinx -T -b html -d _build/doctrees -D language=en . $READTHEDOCS_OUTPUT/html 
