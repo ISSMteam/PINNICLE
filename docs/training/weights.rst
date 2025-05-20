@@ -77,10 +77,22 @@ You can override these defaults in your hyper-parameter configuration by setting
 
    hp["equations"] = {
       "SSA": {
+         "pde_weight": [1.0e-8, 1.0e-8];
+      }
+   }
+
+
+or
+.. code::
+
+   hp["equations"] = {
+      "SSA": {
          "data_weight": [1.0e-8*31536000**2.0, 1.0e-8*31536000**2.0, 1.0e-6, 1.0e-6, 1.0e-8],
       }
    }
 
+
+- ``"pde_weight"`` follows the same order as the ``residuals`` defined in the PDEs
 - ``"data_weight"`` follows the same order as the ``output`` defined in the PDEs
 
 Use lower weights to **reduce influence**, higher weights to **emphasize** a particular term.

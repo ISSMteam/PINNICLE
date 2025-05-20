@@ -3,6 +3,31 @@
 Install and Setup
 =================
 
+Preinstall ML packages
+----------------------
+
+PINNICLE requires **Python ≥ 3.9** and supports several different  machine learning backends. In order to install PINNICLE properly, you will need to install one of the following packages:
+
+- **TensorFlow** ≥ 2.11.0  
+  (Optionally with `tensorflow-probability` ≥ 0.19.0)
+
+.. code-block:: bash
+
+   pip install tensorflow>=2.11.0 tensorflow-probability[tf]>=0.19.0
+
+- **PyTorch** ≥ 1.9.0
+
+.. code-block:: bash
+
+  pip install torch torchvision torchaudio
+
+- **JAX** (plus `Flax`, `Optax`)
+
+.. code-block:: bash
+
+  pip install jax flax optax
+
+
 Installation
 ------------
 
@@ -22,14 +47,6 @@ Alternatively, if you'd like to clone and modify the source code:
    cd PINNICLE
    pip install -e .
 
-PINNICLE requires **Python ≥ 3.9** and supports one of the following machine learning backends:
-
-- **TensorFlow** ≥ 2.11.0  
-  (Optionally with `tensorflow-probability` ≥ 0.19.0)
-
-- **PyTorch** ≥ 1.9.0
-
-- **JAX** (plus `Flax`, `Optax`)
 
 Required Dependencies
 ---------------------
@@ -81,6 +98,21 @@ Create or edit ``~/.deepxde/config.json``:
    }
 
 This sets the default backend for all runs.
+
+Or, you can use ``python -m deepxde.backend.set_default_backend BACKEND`` to set the default backend.
+
+
+Run with Docker
+---------------
+
+PINNICLE can also be run in a fully containerized environment using Docker. This is ideal for avoiding dependency conflicts or running the software in a reproducible HPC/cloud environment.
+The `PINNICLE DOcker image <https://hub.docker.com/r/chenggongdartmouth/pinnicle>`_ contains all the required packages to run PINNICLE with GPU support. 
+
+.. code-block:: bash
+
+   apptainer build --nv set_your_own_name docker://chenggongdartmouth/pinnicle:v0.3
+
+See the details instructions about `how to set up PINNICLE Docker <https://holly-riverbed-43f.notion.site>`_
 
 Optional: GPU Setup
 -------------------
