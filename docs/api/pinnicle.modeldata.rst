@@ -25,6 +25,14 @@ pinnicle.modeldata.issm_data module
    :undoc-members:
    :show-inheritance:
 
+pinnicle.modeldata.issm_light module
+-----------------------------------
+
+.. automodule:: pinnicle.modeldata.issm_light
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 pinnicle.modeldata.h5_data module
 ---------------------------------
 

@@ -106,7 +106,7 @@ Run with Docker
 ---------------
 
 PINNICLE can also be run in a fully containerized environment using Docker. This is ideal for avoiding dependency conflicts or running the software in a reproducible HPC/cloud environment.
-The `PINNICLE DOcker image <https://hub.docker.com/r/chenggongdartmouth/pinnicle>`_ contains all the required packages to run PINNICLE with GPU support. 
+The `PINNICLE Docker image <https://hub.docker.com/r/chenggongdartmouth/pinnicle>`_ contains all the required packages to run PINNICLE with GPU support. 
 
 .. code-block:: bash
 
