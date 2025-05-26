@@ -40,8 +40,12 @@ def plot_solutions(pinn, path="", filename="2Dsolution.png", X_ref=None, sol_ref
     # TODO: add 1D plot
     if pinn.domain.geometry.dim >= 2:
     # generate 200x200 mesh on the domain
-        X, Y = np.meshgrid(np.linspace(pinn.params.nn.input_lb[0], pinn.params.nn.input_ub[0], resolution),
-                np.linspace(pinn.params.nn.input_lb[1], pinn.params.nn.input_ub[1], resolution))
+        if bkd.backend_name == "pytorch":
+            X, Y = np.meshgrid(np.linspace(pinn.params.nn.input_lb[0].cpu(), pinn.params.nn.input_ub[0].cpu(), resolution),
+                    np.linspace(pinn.params.nn.input_lb[1].cpu(), pinn.params.nn.input_ub[1].cpu(), resolution))
+        else:
+            X, Y = np.meshgrid(np.linspace(pinn.params.nn.input_lb[0], pinn.params.nn.input_ub[0], resolution),
+                    np.linspace(pinn.params.nn.input_lb[1], pinn.params.nn.input_ub[1], resolution))
         X_nn = np.hstack((X.flatten()[:,None], Y.flatten()[:,None]))
 
         if pinn.nn.parameters.input_size == 3:
@@ -53,11 +57,13 @@ def plot_solutions(pinn, path="", filename="2Dsolution.png", X_ref=None, sol_ref
                          ((pinn.params.nn.input_ub[1] - pinn.params.nn.input_lb[1])/resolution)**2)**0.5
         if bkd.backend_name == "pytorch":
             grid_size = bkd.to_numpy(grid_size)
+            vranges = {k+"_pred":[pinn.params.nn.output_lb[i].cpu(), pinn.params.nn.output_ub[i].cpu()] for i,k in enumerate(pinn.params.nn.output_variables)}
+        else:
+            vranges = {k+"_pred":[pinn.params.nn.output_lb[i], pinn.params.nn.output_ub[i]] for i,k in enumerate(pinn.params.nn.output_variables)}
 
         # predicted solutions
         sol_pred = pinn.model.predict(X_nn)
         plot_data = {k+"_pred":np.reshape(sol_pred[:,i:i+1], X.shape) for i,k in enumerate(pinn.params.nn.output_variables)}
-        vranges = {k+"_pred":[pinn.params.nn.output_lb[i], pinn.params.nn.output_ub[i]] for i,k in enumerate(pinn.params.nn.output_variables)}
         # take abs
         for k in absvariable:
             plot_data[k+"_pred"] = np.abs( plot_data[k+"_pred"])
