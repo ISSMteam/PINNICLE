@@ -252,6 +252,7 @@ def test_train_with_callbacks(tmp_path):
     hp_local["period"] = 5
     hp_local["patience"] = 8
     hp_local["checkpoint"] = True
+    hp_local["mini_batch"] = 10
     experiment = pinn.PINN(params=hp_local)
     experiment.compile()
     experiment.train()
@@ -270,11 +271,15 @@ def test_only_callbacks(tmp_path):
     hp_local["period"] = 5
     hp_local["patience"] = 8
     hp_local["checkpoint"] = True
+    hp_local["mini_batch"] = 10
     experiment = pinn.PINN(params=hp_local)
     experiment.compile()
     callbacks = experiment.update_callbacks()
     assert callbacks is not None
-    assert len(callbacks) == 3
+    if backend_name in ["pytorch", "paddle"]:
+        assert len(callbacks) == 4
+    else:
+        assert len(callbacks) == 3
 
 @pytest.mark.skipif(backend_name=="jax", reason="plot_prediection is not implemented for jax")
 def test_plot(tmp_path):

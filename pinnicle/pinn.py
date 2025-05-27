@@ -218,6 +218,9 @@ class PINN:
             # resampler of the collocation points
             if params.has_PDEPointResampler():
                 callbacks.append(dde.callbacks.PDEPointResampler(period=params.period))
+            # mini-batch for data points
+            if params.has_MiniBatch():
+                callbacks.append(dde.callbacks.PDEPointResampler(period=1, pde_points=False, bc_points=True))
             return callbacks
         else:
             return None
@@ -226,7 +229,7 @@ class PINN:
         """ update data set used for the training, the order follows 'output_variables'
         """
         # loop through all the PDEs, find those avaliable in the training data, add to the PointSetBC
-        training_temp = [dde.icbc.PointSetBC(training_data.X[d], training_data.sol[d], component=i) 
+        training_temp = [dde.icbc.PointSetBC(training_data.X[d], training_data.sol[d], component=i, batch_size=self.params.training.mini_batch) 
                   for i,d in enumerate(self.params.nn.output_variables) if d in training_data.sol]
 
         # the names of the loss: the order of data follows 'output_variables'

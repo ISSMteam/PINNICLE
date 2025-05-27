@@ -206,6 +206,13 @@ def test_training_callbacks_Checkpoint():
     assert p.has_callbacks == True
     assert p.has_ModelCheckpoint() == True
 
+def test_training_callbacks_MiniBatch():
+    hp = {}
+    hp["mini_batch"] = 100
+    p = TrainingParameter(hp)
+    assert p.has_callbacks == True
+    assert p.has_MiniBatch() == True
+
 def test_print_parameters(capsys):
     hp = {}
     p = Parameters(hp)
