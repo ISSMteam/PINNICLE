@@ -1,6 +1,7 @@
 import pytest
 import numpy as np
 import pinnicle as pinn
+from deepxde.backend import backend_name
 from pinnicle.parameter import DataParameter, SingleDataParameter, NNParameter, DomainParameter, PhysicsParameter, Parameters, EquationParameter, TrainingParameter
 from pinnicle.physics import SSAEquationParameter, DummyEquationParameter
 
@@ -210,8 +211,12 @@ def test_training_callbacks_MiniBatch():
     hp = {}
     hp["mini_batch"] = 100
     p = TrainingParameter(hp)
-    assert p.has_callbacks == True
-    assert p.has_MiniBatch() == True
+    if backend_name in ["pytorch", "paddle"]:
+        assert p.has_callbacks == True
+        assert p.has_MiniBatch() == True
+    else:
+        assert p.has_callbacks == False
+        assert p.has_MiniBatch() == False
 
 def test_print_parameters(capsys):
     hp = {}
