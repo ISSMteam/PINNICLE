@@ -228,8 +228,13 @@ class PINN:
     def update_training_data(self, training_data):
         """ update data set used for the training, the order follows 'output_variables'
         """
+        def min_or_none(a, b):
+            if a is None or b is None:
+                return None
+            return min(a, b)
         # loop through all the PDEs, find those avaliable in the training data, add to the PointSetBC
-        training_temp = [dde.icbc.PointSetBC(training_data.X[d], training_data.sol[d], component=i, batch_size=self.params.training.mini_batch) 
+        training_temp = [dde.icbc.PointSetBC(training_data.X[d], training_data.sol[d], component=i, 
+            batch_size=min_or_none(self.params.training.mini_batch, training_data.sol[d].shape[0]))
                   for i,d in enumerate(self.params.nn.output_variables) if d in training_data.sol]
 
         # the names of the loss: the order of data follows 'output_variables'

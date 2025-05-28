@@ -239,7 +239,7 @@ def test_train_with_callbacks(tmp_path):
     hp_local["save_path"] = str(tmp_path)
     hp_local["is_save"] = True
     hp_local["num_collocation_points"] = 100
-    issm["data_size"] = {"u":100, "v":100, "s":100, "H":100, "C":None, "vel":100}
+    issm["data_size"] = {"u":100, "v":100, "s":100, "H":10, "C":None, "vel":100}
     hp_local["data"] = {"ISSM": issm}
     # additional loss
     vel_loss = {}
@@ -252,7 +252,7 @@ def test_train_with_callbacks(tmp_path):
     hp_local["period"] = 5
     hp_local["patience"] = 8
     hp_local["checkpoint"] = True
-    hp_local["mini_batch"] = 10
+    hp_local["mini_batch"] = 50
     experiment = pinn.PINN(params=hp_local)
     experiment.compile()
     experiment.train()
@@ -260,26 +260,39 @@ def test_train_with_callbacks(tmp_path):
     assert os.path.isfile(f"{tmp_path}/pinn/model-1.{extension}")
     assert os.path.isfile(f"{tmp_path}/pinn/model-9.{extension}")
     assert not os.path.isfile(f"{tmp_path}/pinn/model-{hp_local['epochs']}.{extension}")
+    assert experiment.training_data[0].points.shape[0] == 100
+    assert experiment.training_data[3].points.shape[0] == 10
+    if backend_name in ["pytorch", "paddle"]:
+        assert experiment.training_data[0].batch_indices.shape[0] == 50
+        assert experiment.training_data[3].batch_indices.shape[0] == 10
+    else:
+        assert not hasattr(experiment.training_data[0], 'batch_indices')
 
 def test_only_callbacks(tmp_path):
     hp_local = dict(hp)
     hp_local["save_path"] = str(tmp_path)
     hp_local["num_collocation_points"] = 100
-    issm["data_size"] = {"u":100, "v":100, "s":100, "H":100, "C":None, "vel":100}
+    issm["data_size"] = {"u":100, "v":100, "s":100, "H":10, "C":None, "vel":100}
     hp_local["data"] = {"ISSM": issm}
     hp_local["min_delta"] = 1e10
     hp_local["period"] = 5
     hp_local["patience"] = 8
     hp_local["checkpoint"] = True
-    hp_local["mini_batch"] = 10
+    hp_local["mini_batch"] = 50
     experiment = pinn.PINN(params=hp_local)
     experiment.compile()
     callbacks = experiment.update_callbacks()
     assert callbacks is not None
+    assert callbacks[2].pde_points
+
     if backend_name in ["pytorch", "paddle"]:
         assert len(callbacks) == 4
+        assert experiment.training_data[0].batch_indices.shape[0] == 50
+        assert experiment.training_data[3].batch_indices.shape[0] == 10
+        assert callbacks[3].bc_points
     else:
         assert len(callbacks) == 3
+        assert not hasattr(experiment.training_data[0], 'batch_indices')
 
 @pytest.mark.skipif(backend_name=="jax", reason="plot_prediection is not implemented for jax")
 def test_plot(tmp_path):
