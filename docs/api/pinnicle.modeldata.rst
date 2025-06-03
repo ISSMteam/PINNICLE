@@ -17,6 +17,14 @@ pinnicle.modeldata.general_mat_data module
    :undoc-members:
    :show-inheritance:
 
+pinnicle.modeldata.h5_data module
+---------------------------------
+
+.. automodule:: pinnicle.modeldata.h5_data
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 pinnicle.modeldata.issm_data module
 -----------------------------------
 
@@ -26,17 +34,10 @@ pinnicle.modeldata.issm_data module
    :show-inheritance:
 
 pinnicle.modeldata.issm_light module
------------------------------------
+------------------------------------
 
 .. automodule:: pinnicle.modeldata.issm_light
    :members:
    :undoc-members:
    :show-inheritance:
 
-pinnicle.modeldata.h5_data module
----------------------------------
-
-.. automodule:: pinnicle.modeldata.h5_data
-   :members:
-   :undoc-members:
-   :show-inheritance:
