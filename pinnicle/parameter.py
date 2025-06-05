@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from .utils import data_misfit
+from deepxde.backend import backend_name
 
 
 class ParameterBase(ABC):
@@ -387,6 +388,8 @@ class TrainingParameter(ParameterBase):
         self.period = None
         # dde.callbacks.ModelCheckpoint(filepath, verbose=1, save_better_only=True)
         self.checkpoint = False
+        # set mini-batch (currently only support pytorch)
+        self.mini_batch = None
         # path to save the results
         self.save_path = "./"
         # if save the results and history
@@ -408,6 +411,9 @@ class TrainingParameter(ParameterBase):
             return True
         # ModelCheckpoint
         if self.has_ModelCheckpoint():
+            return True
+        # Mini batch
+        if self.has_MiniBatch():
             return True
         # otherwise
         return False
@@ -444,12 +450,25 @@ class TrainingParameter(ParameterBase):
         else:
             return True
 
+    def has_MiniBatch(self):
+        """ check if param has mini batch
+        """
+        if self.mini_batch is None:
+            return False
+        else:
+            return True
+
     def update(self):
         """ convert dict to class LossFunctionParameter
         """
         # update additional loss
         if self.additional_loss:
             self.additional_loss = {k:LossFunctionParameter(self.additional_loss[k]) for k in self.additional_loss}
+
+        # because DeepXDE only support mini-batch with pytorch and paddle, automatically set mini_batch=None for other backends
+        if backend_name not in ["pytorch", "paddle"]:
+            print(f"Mini Batch is currently not supported with backend {backend_name}!")
+            self.mini_batch = None
 
         #  add callback setttings if given any of them
         self.has_callbacks = self.check_callbacks()

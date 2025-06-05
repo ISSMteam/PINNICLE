@@ -84,7 +84,7 @@ You can also export the backend globally (Linux/macOS):
 
    export DDE_BACKEND=pytorch
 
-Valid options: `tensorflow`, `pytorch`, `jax`
+Valid options: ``tensorflow``, ``pytorch``, ``jax``
 
 Option 2: Config File
 ~~~~~~~~~~~~~~~~~~~~~

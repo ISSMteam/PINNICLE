@@ -9,10 +9,18 @@ pinnicle.physics.constants module
    :undoc-members:
    :show-inheritance:
 
-pinnicle.physics.physics module
--------------------------------
+pinnicle.physics.continuity module
+----------------------------------
 
-.. automodule:: pinnicle.physics.physics
+.. automodule:: pinnicle.physics.continuity
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pinnicle.physics.dummy module
+-----------------------------
+
+.. automodule:: pinnicle.physics.dummy
    :members:
    :undoc-members:
    :show-inheritance:
@@ -25,10 +33,10 @@ pinnicle.physics.equationbase module
    :undoc-members:
    :show-inheritance:
 
-pinnicle.physics.continuity module
-----------------------------------
+pinnicle.physics.physics module
+-------------------------------
 
-.. automodule:: pinnicle.physics.continuity
+.. automodule:: pinnicle.physics.physics
    :members:
    :undoc-members:
    :show-inheritance:
@@ -49,10 +57,3 @@ pinnicle.physics.timeinvariant module
    :undoc-members:
    :show-inheritance:
 
-pinnicle.physics.dummy module
------------------------------
-
-.. automodule:: pinnicle.physics.dummy
-   :members:
-   :undoc-members:
-   :show-inheritance:

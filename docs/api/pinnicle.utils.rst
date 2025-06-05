@@ -17,6 +17,14 @@ pinnicle.utils.data_misfit module
    :undoc-members:
    :show-inheritance:
 
+pinnicle.utils.helper module
+----------------------------
+
+   .. automodule:: pinnicle.utils.helper
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 pinnicle.utils.history module
 -----------------------------
 
@@ -29,14 +37,6 @@ pinnicle.utils.plotting module
 ------------------------------
 
 .. automodule:: pinnicle.utils.plotting
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-pinnicle.utils.helper module
-----------------------------
-
-.. automodule:: pinnicle.utils.helper
    :members:
    :undoc-members:
    :show-inheritance:
