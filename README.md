@@ -1,12 +1,12 @@
 # PINNICLE: Physics-Informed Neural Networks for Ice and CLimatE
 
-![Python](https://img.shields.io/badge/python-3.9+-blue.svg)
+[![Python](https://img.shields.io/badge/python-3.9+-blue.svg)](https://pypi.org/project/PINNICLE/)
 [![CI](https://github.com/ISSMteam/PINNICLE/actions/workflows/CI.yml/badge.svg)](https://github.com/ISSMteam/PINNICLE/actions/workflows/CI.yml)
 [![codecov](https://codecov.io/gh/ISSMteam/PINNICLE/graph/badge.svg?token=S7REK0IKJH)](https://codecov.io/gh/ISSMteam/PINNICLE)
 [![Documentation Status](https://readthedocs.org/projects/pinnicle/badge/?version=latest)](https://pinnicle.readthedocs.io/en/latest/?badge=latest)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15437985.svg)](https://doi.org/10.5281/zenodo.15437985)
-![License](https://img.shields.io/github/license/ISSMteam/PINNICLE)
-![PyPI](https://img.shields.io/pypi/v/pinnicle)
+[![License](https://img.shields.io/github/license/ISSMteam/PINNICLE)](https://pypi.org/project/PINNICLE/)
+[![PyPI](https://img.shields.io/pypi/v/pinnicle)](https://pypi.org/project/PINNICLE/)
 
 **PINNICLE** (Physics-Informed Neural Networks for Ice and CLimatE) is an open-source Python library for modeling ice sheets using physics-informed neural networks.
 It is designed to integrate physical laws with observational data to solve both forward and inverse problems in glaciology.
