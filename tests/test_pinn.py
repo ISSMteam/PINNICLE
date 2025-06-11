@@ -139,7 +139,7 @@ def test_train(tmp_path):
     hp_local["is_save"] = False
     hp_local["num_collocation_points"] = 100
     issm["data_size"] = {"u":100, "v":100, "s":100, "H":100, "C":None}
-    hp_local["data"] = {"ISSM": issm}
+    hp_local["data"] = {"ISSM Light": issm}
     hp_local["equations"] = {"SSA":SSA}
     experiment = pinn.PINN(params=hp_local)
     experiment.compile(decay=("inverse time", 5, 0.3))
