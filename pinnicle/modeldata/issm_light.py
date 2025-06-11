@@ -70,7 +70,7 @@ class ISSMLightData(DataBase, Constants):
             rho_w = md['materials']['rho_water']
             g = md['constants']['g']
             base = md['geometry']['base']
-            N = rho_ice*g*self.data_dict['H'] + rho_w*g*base
+            N = rho_ice*g*data['H'] + rho_w*g*base
             N[np.where(N <= 1.0, True, False)] = 1.0
             data['C'] = C_b*np.sqrt(N)*(data['vel']**(1.0/3.0))
 

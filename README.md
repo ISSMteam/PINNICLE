@@ -145,5 +145,5 @@ Supported by:
 
 * 📦 PyPI: [pinnicle](https://pypi.org/project/pinnicle/)
 * 📖 Documentation: [pinnicle.readthedocs.io](https://pinnicle.readthedocs.io)
-* 📄 Zenodo Archive: [doi.org/10.5281/zenodo.15178900](https://doi.org/10.5281/zenodo.15178900)
+* 📄 Zenodo Archive: [doi.org/10.5281/zenodo.15643042](https://doi.org/10.5281/zenodo.15643042)
 
