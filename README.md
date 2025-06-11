@@ -4,7 +4,7 @@
 [![CI](https://github.com/ISSMteam/PINNICLE/actions/workflows/CI.yml/badge.svg)](https://github.com/ISSMteam/PINNICLE/actions/workflows/CI.yml)
 [![codecov](https://codecov.io/gh/ISSMteam/PINNICLE/graph/badge.svg?token=S7REK0IKJH)](https://codecov.io/gh/ISSMteam/PINNICLE)
 [![Documentation Status](https://readthedocs.org/projects/pinnicle/badge/?version=latest)](https://pinnicle.readthedocs.io/en/latest/?badge=latest)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15437985.svg)](https://doi.org/10.5281/zenodo.15437985)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15643042.svg)](https://doi.org/10.5281/zenodo.15643042)
 [![License](https://img.shields.io/github/license/ISSMteam/PINNICLE)](https://pypi.org/project/PINNICLE/)
 [![PyPI](https://img.shields.io/pypi/v/pinnicle)](https://pypi.org/project/PINNICLE/)
 
