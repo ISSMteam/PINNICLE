@@ -35,6 +35,7 @@ The library currently supports stress balance approximations, mass conservation,
    :caption: Data
 
    data/issm
+   data/issm_light
    data/scatter
    data/h5
 
