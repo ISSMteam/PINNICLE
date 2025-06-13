@@ -4,6 +4,7 @@ import deepxde as dde
 import os
 import numpy as np
 
+
 def test_domain():
     expFileName = "fastflow_CF.exp"
     repoPath = os.path.dirname(__file__) + "/../examples/"
@@ -28,6 +29,7 @@ def test_domain():
     # bbox
     assert np.all(d2.bbox() == d2.geometry.bbox)
 
+def test_rectangle_domain():
     # dealing with rectangle domains
     expFileName = "testtile.exp"
     repoPath = os.path.dirname(__file__) + "/../examples/"
@@ -39,9 +41,18 @@ def test_domain():
     with pytest.raises(Exception):
         pinn.domain.Domain(p)
 
-    p3 = pinn.parameter.DomainParameter(hp)
-    d3 = pinn.domain.Domain(p3)
-    assert type(d3.geometry) == dde.geometry.Polygon
+    p2 = pinn.parameter.DomainParameter(hp)
+    d2 = pinn.domain.Domain(p2)
+    assert type(d2.geometry) == dde.geometry.Polygon
+
+    # inside
+    c = np.array([0.5*(d2.geometry.bbox[0]+d2.geometry.bbox[1])])
+    assert d2.inside(c)
+    o = np.array([d2.geometry.bbox[0]-[100,100] ,d2.geometry.bbox[1]+[100,100]])
+    assert not np.any(d2.inside(o))
+
+    # bbox
+    assert np.all(d2.bbox() == d2.geometry.bbox)
 
 def test_time_dependent_domain():
     expFileName = "fastflow_CF.exp"

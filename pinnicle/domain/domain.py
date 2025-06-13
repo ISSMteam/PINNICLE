@@ -37,23 +37,12 @@ class Domain:
             # appending to main domain list
             domain_list.append(vertex_list)
 
-        # deal with rectangles
-        if len(domain_list)==4:
-            # update the list to include 5 points
-            for i in range(len(domain_list)-1):
-                [newx, newy] = domain_list[0]
-                if domain_list[i][0] == domain_list[i+1][0]:
-                    newx = domain_list[i][0]
-                    newy = 0.5*(domain_list[i][1] + domain_list[i+1][1])
-                    domain_list.insert(i+1, [newx, newy])
-                    break
-                elif domain_list[i][1] == domain_list[i+1][1]:
-                    newx = 0.5*(domain_list[i][0] + domain_list[i+1][0])
-                    newy = domain_list[i][1]
-                    domain_list.insert(i+1, [newx, newy])
-                    break
-                else:
-                    continue
+        if len(domain_list) == 4: 
+            # add a mid point between the first two points of the list to make it contains 5 points
+            # so that deepxde will not complain the domain as a rectangle
+            newy = 0.5*(domain_list[0][1] + domain_list[1][1])
+            newx = 0.5*(domain_list[0][0] + domain_list[1][0])
+            domain_list.insert(1, [newx, newy])
 
         return domain_list
 
