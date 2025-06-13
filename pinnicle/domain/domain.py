@@ -37,6 +37,13 @@ class Domain:
             # appending to main domain list
             domain_list.append(vertex_list)
 
+        if len(domain_list) == 4: 
+            # add a mid point between the first two points of the list to make it contains 5 points
+            # so that deepxde will not complain the domain as a rectangle
+            newy = 0.5*(domain_list[0][1] + domain_list[1][1])
+            newx = 0.5*(domain_list[0][0] + domain_list[1][0])
+            domain_list.insert(1, [newx, newy])
+
         return domain_list
 
     def inside(self, x):
