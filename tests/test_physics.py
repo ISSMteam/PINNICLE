@@ -67,6 +67,21 @@ def test_Physics_SSAVB():
     assert len(phy.data_weights) == 6
     assert len(phy.pde_weights) == 2
 
+def test_Physics_SSAtau():
+    SSA = {}
+    SSA["scalar_variables"] = {"n":3}
+    hp = {}
+    hp["equations"] = {"SSA Taub":SSA}
+    phy = Physics(PhysicsParameter(hp))
+
+    assert phy.input_var == ['x', 'y']
+    assert phy.output_var == ['u', 'v', 's', 'H', 'taub']
+    assert phy.residuals == ['fSSA Taub1', 'fSSA Taub2']
+    assert len(phy.output_lb) == 5
+    assert len(phy.output_ub) == 5
+    assert len(phy.data_weights) == 5
+    assert len(phy.pde_weights) == 2
+
 def test_Physics_MC():
     hp = {}
     hp["equations"] = {"MC":{}}
@@ -176,7 +191,7 @@ def test_operator():
     SSA["scalar_variables"] = {"B":1.26802073401e+08}
 
     hp = {}
-    hp["equations"] = {"MC":{}, "SSA":SSA, "SSA_VB":{}, "MOLHO":{}, "Mass transport":{}, "Time_Invariant":{}}
+    hp["equations"] = {"MC":{}, "SSA":SSA, "SSA_VB":{}, "SSA Taub":{}, "MOLHO":{}, "Mass transport":{}, "Time_Invariant":{}}
     phy = Physics(PhysicsParameter(hp))
     
     assert phy.operator('mc')
@@ -185,6 +200,8 @@ def test_operator():
     assert phy.operator('ssa')
     assert phy.operator('SSA_VB')
     assert phy.operator('ssa_vb')
+    assert phy.operator('SSA Taub')
+    assert phy.operator('ssa taub')
     assert phy.operator('molho')
     assert phy.operator('MOLHO')
     assert phy.operator('MASS TRANSPORT')

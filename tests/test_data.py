@@ -47,7 +47,7 @@ def test_ISSMLightData_domain():
     
     hp = {}
     hp["data_path"] = path
-    hp["data_size"] = {"u":400, "v":4000, "H":40000}
+    hp["data_size"] = {"u":400, "v":4000, "H":40000, "taub":1000}
     hp["source"] = "ISSM Light"
     hp["shapefile"] = os.path.join(repoPath, "dataset", expFileName)
     
@@ -62,6 +62,8 @@ def test_ISSMLightData_domain():
     assert(data_loader.sol['v'].shape == (4000,1))
     assert(data_loader.X['H'].shape == (5841,2))
     assert(data_loader.sol['H'].shape == (5841,1))
+    assert(data_loader.X['taub'].shape == (1000,2))
+    assert(data_loader.sol['taub'].shape == (1000,1))
     icoord = data_loader.get_ice_coordinates()
     assert icoord.shape == (5841,2)
     assert(data_loader.X_dict['x'].shape == (5841,1))
@@ -75,7 +77,7 @@ def test_ISSMLIghtData_physics():
     
     hp = {}
     hp["data_path"] = path
-    hp["data_size"] = {"u":400, "v":4000, "s":10000}
+    hp["data_size"] = {"u":400, "v":4000, "s":10000, "taub":1000}
     hp["shapefile"] = os.path.join(repoPath, "dataset", expFileName)
     hp["source"] = "ISSM Light"
     hp["equations"] = {"SSA":{"input":["x1", "x2"]}}
@@ -125,7 +127,7 @@ def test_Data():
     
     issm = {}
     issm["data_path"] = path
-    issm["data_size"] = {"u":4000, "v":4000, "s":4000, "H":4000, "C":None}
+    issm["data_size"] = {"u":4000, "v":4000, "s":4000, "H":4000, "C":None, "taub":1000}
     hp = {}
     hp['data'] = {"issm":issm}
 
@@ -139,6 +141,8 @@ def test_Data():
     assert(data_loader.sol['s'].shape == (4000,1))
     assert(data_loader.X['H'].shape == (4000,2))
     assert(data_loader.sol['C'].shape == (278,1))
+    assert(data_loader.X['taub'].shape == (1000,2))
+    assert(data_loader.sol['taub'].shape == (1000,1))
 
 def test_Data_multiple():
     filename = "Helheim_fastflow.mat"

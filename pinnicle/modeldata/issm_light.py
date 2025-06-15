@@ -74,6 +74,9 @@ class ISSMLightData(DataBase, Constants):
             N[np.where(N <= 1.0, True, False)] = 1.0
             data['C'] = C_b*np.sqrt(N)*(data['vel']**(1.0/3.0))
 
+        # compute taub using Weertman's law
+        data['taub'] = data['C']*data['vel']**(1.0/3.0)
+
         # clean up is any of the keys are empty
         data = {k:data[k] for k in data if data[k].shape != ()}
         # ice mask
