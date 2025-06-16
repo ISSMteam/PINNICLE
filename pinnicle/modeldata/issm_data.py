@@ -68,7 +68,7 @@ class ISSMmdData(DataBase, Constants):
             self.data_dict['C'] = C_b*np.sqrt(N)*(self.data_dict['vel']**(1.0/3.0))
 
         # compute taub using Weertman's law
-        self.data_dict['taub'] = self.data_dict['C']*self.data_dict['vel']**(1.0/3.0)
+        self.data_dict['taub'] = (self.data_dict['C']**2.0)*self.data_dict['vel']**(1.0/3.0)
 
         # clean up is any of the keys are empty
         self.data_dict = {k:self.data_dict[k] for k in self.data_dict if self.data_dict[k].shape != ()}
