@@ -66,6 +66,8 @@ def test_input_fft_nn():
     hp['B'] = [[1,2,3]]
     hp['num_fourier_feature'] = 3
     d = NNParameter(hp)
+    d.input_lb = 1.0
+    d.input_ub = 10.0
     p = pinn.nn.FNN(d)
     assert np.all(hp['B'] == bkd.to_numpy(p.B))
 
