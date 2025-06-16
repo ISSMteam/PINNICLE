@@ -20,6 +20,11 @@ class FNN:
 
         # by default, use min-max scale for the input
         if self.parameters.is_input_scaling():
+            # force the input and output lb and ub to be tensors
+            if bkd.backend_name == "pytorch":
+                self.parameters.input_lb = bkd.as_tensor(self.parameters.input_lb, dtype=default_float_type())
+                self.parameters.input_ub = bkd.as_tensor(self.parameters.input_ub, dtype=default_float_type())
+
             if self.parameters.fft :
                 print(f"add Fourier feature transform to input transform")
                 if self.parameters.B is not None: 
@@ -34,10 +39,6 @@ class FNN:
                 self.net.apply_feature_transform(wrapper)
             else: 
                 print(f"add input transform with {self.parameters.input_lb} and {self.parameters.input_ub}")
-                # force the input and output lb and ub to be tensors
-                if bkd.backend_name == "pytorch":
-                    self.parameters.input_lb = bkd.as_tensor(self.parameters.input_lb, dtype=default_float_type())
-                    self.parameters.input_ub = bkd.as_tensor(self.parameters.input_ub, dtype=default_float_type())
                 # add input transform
                 self._add_input_transform(minmax_scale)
 
