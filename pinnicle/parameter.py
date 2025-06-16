@@ -122,6 +122,9 @@ class DataParameter(ParameterBase):
         if self.data:
             self.data = {k:SingleDataParameter(self.data[k]) for k in self.data}
 
+        # check consistency after update
+        self.check_consistency()
+
 
 class SingleDataParameter(ParameterBase):
     """ parameters of a single data file
@@ -169,6 +172,9 @@ class SingleDataParameter(ParameterBase):
             # names in data_size, if not given in name_map, then use the same name for key and value
             if k not in self.name_map:
                 self.name_map[k] = k
+
+        # check consistency after update
+        self.check_consistency()
 
 
 class NNParameter(ParameterBase):
@@ -249,11 +255,16 @@ class NNParameter(ParameterBase):
         if isinstance(self.num_neurons, list):
             self.num_layers = len(self.num_neurons)
 
+        # need check again after updating params
+        self.update()
+
     def update(self):
         """ update the input_size for fourier feature transform
         """
         if self.fft:
             self.input_size = self.num_fourier_feature*2
+
+        self.check_consistency()
 
 class PhysicsParameter(ParameterBase):
     """ parameter of physics
@@ -347,6 +358,9 @@ class EquationParameter(ParameterBase):
                         setattr(self, key, old_dict)
                     else:
                         setattr(self, key, value)
+
+        # check consistency after update
+        self.check_consistency()
 
     def __str__(self):
         """
@@ -472,6 +486,9 @@ class TrainingParameter(ParameterBase):
 
         #  add callback setttings if given any of them
         self.has_callbacks = self.check_callbacks()
+
+        # check consistency after update
+        self.check_consistency()
 
 
 class LossFunctionParameter(ParameterBase):

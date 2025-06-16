@@ -128,6 +128,8 @@ def test_train_only_data(tmp_path):
     hp_local["data"] = {"ISSM": issm}
     dummy = {}
     dummy["output"] = ['v', 'H']
+    dummy["output_lb"] =[-1.0, 0.0]
+    dummy["output_ub"] =[1.0, 1.0]
     hp_local["equations"] = {"DUMMY":dummy}
     experiment = pinn.PINN(params=hp_local)
     experiment.compile()
@@ -177,6 +179,9 @@ def test_fft_training(tmp_path):
     assert experiment.params.param_dict == experiment2.params.param_dict
     assert len(experiment2.params.nn.B) == 2
     assert len(experiment2.params.nn.B[1]) == 10    
+    experiment.compile()
+    experiment.train()
+    assert experiment.loss_names == ['fSSA1', 'fSSA2', 'u', 'v', 's', 'H', 'C']
 
 @pytest.mark.skipif(backend_name in ["jax"], reason="save model is not implemented in deepxde for jax")
 def test_train_PFNN(tmp_path):

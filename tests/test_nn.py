@@ -58,7 +58,7 @@ def test_input_fft_nn():
     d.input_lb = 1.0
     d.input_ub = 10.0
     p = pinn.nn.FNN(d)
-    x = bkd.reshape(bkd.as_tensor(np.linspace(d.input_lb, d.input_ub, 100), dtype=default_float_type()), [100,1])
+    x = bkd.reshape(bkd.as_tensor(np.linspace(1.0, 10.0, 100), dtype=default_float_type()), [100,1])
     y = bkd.to_numpy(p.net._input_transform(x))
     z = y**2
     assert np.all(abs(z[:,1:10]+z[:,11:20]) <= 1.0+np.finfo(float).eps)
@@ -81,7 +81,7 @@ def test_input_scale_nn():
     d.input_lb = 1.0
     d.input_ub = 10.0
     p = pinn.nn.FNN(d)
-    x = bkd.as_tensor(np.linspace(d.input_lb, d.input_ub, 100), dtype=default_float_type())
+    x = bkd.as_tensor(np.linspace(1.0, 10.0, 100), dtype=default_float_type())
     y = bkd.to_numpy(p.net._input_transform(x))
     assert np.all(abs(y) <= 1.0+np.finfo(float).eps)
 

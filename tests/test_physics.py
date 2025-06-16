@@ -212,6 +212,8 @@ def test_operator():
 def test_Physics_dummy():
     dummy = {}
     dummy["output"] = ['u', 's', 'C']
+    dummy["output_lb"] =[-1.0, -1.0, -1.0]
+    dummy["output_ub"] =[1.0, 1.0, 1.0]
     hp = {}
     hp["equations"] = {"DUMMY":dummy}
     phy = Physics(PhysicsParameter(hp))
