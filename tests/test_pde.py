@@ -32,7 +32,7 @@ hp["num_layers"] = 4
 # data
 issm = {}
 issm["data_path"] = path
-issm["data_size"] = {"u":10, "v":10, "s":10, "H":10, "C":None, "vel":10, "B":10}
+issm["data_size"] = {"u":10, "v":10, "s":10, "H":10, "C":None, "vel":10, "B":10, "taub":10}
 hp["data"] = {"ISSM": issm}
 
 # domain
@@ -146,6 +146,16 @@ def test_time_invariant_func():
     assert len(y) == 2
     assert y[0].shape == (10,1)
     assert y[1].shape == (10,1)
+
+def test_weertman_pde_function():
+    hp_local = dict(hp)
+    hp_local["equations"] = {"Weertman":{}}
+    experiment = pinn.PINN(params=hp_local)
+    experiment.compile()
+    y = experiment.model.predict(experiment.model_data.X['taub'], operator=experiment.physics.operator("Weertman"))
+
+    assert len(y) == 1
+    assert y[0].shape == (10,1)
 
 def test_vel_mag():
     hp_local = dict(hp)

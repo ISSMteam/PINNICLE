@@ -124,6 +124,19 @@ def test_Physics_MOLHO():
     assert len(phy.data_weights) == 7
     assert len(phy.pde_weights) == 4
 
+def test_Physics_Friction():
+    hp = {}
+    hp["equations"] = {"Weertman":{}}
+    phy = Physics(PhysicsParameter(hp))
+
+    assert phy.input_var == ['x', 'y']
+    assert phy.output_var == ['u', 'v', 'C', 'taub']
+    assert phy.residuals == ['fWeertman']
+    assert len(phy.output_lb) == 4
+    assert len(phy.output_ub) == 4
+    assert len(phy.data_weights) == 4
+    assert len(phy.pde_weights) == 1
+
 def test_Physics_SSA_MOLHO():
     SSA = {}
     SSA["scalar_variables"] = {"B":1.26802073401e+08}
@@ -191,7 +204,8 @@ def test_operator():
     SSA["scalar_variables"] = {"B":1.26802073401e+08}
 
     hp = {}
-    hp["equations"] = {"MC":{}, "SSA":SSA, "SSA_VB":{}, "SSA Taub":{}, "MOLHO":{}, "Mass transport":{}, "Time_Invariant":{}}
+    hp["equations"] = {"MC":{}, "SSA":SSA, "SSA_VB":{}, "SSA Taub":{}, "MOLHO":{}, "Mass transport":{}, "Time_Invariant":{}, 
+            "Weertman":{}}
     phy = Physics(PhysicsParameter(hp))
     
     assert phy.operator('mc')
@@ -208,6 +222,8 @@ def test_operator():
     assert phy.operator('mass transport')
     assert phy.operator('Time_Invariant')
     assert phy.operator('TIME_INVARIANT')
+    assert phy.operator('Weertman')
+    assert phy.operator('weertman')
 
 def test_Physics_dummy():
     dummy = {}
