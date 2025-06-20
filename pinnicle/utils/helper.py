@@ -95,12 +95,17 @@ def down_sample(points, data_size):
         ind: indices of the downsample
     """
     # if data_size is larger than the number of points, use all points
+    if isinstance(data_size, str):
+        if data_size.lower() == 'max':
+            # use all the points
+            data_size = points.shape[0]
+
     data_size = min(points.shape[0], data_size)
 
     # start with double resolution
     resolution = 2*int(np.ceil(data_size**0.5))
     ind = down_sample_core(points, resolution=resolution)
-    
+
     while (resolution**2 < points.shape[0]) and (ind.shape[0]< data_size):
         resolution *= 2
         ind = down_sample_core(points, resolution=resolution)

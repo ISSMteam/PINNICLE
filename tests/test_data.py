@@ -12,14 +12,14 @@ def test_ISSMLightData():
     
     hp = {}
     hp["data_path"] = path
-    hp["data_size"] = {"u":400, "v":400, "s":400, "H":400, "a":300}
+    hp["data_size"] = {"u":"max", "v":400, "s":400, "H":400, "a":300}
     hp["source"] = "ISSM Light"
     p = SingleDataParameter(hp)
     data_loader = ISSMLightData(p)
     data_loader.load_data()
     data_loader.prepare_training_data()
 
-    assert(data_loader.sol['u'].shape == (400,1))
+    assert(data_loader.sol['u'].shape == (11874,1))
     assert(data_loader.X['v'].shape == (400,2))
     assert(data_loader.sol['s'].shape == (400,1))
     assert(data_loader.X['H'].shape == (400,2))
@@ -227,7 +227,7 @@ def test_MatData_domain():
     
     hp = {}
     hp["data_path"] = path
-    hp["data_size"] = {"H":100}
+    hp["data_size"] = {"H":"Max"}
     hp["name_map"] = {"H":"thickness"}
     hp["source"] = "mat"
     hp["X_map"] = {"x1":"x", "x2":"y"}
@@ -238,8 +238,8 @@ def test_MatData_domain():
     data_loader = MatData(p)
     data_loader.load_data(d)
     data_loader.prepare_training_data()
-    assert(data_loader.X['H'].shape == (100,2))
-    assert(data_loader.sol['H'].shape == (100,1))
+    assert(data_loader.X['H'].shape == (673,2))
+    assert(data_loader.sol['H'].shape == (673,1))
     icoord = data_loader.get_ice_coordinates()
     assert icoord.shape == (673,2)
 
@@ -277,7 +277,7 @@ def test_h5Data():
 
     hp = {}
     hp["data_path"] = path
-    hp["data_size"] = {"u":300, "v":100, "s":2, "b":100, "a":10}
+    hp["data_size"] = {"u":300, "v":"MAX", "s":2, "b":100, "a":10}
     hp["X_map"] = {"x":"surf_x", "y":"surf_y" }
     hp["name_map"] = {"s":"surf_elv", "u":"surf_vx", "v":"surf_vy", "a":"surf_SMB", "b":"bed_BedMachine"}
     hp["source"] = "h5"
@@ -287,7 +287,8 @@ def test_h5Data():
     data_loader.load_data()
     data_loader.prepare_training_data()
     assert(data_loader.sol['u'].shape == (300,1))
-    assert(data_loader.X['v'].shape == (100,2))
+    assert(data_loader.X['v'].shape == (60000,2))
+    assert(data_loader.sol['a'].shape == (10,1))
     icoord = data_loader.get_ice_coordinates()
     assert icoord.shape == (60000, 2)
 
@@ -350,7 +351,7 @@ def test_ISSMmdData():
 
     hp = {}
     hp["data_path"] = path
-    hp["data_size"] = {"u":4000, "v":4000, "s":4000, "H":4000, "C":None, "a":500}
+    hp["data_size"] = {"u":4000, "v":4000, "s":"max", "H":4000, "C":None, "a":500}
     p = SingleDataParameter(hp)
     data_loader = ISSMmdData(p)
     data_loader.load_data()
@@ -358,7 +359,7 @@ def test_ISSMmdData():
 
     assert(data_loader.sol['u'].shape == (4000,1))
     assert(data_loader.X['v'].shape == (4000,2))
-    assert(data_loader.sol['s'].shape == (4000,1))
+    assert(data_loader.sol['s'].shape == (11874,1))
     assert(data_loader.X['H'].shape == (4000,2))
     assert(data_loader.sol['C'].shape == (278,1))
     assert(data_loader.sol['a'].shape == (500,1))
