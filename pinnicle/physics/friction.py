@@ -57,7 +57,7 @@ class WeertmanFriction(EquationBase): #{{{
 
         # compute the basal stress
         u_norm = (u**2+v**2)**0.5
-        f1 = C**2*(u_norm)**(1.0/self.m)
+        f1 = C**2*(u_norm)**(1.0/self.m) - taub
 
         return [f1] #}}}
     def _pde_jax(self, nn_input_var, nn_output_var): #{{{
