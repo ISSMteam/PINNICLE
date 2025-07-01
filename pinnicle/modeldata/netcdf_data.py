@@ -2,9 +2,7 @@ from . import DataBase
 from ..parameter import SingleDataParameter
 from ..physics import Constants
 from ..utils import down_sample
-import netCDF4  # this need to be imported to avoid xarray conflict with h5py
-import xarray as xr
-import h5py
+from netCDF4 import Dataset
 import numpy as np
 
 
@@ -30,12 +28,12 @@ class NetCDFData(DataBase, Constants):
         """ load grid data from a `.nc` file, based on the domain, return a dict with the required data
         """
         # Reading .nc data handler
-        data = xr.load_dataset(self.parameters.data_path, engine='netcdf4')
+        data = Dataset(self.parameters.data_path, "r")
 
         # pre load x, y, the spatial coordinates, from now on, use X and its keys only, X_map translate the data already
         X = {}
         for k, v in self.parameters.X_map.items():
-            if v in data.coords:
+            if v in data.dimensions:
                 X[k] = data[v]
             else:
                 print(f"{v} is not found in the data from {self.parameters.data_path}, please specify the mapping in 'X_map'")
@@ -50,48 +48,34 @@ class NetCDFData(DataBase, Constants):
         if domain:
             bbox = domain.bbox()
             # set the flag based on the bbox region
-            xmin = bbox[0][0]
-            xmax = bbox[1][0]
-            ymin = bbox[0][1]
-            ymax = bbox[1][1]
+            xmin = [bbox[0][0], bbox[0][1]]
+            xmax = [bbox[1][0], bbox[1][1]]
         else:
             # otherwise use the whole data
-            xmin = (X[xkeys[0]].min()).values
-            xmax = (X[xkeys[0]].max()).values
-            ymin = (X[xkeys[1]].min()).values
-            ymax = (X[xkeys[1]].max()).values
+            xmin = [data.variables[k][:].min() for k in xkeys]
+            xmax = [data.variables[k][:].max() for k in xkeys]
 
         # Load coordinate arrays
-        x_coord = X[xkeys[0]].values
-        y_coord = X[xkeys[1]].values
+        x_coord = [data[k][:] for k in xkeys]
 
-        # Find indices in x
-        x_inds = np.where((x_coord >= xmin) & (x_coord <= xmax))[0]
-        if len(x_inds) > 0:
-            x_start = x_inds[0]
-            x_end   = x_inds[-1] + 1
-        else:
-            raise ValueError("No x indices found in range.")
-        
-        # Find indices in y
-        y_inds = np.where((y_coord >= ymin) & (y_coord <= ymax))[0]
-        if len(y_inds) > 0:
-            y_start = y_inds[0]
-            y_end   = y_inds[-1] + 1
-        else:
-            raise ValueError("No y indices found in range.")
+        # Find indices in Xs
+        x_start = []
+        x_end = []
+        for i, k in enumerate(xkeys):
+            x_inds = np.where((x_coord[i] >= xmin[i]) & (x_coord[i] <= xmax[i]))[0]
+            if len(x_inds) > 0:
+                x_start.append(x_inds[0])
+                x_end.append(x_inds[-1] + 1)
+            else:
+                raise ValueError("No x indices found in range.")
 
         # load all variables from parameters.name_map
-        sub_data = data.isel(
-                **{xkeys[1]: slice(y_start, y_end), 
-                    xkeys[0]: slice(x_start, x_end)})
-
-        for k in self.parameters.name_map:
-            self.data_dict[k] = sub_data[self.parameters.name_map[k]].values.flatten()[:,None]
+        for k,v in self.parameters.name_map.items():
+            self.data_dict[k] = data.variables[v][x_start[1]:x_end[1], x_start[0]:x_end[0]].flatten()[:,None]
 
         # load and generate the coordinates
-        x_slice = X[xkeys[0]].isel({xkeys[0]: slice(x_start, x_end)}).values
-        y_slice = X[xkeys[1]].isel({xkeys[1]: slice(y_start, y_end)}).values
+        x_slice = X[xkeys[0]][x_start[0]: x_end[0]]
+        y_slice = X[xkeys[1]][x_start[1]: x_end[1]]
 
         # Create meshgrid
         X_mesh, Y_mesh = np.meshgrid(x_slice, y_slice)

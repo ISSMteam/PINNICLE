@@ -1,7 +1,8 @@
+from netCDF4 import Dataset
 import pytest
 import os
 import pinnicle as pinn
-from pinnicle.modeldata import ISSMLightData, ISSMmdData, MatData, Data, H5Data
+from pinnicle.modeldata import ISSMLightData, ISSMmdData, NetCDFData, MatData, Data, H5Data
 from pinnicle.parameter import DataParameter, SingleDataParameter
 
 def test_ISSMLightData():
@@ -342,6 +343,89 @@ def test_h5Data_physics():
     assert(data_loader.sol['a'].shape == (10,1))
     icoord = data_loader.get_ice_coordinates()
     assert icoord.shape == (60000,2)
+
+def test_ncData():
+    filename = "subdomain_bed.nc"
+    repoPath = os.path.dirname(__file__) + "/../examples/"
+    appDataPath = os.path.join(repoPath, "dataset")
+    path = os.path.join(appDataPath, filename)
+
+    hp = {}
+    hp["data_path"] = path
+    hp["data_size"] = {"s":300, "H":"MAX", "b":10}
+    hp["X_map"] = {"x":"x", "y":"y" }
+    hp["name_map"] = {"s":"surface", "H":"thickness", "b":"bed"}
+    hp["source"] = "nc"
+
+    p = SingleDataParameter(hp)
+    data_loader = NetCDFData(p)
+    data_loader.load_data()
+    data_loader.prepare_training_data()
+    assert(data_loader.sol['s'].shape == (300,1))
+    assert(data_loader.X['H'].shape == (17956,2))
+    assert(data_loader.sol['b'].shape == (10,1))
+    icoord = data_loader.get_ice_coordinates()
+    assert icoord.shape == (17956, 2)
+
+def test_ncData_domain():
+    filename = "subdomain_bed.nc"
+    expFileName = "fastflow_CF.exp"
+    repoPath = os.path.dirname(__file__) + "/../examples/"
+    appDataPath = os.path.join(repoPath, "dataset")
+    path = os.path.join(appDataPath, filename)
+
+    hp = {}
+    hp["data_path"] = path
+    hp["data_size"] = {"s":300, "H":"MAX", "b":10}
+    hp["X_map"] = {"x":"x", "y":"y" }
+    hp["name_map"] = {"s":"surface", "H":"thickness", "b":"bed"}
+    hp["source"] = "nc"
+    hp["shapefile"] = os.path.join(repoPath, "dataset", expFileName)
+
+    d = pinn.domain.Domain( pinn.parameter.DomainParameter(hp))
+    p = SingleDataParameter(hp)
+    data_loader = NetCDFData(p)
+    data_loader.load_data(d)
+    data_loader.prepare_training_data()
+    assert(data_loader.X['b'].shape == (10,2))
+    assert(data_loader.X['H'].shape == (12328,2))
+    assert(data_loader.sol['s'].shape == (300,1))
+    icoord = data_loader.get_ice_coordinates()
+    assert icoord.shape == (12328,2)
+
+    hp["shapefile"] = os.path.join(repoPath, "dataset", "Kangerlussuaq.exp")
+    d = pinn.domain.Domain( pinn.parameter.DomainParameter(hp))
+    p = SingleDataParameter(hp)
+    data_loader = NetCDFData(p)
+
+    with pytest.raises(Exception):
+        data_loader.load_data(d)
+
+def test_ncData_physics():
+    filename = "subdomain_bed.nc"
+    expFileName = "fastflow_CF.exp"
+    repoPath = os.path.dirname(__file__) + "/../examples/"
+    appDataPath = os.path.join(repoPath, "dataset")
+    path = os.path.join(appDataPath, filename)
+
+    hp = {}
+    hp["data_path"] = path
+    hp["data_size"] = {"s":300, "H":"MAX", "b":10}
+    hp["X_map"] = {"x":"x", "y":"y" }
+    hp["name_map"] = {"s":"surface", "H":"thickness", "b":"bed"}
+    hp["source"] = "nc"
+    hp["shapefile"] = os.path.join(repoPath, "dataset", expFileName)
+    hp["equations"] = {"SSA":{}}
+
+    phy = pinn.physics.Physics(pinn.parameter.PhysicsParameter(hp))
+    p = SingleDataParameter(hp)
+    data_loader = NetCDFData(p)
+    data_loader.load_data(physics=phy)
+    data_loader.prepare_training_data()
+    assert(data_loader.X['b'].shape == (10,2))
+    assert(data_loader.sol['H'].shape == (17956,1))
+    icoord = data_loader.get_ice_coordinates()
+    assert icoord.shape == (17956,2)
 
 def test_ISSMmdData():
     filename = "Helheim_fastflow.mat"
