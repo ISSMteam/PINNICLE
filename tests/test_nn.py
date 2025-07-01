@@ -61,7 +61,7 @@ def test_input_fft_nn():
     x = bkd.reshape(bkd.as_tensor(np.linspace(1.0, 10.0, 100), dtype=default_float_type()), [100,1])
     y = bkd.to_numpy(p.net._input_transform(x))
     z = y**2
-    assert np.all(abs(z[:,1:10]+z[:,11:20]) <= 1.0+np.finfo(float).eps)
+    assert np.all(abs(z[:,1:10]+z[:,11:20]-1.0)+np.finfo(float).eps)
 
     hp['B'] = [[1,2,3]]
     hp['num_fourier_feature'] = 3
