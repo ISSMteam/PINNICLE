@@ -1,6 +1,7 @@
 deepxde
 mat73
 matplotlib
+netCDF4
 h5py
 numpy
 pandas
