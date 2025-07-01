@@ -38,6 +38,7 @@ The library currently supports stress balance approximations, mass conservation,
    data/issm_light
    data/scatter
    data/h5
+   data/nc
 
 
 .. toctree::

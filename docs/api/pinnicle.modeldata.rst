@@ -42,7 +42,7 @@ pinnicle.modeldata.issm_light module
    :show-inheritance:
 
 pinnicle.modeldata.netcdf_data module
-------------------------------------
+-------------------------------------
 
    .. automodule:: pinnicle.modeldata.netcdf_data
    :members:
