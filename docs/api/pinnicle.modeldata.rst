@@ -41,3 +41,11 @@ pinnicle.modeldata.issm_light module
    :undoc-members:
    :show-inheritance:
 
+pinnicle.modeldata.netcdf_data module
+------------------------------------
+
+   .. automodule:: pinnicle.modeldata.netcdf_data
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
