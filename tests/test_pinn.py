@@ -277,7 +277,7 @@ def test_only_callbacks(tmp_path):
     hp_local = dict(hp)
     hp_local["save_path"] = str(tmp_path)
     hp_local["num_collocation_points"] = 100
-    issm["data_size"] = {"u":100, "v":100, "s":100, "H":10, "C":None, "vel":100}
+    issm["data_size"] = {"u":100, "v":"MAX", "s":100, "H":10, "C":None, "vel":100}
     hp_local["data"] = {"ISSM": issm}
     hp_local["min_delta"] = 1e10
     hp_local["period"] = 5

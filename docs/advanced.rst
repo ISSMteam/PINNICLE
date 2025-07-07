@@ -10,9 +10,11 @@ Mini-batch
 
 PINNICLE supports mini-batch training when using the ``pytorch`` backend. In the current implementation, mini-batches are resampled at every epoch to enhance convergence stability.
 To activate mini-batch training, simply add the following setting to the hyperparameter dictionary. PINNICLE will automatically generate mini-batches from the data specified in ``hp["data"]``.
+And in the data section, you can set the ``"data_size"`` to a large number or simply ``"MAX"``, to cover a large amount of your data.
 
 .. code-block:: python
    
+   hp_local["data"] = {"ISSM": {"data_size": {"u":100, "v":"MAX", "s":100, "H":10, "C":None}}}
    hp["mini_batch"] = mini_batch
 
 - Avoid setting ``mini_batch`` too large, as this can lead to inefficiencies and excessive memory usage.
