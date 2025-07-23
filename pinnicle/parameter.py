@@ -143,6 +143,8 @@ class SingleDataParameter(ParameterBase):
         self.name_map = {}
         # X name map k->v, k is the input names in the PINN, v is the coordinates name in the data file
         self.X_map = {}
+        # scaling factor, map using k->s, by default s=1, k is the same (or subset) as in data_size
+        self.scaling = {}
         # source of the data
         self.source = "ISSM"
         # default time point, None means not in used
@@ -172,6 +174,9 @@ class SingleDataParameter(ParameterBase):
             # names in data_size, if not given in name_map, then use the same name for key and value
             if k not in self.name_map:
                 self.name_map[k] = k
+
+            if k not in self.scaling:
+                self.scaling[k] = 1.0
 
         # check consistency after update
         self.check_consistency()

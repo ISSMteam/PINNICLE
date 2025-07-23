@@ -36,7 +36,7 @@ def test_single_data_parameter():
     assert [d.X_map[k] == k for k in ["x","y","t"]]
     assert d.default_time is None
 
-    mat = {"data_path":"./", "data_size":{"u":4000, "v":None}, "source":"mat", "X_map":{"x":"y"}, "default_time":1}
+    mat = {"data_path":"./", "data_size":{"u":4000, "v":None}, "source":"mat", "X_map":{"x":"y"}, "default_time":1, "scaling":{"u":100}}
     d = SingleDataParameter(mat)
     assert d.name_map["u"] == "u"
     assert d.name_map["v"] == "v"
@@ -44,6 +44,8 @@ def test_single_data_parameter():
     assert d.X_map["x"] == "y"
     assert "y" not in d.X_map
     assert d.default_time == 1
+    assert d.scaling["u"] == 100
+    assert d.scaling["v"] == 1
 
     with pytest.raises(Exception):
         unknown = {"source": "unknown"}

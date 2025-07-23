@@ -71,7 +71,7 @@ class NetCDFData(DataBase, Constants):
 
         # load all variables from parameters.name_map
         for k,v in self.parameters.name_map.items():
-            self.data_dict[k] = data.variables[v][x_start[1]:x_end[1], x_start[0]:x_end[0]].flatten()[:,None]
+            self.data_dict[k] = (data.variables[v][x_start[1]:x_end[1], x_start[0]:x_end[0]].flatten()[:,None])*self.parameters.scaling[k]
 
         # load and generate the coordinates
         x_slice = X[xkeys[0]][x_start[0]: x_end[0]]

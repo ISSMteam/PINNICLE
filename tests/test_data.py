@@ -200,6 +200,8 @@ def test_MatData():
     hp["name_map"] = {"H":"thickness"}
     hp["source"] = "mat"
     hp["X_map"] = {"x1":"x", "x2":"y"}
+    hp["scaling"] = {"H":0}
+
     p = SingleDataParameter(hp)
     data_loader = MatData(p)
     data_loader.load_data()
@@ -207,6 +209,7 @@ def test_MatData():
 
     assert(data_loader.sol['H'].shape == (100,1))
     assert(data_loader.X['H'].shape == (100,2))
+    assert max(data_loader.sol['H']) == 0.0
 
     icoord = data_loader.get_ice_coordinates()
     assert icoord.shape == (3192, 2)
@@ -379,6 +382,7 @@ def test_ncData_domain():
     hp["data_size"] = {"s":300, "H":"MAX", "b":10}
     hp["X_map"] = {"x":"x", "y":"y" }
     hp["name_map"] = {"s":"surface", "H":"thickness", "b":"bed"}
+    hp["scaling"] = {"s":0}
     hp["source"] = "nc"
     hp["shapefile"] = os.path.join(repoPath, "dataset", expFileName)
 
@@ -392,6 +396,8 @@ def test_ncData_domain():
     assert(data_loader.sol['s'].shape == (300,1))
     icoord = data_loader.get_ice_coordinates()
     assert icoord.shape == (12328,2)
+    assert max(data_loader.sol['s']) == 0.0
+    assert max(data_loader.sol['H']) < 1105
 
     hp["shapefile"] = os.path.join(repoPath, "dataset", "Kangerlussuaq.exp")
     d = pinn.domain.Domain( pinn.parameter.DomainParameter(hp))

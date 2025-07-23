@@ -59,7 +59,7 @@ class MatData(DataBase, Constants):
 
         # load all variables from parameters.name_map
         for k in self.parameters.name_map:
-            self.data_dict[k] = data[self.parameters.name_map[k]][boxflag].flatten()[:,None]
+            self.data_dict[k] = (data[self.parameters.name_map[k]][boxflag].flatten()[:,None])*self.parameters.scaling[k]
 
     def plot(self, data_names=[], vranges={}, axs=None, **kwargs):
         """ TODO: scatter plot of the selected data from data_names
