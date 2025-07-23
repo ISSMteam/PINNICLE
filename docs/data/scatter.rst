@@ -29,8 +29,9 @@ To use scattered data in your PINNICLE configuration, specify a dataset like thi
    hp["data"] = {
        "flight track": {
            "data_path": "glacier_obs.mat",
-           "data_size": {"H": 2000},
-           "name_map": {"H":"H_mat"},
+           "data_size": {"H": 2000, "a":1000},
+           "name_map": {"H":"H_mat", "a":"smb"},
+           "scaling": {"a":1.0/31536000},
            "X_map": {"x":"x_mat", "y":"y_mat"},
            "source": "mat"
        }

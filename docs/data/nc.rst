@@ -23,6 +23,7 @@ To use :code:`.nc` data in PINNICLE, add a new data source with :code:`"source":
          "X_map": {"x":"surf_x", "y":"surf_y" },
          "name_map": {"s":"surf_elv", "u":"surf_vx", "v":"surf_vy", "a":"surf_SMB", "b":"bed_BedMachine"},
          "data_size": {"u": 5000, "v": 5000, "H": 5000, "s": 5000},
+         "scaling": {"u":1.0/31536000, "v":1.0/31536000},
          "source": "nc"
        }
    }
@@ -32,6 +33,7 @@ To use :code:`.nc` data in PINNICLE, add a new data source with :code:`"source":
 - :code:`"X_map"`: set the name mapping of the coordinates in PINNICLE to the :code:`.nc` file 
 - :code:`"name_map"`: set the name mapping of the variables in PINNICLE to the :code:`.nc` file 
 - :code:`"data_size"`: Number of data points to randomly sample for each variable
+- :code:`"scaling"`: scaling factors multiplied to the data, the key is the same as the :code:`"name_map"`
 - Set a variable to :code:`"None"` to infer it is only used as a Dirichlet boundary condition
 - If the key is not mentioned in :code:`"data_size"`, then the corresponding field will not use data from this file
 
