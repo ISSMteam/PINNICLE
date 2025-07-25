@@ -63,3 +63,5 @@ def test_plot2d():
     assert plot2d(axs[0][0], X, Y, data)
 
 
+def test_plotscatter():
+    assert plot2d(axs[0][0], X, Y, data)
