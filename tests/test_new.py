@@ -62,6 +62,8 @@ fig, axs = plt.subplots(3,2, figsize=(8,8))
 
 def test_plot2d():
     assert plot2d(axs[0][0], X, Y, data)
+    mask = np.ones(X.shape, dtype=bool)
+    assert plot2d(axs[0][0], X, Y, data, mask=mask)
 
 def test_plottriangle():
     assert plottriangle(axs[0][0], mpl.tri.Triangulation(X, Y), data)
