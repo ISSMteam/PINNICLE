@@ -23,7 +23,21 @@ def plot2d(axs, X, Y, data, **kwargs):
     # generate triagular mesh, the plot all the 1d-array data, no matter if it has a grid or not
 
     triangles = mpl.tri.Triangulation(X, Y)
-    im = axs.tripcolor(triangles, data, **kwargs)
+    axs = plottriangle(axs, triangles, data, **kwargs)
+
+    return axs
+
+def plottriangle(axs, triangles,  data, **kwargs):
+    """ plot a triagular mesh
+
+    Args:
+        axs (AxesSubplot): handler for plotting
+        triangles (ntri, 3): a triangluar mesh generated using mpl.tri.Triangulation
+        data (np.array): data for the 2D plot, it has the same size as X and Y
+    return:
+        axs (AxesSubplot): axes of the subplots
+    """
+    axs = axs.tripcolor(triangles, data, **kwargs)
 
     return axs
 

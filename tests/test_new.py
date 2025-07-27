@@ -2,6 +2,7 @@ import os
 import pinnicle as pinn
 import numpy as np
 import deepxde as dde
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 from pinnicle.utils import *
 import pytest
@@ -62,6 +63,8 @@ fig, axs = plt.subplots(3,2, figsize=(8,8))
 def test_plot2d():
     assert plot2d(axs[0][0], X, Y, data)
 
+def test_plottriangle():
+    assert plottriangle(axs[0][0], mpl.tri.Triangulation(X, Y), data)
 
 def test_plotscatter():
     assert plot2d(axs[0][0], X, Y, data)
