@@ -51,6 +51,8 @@ hp["num_collocation_points"] = 100
 SSA = {}
 SSA["scalar_variables"] = {"B":1.26802073401e+08}
 hp["equations"] = {"SSA":SSA}
+model = pinn.PINN(params=hp)
+model.compile()
 
 x = np.array(range(10))
 y = np.array(range(10))
@@ -59,6 +61,8 @@ X = X.flatten()
 Y = Y.flatten()
 data = X*2+Y/2+X*Y
 fig, axs = plt.subplots(3,2, figsize=(8,8))
+def test_plotpredict():
+    assert plotprediction(axs[0][0], model, X, Y, "u")
 
 def test_plot2d():
     assert plot2d(axs[0][0], X, Y, data)

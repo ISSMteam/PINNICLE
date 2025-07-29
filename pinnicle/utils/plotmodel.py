@@ -9,6 +9,30 @@ def plotmodel(pinn, path="", filename="", **kwargs):
     """
     pass
 
+def plotprediction(axs, model, X, Y, key, **kwargs):
+    """ plot predictions of the keys from the pinn model
+
+    Args:
+        axs (AxesSubplot): handler for plotting
+        model (pinnicle.pinn): PINNICLE model
+        X (np.array): x-coordinates of the 2D plot
+        Y (np.array): y-coordinates of the 2D plot
+        key (str): key of the output variable
+    return:
+        axs (AxesSubplot): axes of the subplots
+    """
+    # compute the prediction
+    X_nn = np.hstack((X.flatten()[:,None], Y.flatten()[:,None]))
+    sol_pred = model.model.predict(X_nn)
+
+    # get the index of the key
+    keylist = model.params.nn.output_variables
+    ind = keylist.index(key)
+
+    # plot
+    plot2d(axs, X, Y, sol_pred[:,ind:ind+1], **kwargs)
+    return axs
+
 
 def plot2d(axs, X, Y, data, mask=None, resolution=200, **kwargs):
     """ plot 2d scattered data, make a triangular mesh and plot the data on the mesh
