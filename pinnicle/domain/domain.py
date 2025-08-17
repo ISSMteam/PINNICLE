@@ -11,13 +11,19 @@ class Domain:
         # load space domain from parameters
         if self.parameters.shapefile is None:
             # define the domain using a rectangle domain defined by shapebox =[xmin, xmax, ymin, ymax]
-            pass
+            xmin, xmax, ymin, ymax = self.parameters.shapebox
+            self.vertices = [[xmin,ymin], [xmin,ymax],[xmax,ymax],[xmax, ymin]]
         elif is_file_ext(self.parameters.shapefile, '.exp'):
             # create spatial domain
             self.vertices = self.get_polygon_vertices(self.parameters.shapefile)
-            spacedomain = dde.geometry.Polygon(self.vertices)
         else:
             raise TypeError("File type in "+self.parameters.shapefile+" is currently not supported!")
+
+        # manually add a midpoint to a rectangle domain, to force deepXDE to use polygon
+        if len(self.vertices) == 4:
+            self._add_midpoint(self.vertices)
+
+        spacedomain = dde.geometry.Polygon(self.vertices)
 
         # create space-time domain
         if self.parameters.time_dependent:
@@ -40,9 +46,6 @@ class Domain:
             vertex_list = list(vertex)
             # appending to main domain list
             domain_list.append(vertex_list)
-
-        if len(domain_list) == 4: 
-           self._add_midpoint(domain_list)
 
         return domain_list
 

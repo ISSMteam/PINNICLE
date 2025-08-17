@@ -79,8 +79,8 @@ class DomainParameter(ParameterBase):
     def set_default(self):
         # shape file to define the outer boundary of the domain
         self.shapefile = None
-        # shapebox =[xmin, xmax, ymin, ymax]
-        self.shapebox = [0,0,0,0]
+        # shapebox = [xmin, xmax, ymin, ymax]
+        self.shapebox = [None]*4
         # number of collocation points used in the domain
         self.num_collocation_points = 0
         # static or time dependent problem
@@ -98,6 +98,12 @@ class DomainParameter(ParameterBase):
         if self.shapefile is None:
             if len(self.shapebox) != 4:
                 raise ValueError("shapefile and shapebox are not defined, you need to define one of them")
+            if None not in self.shapebox:
+                xmin, xmax, ymin, ymax = self.shapebox
+                if xmin >= xmax:
+                    raise ValueError("xmin>=xmax! `shapebox` should be in the order [xmin, xmax, ymin, ymax]")
+                if ymin >= ymax:
+                    raise ValueError("ymin>=ymax! `shapebox` should be in the order [xmin, xmax, ymin, ymax]")
 
 
 class DataParameter(ParameterBase):
