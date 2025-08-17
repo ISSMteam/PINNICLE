@@ -79,6 +79,8 @@ class DomainParameter(ParameterBase):
     def set_default(self):
         # shape file to define the outer boundary of the domain
         self.shapefile = None
+        # shapebox =[xmin, xmax, ymin, ymax]
+        self.shapebox = [0,0,0,0]
         # number of collocation points used in the domain
         self.num_collocation_points = 0
         # static or time dependent problem
@@ -93,6 +95,9 @@ class DomainParameter(ParameterBase):
         if self.time_dependent:
             if self.start_time >= self.end_time:
                 raise ValueError(f"'start_time' at {self.start_time} is ahead of 'end_time' at {self.end_time}")
+        if self.shapefile is None:
+            if len(self.shapebox) != 4:
+                raise ValueError("shapefile and shapebox are not defined, you need to define one of them")
 
 
 class DataParameter(ParameterBase):

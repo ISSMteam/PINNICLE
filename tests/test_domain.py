@@ -29,6 +29,12 @@ def test_domain():
     # bbox
     assert np.all(d2.bbox() == d2.geometry.bbox)
 
+    # add midpoint 
+    assert len(d2.vertices) == 13
+    d2._add_midpoint(d2.vertices)
+    assert len(d2.vertices) == 14
+
+
 def test_rectangle_domain():
     # dealing with rectangle domains
     expFileName = "testtile.exp"
@@ -76,3 +82,4 @@ def test_time_dependent_domain():
 
     # bbox
     assert np.all(d2.bbox() == d2.geometry.geometry.bbox)
+

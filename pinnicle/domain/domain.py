@@ -7,8 +7,12 @@ import deepxde as dde
 class Domain:
     def __init__(self, parameters=DomainParameter()):
         self.parameters = parameters
-        # load space domain from shapefile
-        if is_file_ext(self.parameters.shapefile, '.exp'):
+
+        # load space domain from parameters
+        if self.parameters.shapefile is None:
+            # define the domain using a rectangle domain defined by shapebox =[xmin, xmax, ymin, ymax]
+            pass
+        elif is_file_ext(self.parameters.shapefile, '.exp'):
             # create spatial domain
             self.vertices = self.get_polygon_vertices(self.parameters.shapefile)
             spacedomain = dde.geometry.Polygon(self.vertices)
@@ -38,11 +42,7 @@ class Domain:
             domain_list.append(vertex_list)
 
         if len(domain_list) == 4: 
-            # add a mid point between the first two points of the list to make it contains 5 points
-            # so that deepxde will not complain the domain as a rectangle
-            newy = 0.5*(domain_list[0][1] + domain_list[1][1])
-            newx = 0.5*(domain_list[0][0] + domain_list[1][0])
-            domain_list.insert(1, [newx, newy])
+           self._add_midpoint(domain_list)
 
         return domain_list
 
@@ -67,3 +67,12 @@ class Domain:
             return self.geometry.geometry.bbox
         else:
             return self.geometry.bbox
+
+    def _add_midpoint(self, domain_list):
+        """
+        add a mid point between the first two points of the list to make it contains 5 points
+        so that deepxde will not complain the domain as a rectangle
+        """
+        newy = 0.5*(domain_list[0][1] + domain_list[1][1])
+        newx = 0.5*(domain_list[0][0] + domain_list[1][0])
+        domain_list.insert(1, [newx, newy])

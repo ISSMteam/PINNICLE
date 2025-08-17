@@ -26,6 +26,10 @@ def test_domain_parameter():
         timedep = {'time_dependent':True, 'start_time':10, 'end_time':1}
         d = DomainParameter(timedep)
 
+    with pytest.raises(Exception):
+        shapenotdefine = {'shapebox':[]}
+        d = DomainParameter(shapenotdefine)
+
 def test_single_data_parameter():
     issm = {"data_path":"./", "data_size":{"u":4000, "v":None}}
     d = SingleDataParameter(issm)
