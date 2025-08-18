@@ -29,6 +29,8 @@ def test_domain_parameter():
     with pytest.raises(Exception):
         shapenotdefine = {'shapebox':[]}
         d = DomainParameter(shapenotdefine)
+
+    with pytest.raises(Exception):
         shapenotdefine = {'shapebox':[2,1,4,3]}
         d = DomainParameter(shapenotdefine)
 
