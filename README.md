@@ -24,7 +24,7 @@ Developed at the Department of Earth Sciences, Dartmouth College, USA.
 - Built-in support for:
   - Shelfy-Stream Approximation (SSA)
   - Mono-Layer Higher-Order (MOLHO) stress balance
-  - Time-dependent mass conservation
+  - Mass conservation
 - Support for multiple backends: TensorFlow, PyTorch, JAX
 - Integration with observational data: [ISSM](https://issm.jpl.nasa.gov) data format, MATLAB general `.mat`, HDF5, NetCDF.
 - Fourier Feature Transform for input and output
@@ -83,13 +83,13 @@ Alternatively, edit `~/.deepxde/config.json`:
 
 Example scripts and input files are located in the [`examples/`](https://github.com/ISSMteam/PINNICLE/tree/main/examples) directory.
 
-* [**Example 1**](https://github.com/ISSMteam/PINNICLE/blob/main/examples/example1_helheim_ssa_inverse.py):
+* [**Example 1**](https://github.com/ISSMteam/PINNICLE/blob/main/examples/example1_Helheim_inverse/example1.py):
   Inverse problem on Helheim Glacier using SSA to infer basal friction
 
-* [**Example 2**](https://github.com/ISSMteam/PINNICLE/blob/main/examples/example2_pig_ssa_rheology.py):
-  Joint inversion of basal friction and ice rheology for Pine Island Glacier
+* [**Example 2**](https://github.com/ISSMteam/PINNICLE/blob/main/examples/example2_PIG/example2.py):
+  Simultaneous Inference of Basal Friction and Ice Rheology for Pine Island Glacier, Antarctica
 
-* [**Example 3**](https://github.com/ISSMteam/PINNICLE/blob/main/examples/example3_helheim_forward_transient.py):
+* [**Example 3**](https://github.com/ISSMteam/PINNICLE/blob/main/examples/example3_Helheim_Transient/example3.py):
   Time-dependent forward modeling of Helheim Glacier (2008–2009)
 
 Each example includes a complete Python script and configuration dictionary.
@@ -106,20 +106,21 @@ Full documentation is available in the `docs/` folder or at:
 
 If you use PINNICLE in your research, please cite:
 
-> Cheng, G., Krishna, M., and Morlighem, M.: A Python library for solving ice sheet modeling problems using Physics Informed Neural Networks, PINNICLE v1.0, EGUsphere [preprint], https://doi.org/10.5194/egusphere-2025-1188, 2025.
+> Cheng, G., Krishna, M., and Morlighem, M.: A Python library for solving ice sheet modeling problems using physics-informed neural networks, PINNICLE v1.0, Geosci. Model Dev., 18, 5311–5327, https://doi.org/10.5194/gmd-18-5311-2025, 2025.
 
 **BibTeX**:
 
 ```bibtex
-@Article{egusphere-2025-1188,
-   AUTHOR = {Cheng, G. and Krishna, M. and Morlighem, M.},
-   TITLE = {A Python library for solving ice sheet modeling problems using Physics Informed Neural Networks, PINNICLE v1.0},
-   JOURNAL = {EGUsphere},
-   VOLUME = {2025},
-   YEAR = {2025},
-   PAGES = {1--26},
-   URL = {https://egusphere.copernicus.org/preprints/2025/egusphere-2025-1188/},
-   DOI = {10.5194/egusphere-2025-1188}
+@Article{gmd-18-5311-2025,
+  AUTHOR = {Cheng, G. and Krishna, M. and Morlighem, M.},
+  TITLE = {A Python library for solving ice sheet modeling problems using physics-informed neural networks, PINNICLE v1.0},
+  JOURNAL = {Geoscientific Model Development},
+  VOLUME = {18},
+  YEAR = {2025},
+  NUMBER = {16},
+  PAGES = {5311--5327},
+  URL = {https://gmd.copernicus.org/articles/18/5311/2025/},
+  DOI = {10.5194/gmd-18-5311-2025}
 }
 ```
 
