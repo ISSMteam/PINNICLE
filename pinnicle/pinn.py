@@ -77,7 +77,10 @@ class PINN:
         self.model.predict(np.zeros([1, self.params.nn.input_size]))
 
         # now the weights can be loaded
-        self.model.restore(filename)
+        if dde.backend.backend_name == "pytorch":
+            self.model.restore(filename, device=dde.backend.torch.get_default_device())
+        else:
+            self.model.restore(filename)
         self.compile()
 
     def load_setting(self, path="", filename="params.json"):
