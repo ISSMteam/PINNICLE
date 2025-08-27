@@ -292,6 +292,7 @@ class PhysicsParameter(ParameterBase):
     def set_default(self):
         # name(s) and parameters of the equations
         self.equations = {}
+        self.manual_data_weights = None
 
     def check_consistency(self):
         pass

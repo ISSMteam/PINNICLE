@@ -50,6 +50,7 @@ def test_Physics_SSA():
     assert len(phy.output_lb) == 5
     assert len(phy.output_ub) == 5
     assert len(phy.data_weights) == 5
+    assert phy.data_weights[3] == 1e-6
     assert len(phy.pde_weights) == 2
 
 def test_Physics_SSAVB():
@@ -57,6 +58,7 @@ def test_Physics_SSAVB():
     SSA["scalar_variables"] = {"n":3}
     hp = {}
     hp["equations"] = {"SSA_VB":SSA}
+    hp["manual_data_weights"] = {"H":1}
     phy = Physics(PhysicsParameter(hp))
 
     assert phy.input_var == ['x', 'y']
@@ -65,6 +67,7 @@ def test_Physics_SSAVB():
     assert len(phy.output_lb) == 6
     assert len(phy.output_ub) == 6
     assert len(phy.data_weights) == 6
+    assert phy.data_weights[3] == 1
     assert len(phy.pde_weights) == 2
 
 def test_Physics_SSAtau():

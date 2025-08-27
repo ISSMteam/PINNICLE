@@ -29,6 +29,13 @@ class Physics:
             self.output_lb.append(min([p.output_lb[k] for p in self.equations if k in p.output_lb]))
             self.output_ub.append(max([p.output_ub[k] for p in self.equations if k in p.output_ub]))
             self.data_weights.append(max([p.data_weights[k] for p in self.equations if k in p.data_weights]))
+        
+        # manualy update data weights
+        if self.parameters.manual_data_weights is not None:
+             for k in self.parameters.manual_data_weights:
+                 if k in self.output_var:
+                     kid = self.output_var.index(k)
+                     self.data_weights[kid] = self.parameters.manual_data_weights[k]
 
         # update residual list
         self.residuals = list(itertools.chain.from_iterable([p.residuals for p in self.equations]))
