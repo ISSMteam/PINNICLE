@@ -9,7 +9,7 @@ def plotmodel(pinn, path="", filename="", **kwargs):
     """
     pass
 
-def plotprediction(axs, model, X, Y, key, **kwargs):
+def plotprediction(axs, model, X, Y, key, scaling=1, **kwargs):
     """ plot predictions of the keys from the pinn model
 
     Args:
@@ -18,6 +18,7 @@ def plotprediction(axs, model, X, Y, key, **kwargs):
         X (np.array): x-coordinates of the 2D plot
         Y (np.array): y-coordinates of the 2D plot
         key (str): key of the output variable
+        scaling (float, optional): scaling factor for the data. Defaults to 1
     return:
         axs (AxesSubplot): axes of the subplots
     """
@@ -30,11 +31,36 @@ def plotprediction(axs, model, X, Y, key, **kwargs):
     ind = keylist.index(key)
 
     # plot
-    plot2d(axs, X, Y, sol_pred[:,ind:ind+1], **kwargs)
+    axs = plot2d(axs, X, Y, scaling*sol_pred[:,ind:ind+1].flatten(), **kwargs)
     return axs
 
+def plotdiff(axs, model, X, Y, data, key, scaling=1, **kwargs):
+    """ plot the difference between the prediction of the keys from the pinn model and the data
 
-def plot2d(axs, X, Y, data, mask=None, resolution=200, **kwargs):
+    Args:
+        axs (AxesSubplot): handler for plotting
+        model (pinnicle.pinn): PINNICLE model
+        X (np.array): x-coordinates of the 2D plot
+        Y (np.array): y-coordinates of the 2D plot
+        data (np.array): data for the 2D plot, it has the same size as X and Y
+        key (str): key of the output variable
+        scaling (float, optional): scaling factor for the data. Defaults to 1
+    return:
+        axs (AxesSubplot): axes of the subplots
+    """
+    # compute the prediction
+    X_nn = np.hstack((X.flatten()[:,None], Y.flatten()[:,None]))
+    sol_pred = model.model.predict(X_nn)
+
+    # get the index of the key
+    keylist = model.params.nn.output_variables
+    ind = keylist.index(key)
+
+    # plot
+    axs = plot2d(axs, X, Y, scaling*(sol_pred[:,ind:ind+1].flatten()-data), **kwargs)
+    return axs
+
+def plot2d(axs, X, Y, data, mask=None, scaling=1, **kwargs):
     """ plot 2d scattered data, make a triangular mesh and plot the data on the mesh
 
     Args:
@@ -42,23 +68,25 @@ def plot2d(axs, X, Y, data, mask=None, resolution=200, **kwargs):
         X (np.array): x-coordinates of the 2D plot
         Y (np.array): y-coordinates of the 2D plot
         data (np.array): data for the 2D plot, it has the same size as X and Y
+        mask (np.array, optional): mask for the data, True for invalid data. Defaults to None
+        scaling (float, optional): scaling factor for the data. Defaults to 1
     return:
         axs (AxesSubplot): axes of the subplots
     """
     # generate triagular mesh, the plot all the 1d-array data, no matter if it has a grid or not
-
     triangles = mpl.tri.Triangulation(X, Y)
 
-    # TODO: add masks to enable concave shape of the domain
-    if mask is not None:
-        grid_size = 2.0*((max(X)-min(X))**2.0+(max(Y)-min(Y))**2.0)**0.5/resolution
-        mask_coord = np.c_[X[mask].ravel(), Y[mask].ravel()]
-        tree = KDTree(mask_coord)
-        dist, _ = tree.query(np.c_[X.ravel(), Y.ravel()], k=1)
-        dist = dist.reshape(X.shape)
-        data[dist > grid_size] = np.nan
-
-    axs = plottriangle(axs, triangles, data, **kwargs)
+    # apply the mask    
+    if mask is None:
+        if np.ma.is_masked(data):
+            mask = np.isnan(data).filled(True)
+        else:
+            mask = np.isnan(data)
+        
+    data[mask] = np.nan
+    
+    # plot
+    axs = plottriangle(axs, triangles, scaling*data, **kwargs)
 
     return axs
 
@@ -90,9 +118,3 @@ def plotscatter(axs, X, Y, data, **kwargs):
     axs = axs.scatter(X, Y, s=1, c=data, **kwargs)
 
     return axs
-
-# plot_prediction
-# with mask 
-
-
-
