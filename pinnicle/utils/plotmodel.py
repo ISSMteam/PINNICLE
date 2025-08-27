@@ -12,11 +12,10 @@ def plotmodel(pinn, path="", filename="", **kwargs):
 # def plotscattercompare(axs, model, dataname, output, scaling=1, diffrange=None, **kwargs):
 
 
-def plotmodelcompare(axs, model, dataname, output, scaling=1, diffrange=None, iscatter=False, **kwargs):
+def plotmodelcompare(model, dataname, output, scaling=1, diffrange=None, iscatter=False, **kwargs):
     """ plot the comparison between the prediction of the keys from the pinn model and the data
 
     Args:
-        axs (AxesSubplot): handler for plotting, it should have 3 subplots
         model (pinnicle.pinn): PINNICLE model
         dataname (str): name of the data in model.model_data.data
         output (str): key of the output variable
@@ -26,6 +25,9 @@ def plotmodelcompare(axs, model, dataname, output, scaling=1, diffrange=None, is
     return:
         axs (AxesSubplot): axes of the subplots
     """
+    figsize = kwargs.pop('figsize', (12,5))
+    fig, axs = plt.subplots(1, 3 , figsize=figsize)
+
     X = model.model_data.data[dataname].X_dict['x'].flatten()
     Y = model.model_data.data[dataname].X_dict['y'].flatten()
     data = model.model_data.data[dataname].data_dict[output].flatten()
