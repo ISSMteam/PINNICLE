@@ -42,7 +42,7 @@ hp["num_layers"] = 2
 # data
 issm = {}
 issm["data_path"] = path
-issm["data_size"] = {"u":10}
+issm["data_size"] = {"u":10,"s":10,"H":10}
 hp["data"] = {"issm":issm}
 
 # domain
@@ -73,6 +73,9 @@ def test_plotmodelcompare():
 def test_plotpredict():
     assert plotprediction(axs[0][0], model, "u")
     assert plotprediction(axs[0][0], model, "u", X=X, Y=Y, scaling=2)
+    assert plotprediction(axs[0][0], model, "bed")
+    with pytest.raises(Exception):
+        plotprediction(axs[0][0], model, "invalid_key")
 
 def test_plotdiff():
     assert plotdiff(axs[0][0], model, X, Y, data, "u")

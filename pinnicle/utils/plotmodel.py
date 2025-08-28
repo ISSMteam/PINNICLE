@@ -9,9 +9,6 @@ def plotmodel(pinn, path="", filename="", **kwargs):
     """
     pass
 
-# def plotscattercompare(axs, model, dataname, output, scaling=1, diffrange=None, **kwargs):
-
-
 def plotmodelcompare(model, dataname, output, scaling=1, diffrange=None, iscatter=False, **kwargs):
     """ plot the comparison between the prediction of the keys from the pinn model and the data
 
@@ -94,10 +91,20 @@ def plotprediction(axs, model, key, X=None, Y=None, scaling=1, resolution=200, *
 
     # get the index of the key
     keylist = model.params.nn.output_variables
-    ind = keylist.index(key)
-
+    if key in keylist:
+        ind = keylist.index(key)
+        data = scaling*sol_pred[:,ind:ind+1].flatten()
+    elif key == 'bed':
+        ind_s = keylist.index('s')
+        ind_H = keylist.index('H')
+        s = scaling*sol_pred[:,ind_s:ind_s+1].flatten()
+        H = scaling*sol_pred[:,ind_H:ind_H+1].flatten()
+        data = s - H
+    else:
+        raise ValueError(f"Key {key} not found in model output variables and is not 'bed'.")
+    
     # plot
-    axs = plot2d(axs, X, Y, scaling*sol_pred[:,ind:ind+1].flatten(), **kwargs)
+    axs = plot2d(axs, X, Y, data, **kwargs)
     return axs
 
 def plotdiff(axs, model, X, Y, data, key, scaling=1, iscatter=False, **kwargs):
