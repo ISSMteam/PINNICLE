@@ -4,7 +4,6 @@ from pinnicle.parameter import NNParameter
 import deepxde as dde
 import deepxde.backend as bkd
 from deepxde.backend import backend_name, jax
-import pytest
 import numpy as np
 
 dde.config.set_default_float('float64')

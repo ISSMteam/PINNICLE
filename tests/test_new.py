@@ -76,6 +76,8 @@ def test_plotpredict():
     assert plotprediction(axs[0][0], model, "bed")
     with pytest.raises(Exception):
         plotprediction(axs[0][0], model, "invalid_key")
+    assert plotprediction(axs[0][0], model, "u", operator=lambda x: x**2)
+    assert plotprediction(axs[0][0], model, "u", operator=np.abs)
 
 def test_plotdiff():
     assert plotdiff(axs[0][0], model, X, Y, data, "u")

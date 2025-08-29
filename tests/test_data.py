@@ -1,4 +1,3 @@
-from netCDF4 import Dataset
 import pytest
 import os
 import pinnicle as pinn

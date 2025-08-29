@@ -62,7 +62,7 @@ def plotmodelcompare(model, dataname, output, scaling=1, diffrange=None, iscatte
 
     return axs
 
-def plotprediction(axs, model, key, X=None, Y=None, scaling=1, resolution=200, **kwargs):
+def plotprediction(axs, model, key, X=None, Y=None, scaling=1, resolution=200, operator=None, **kwargs):
     """ plot predictions of the keys from the pinn model
 
     Args:
@@ -102,6 +102,10 @@ def plotprediction(axs, model, key, X=None, Y=None, scaling=1, resolution=200, *
         data = s - H
     else:
         raise ValueError(f"Key {key} not found in model output variables and is not 'bed'.")
+    
+    # apply operator if provided
+    if operator is not None:
+        data = operator(data)
     
     # plot
     axs = plot2d(axs, X, Y, data, **kwargs)

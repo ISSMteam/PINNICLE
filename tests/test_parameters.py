@@ -1,6 +1,4 @@
 import pytest
-import numpy as np
-import pinnicle as pinn
 from deepxde.backend import backend_name
 from pinnicle.parameter import DataParameter, SingleDataParameter, NNParameter, DomainParameter, PhysicsParameter, Parameters, EquationParameter, TrainingParameter
 from pinnicle.physics import SSAEquationParameter, DummyEquationParameter

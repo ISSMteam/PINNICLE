@@ -1,4 +1,3 @@
-import pinnicle as pinn
 from pinnicle.physics import *
 from pinnicle.parameter import PhysicsParameter
 import pytest

@@ -1,11 +1,9 @@
 import pytest
-import deepxde as dde
 import os
 import numpy as np
 from deepxde import backend
-from deepxde.backend import backend_name
 import pinnicle
-from pinnicle.utils import save_dict_to_json, load_dict_from_json, data_misfit, load_mat, down_sample_core, down_sample
+from pinnicle.utils import *
 
 data = {"s":1, "v":[1, 2, 3]}
 
@@ -82,3 +80,16 @@ def test_slice_column():
     c = pinnicle.utils.backends_specified.slice_column_jax(a, 1)
     assert c.shape == (1,)
     assert c[0] == 2
+
+def test_interpfrombedmachine():
+    x = np.array([300025,301025,302025])
+    y = np.array([-2579975, -2578975, -2577975])
+    repoPath = os.path.dirname(__file__) + "/../examples/"
+    appDataPath = os.path.join(repoPath, "dataset")
+    path = os.path.join(appDataPath, "subdomain_bed.nc")
+    var_interp = interpfrombedmachine(x, y, "thickness", path)
+    assert var_interp.shape == (3,)
+    x = np.array([330025])
+    y = np.array([-2579975])
+    with pytest.raises(Exception):
+        var_interp = interpfrombedmachine(x, y, "bed", path)
