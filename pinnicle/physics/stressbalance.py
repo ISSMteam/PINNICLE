@@ -1,5 +1,5 @@
 import deepxde as dde
-from deepxde.backend import jax
+from deepxde.backend import jax, abs
 from . import EquationBase, Constants
 from ..parameter import EquationParameter
 from ..utils import slice_column, jacobian, slice_function_jax
@@ -224,8 +224,8 @@ class SSA_Taub(EquationBase): #{{{
         # compute the basal stress
         u_norm = (u**2+v**2)**0.5
 
-        f1 = sigma11 + sigma12 - taub*u/(u_norm+1e-30) - self.rhoi*self.g*H*s_x
-        f2 = sigma21 + sigma22 - taub*v/(u_norm+1e-30) - self.rhoi*self.g*H*s_y
+        f1 = sigma11 + sigma12 - abs(taub)*u/(u_norm+1e-30) - self.rhoi*self.g*H*s_x
+        f2 = sigma21 + sigma22 - abs(taub)*v/(u_norm+1e-30) - self.rhoi*self.g*H*s_y
 
         return [f1, f2] #}}}
     def _pde_jax(self, nn_input_var, nn_output_var): #{{{
@@ -278,8 +278,8 @@ class SSA_Taub(EquationBase): #{{{
 
         u_norm = (u**2+v**2)**0.5
 
-        f1 = sigma11 + sigma12 - taub*u/(u_norm+1e-30) - self.rhoi*self.g*H*s_x
-        f2 = sigma21 + sigma22 - taub*v/(u_norm+1e-30) - self.rhoi*self.g*H*s_y
+        f1 = sigma11 + sigma12 - abs(taub)*u/(u_norm+1e-30) - self.rhoi*self.g*H*s_x
+        f2 = sigma21 + sigma22 - abs(taub)*v/(u_norm+1e-30) - self.rhoi*self.g*H*s_y
 
         return [f1, f2] #}}}
     #}}}
