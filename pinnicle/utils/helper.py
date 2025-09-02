@@ -117,3 +117,24 @@ def down_sample(points, data_size):
         # randomly choose 
         idx = np.random.choice(ind, data_size, replace=False)
         return idx
+
+def createsubdomain(xmin, ymin, xid, yid, dx=50000, dy=50000):
+    """ Create a rectangle subdomain within the large domain defined by the bottom-left corner and x, y indices
+
+    Args:
+        xmin (float): x coordinate of bottom-left corner of the large domain
+        ymin (float): y coordinate of bottom-left corner of the large domain
+        xid (int): x index of the subdomain (starting from 0)
+        yid (int): y index of the subdomain (starting from 0)
+        dx (float, optional): width of the subdomain. Defaults to 50000.
+        dy (float, optional): height of the subdomain. Defaults to 50000.
+
+    Returns:
+        tuple: (x0, y0, x1, y1) coordinates of the subdomain
+    """
+    x0 = xmin + xid * dx
+    y0 = ymin + yid * dy
+    x1 = xmin + (xid + 1) * dx
+    y1 = ymin + (yid + 1) * dy
+
+    return x0, y0, x1, y1    

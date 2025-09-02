@@ -53,3 +53,23 @@ def interpfrombedmachine(x, y, name, path, method="linear"):
     var_interp = griddata(points, values, xi, method=method)
 
     return var_interp.reshape(x.shape)
+
+def subdomainmask(subdomain, input_file, name='mask', resolution=200):
+    """ Check if there is ice in the subdomain by interpolating the BedMachine data
+
+    Args:
+        subdomain (tuple): (xmin, ymin, xmax, ymax) of the subdomain
+        input_file (str): path to the input BedMachine .nc file
+        name (str, optional): variable name to interpolate. Defaults to 'mask'.
+        resolution (int, optional): resolution of the test points within the subdomain. Defaults to 200.
+
+    Returns:
+        bool: true if there is any mask>0 in the subdomain, false otherwise
+    """
+    x0, y0, x1, y1 = subdomain
+    x = np.linspace(x0, x1, resolution)
+    y = np.linspace(y0, y1, resolution)
+    X, Y = np.meshgrid(x, y)
+
+    mask = interpfrombedmachine(X, Y, 'mask', input_file,  method="linear")
+    return np.any(mask > 0)

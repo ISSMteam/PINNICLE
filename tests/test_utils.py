@@ -93,3 +93,27 @@ def test_interpfrombedmachine():
     y = np.array([-2579975])
     with pytest.raises(Exception):
         var_interp = interpfrombedmachine(x, y, "bed", path)
+
+def test_createsubdomain():
+    xmin = 300000
+    ymin = -2580000
+    xid = 1
+    yid = 1
+    dx = 50000
+    dy = 50000
+    x0, y0, x1, y1 = createsubdomain(xmin, ymin, xid, yid, dx, dy)
+    assert x1 == 400000
+    assert y1 == -2480000
+    assert x0 == 350000
+    assert y0 == -2530000
+
+def test_subdomainmask():
+    xmin = 300000
+    ymin = -2580000
+    xmax = 400000
+    ymax = -2480000
+    subdomain = (xmin, ymin, xmax, ymax)
+    repoPath = os.path.dirname(__file__) + "/../examples/"
+    appDataPath = os.path.join(repoPath, "dataset")
+    path = os.path.join(appDataPath, "subdomain_bed.nc")
+    assert subdomainmask(subdomain, path) == True
