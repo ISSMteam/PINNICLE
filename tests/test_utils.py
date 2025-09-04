@@ -101,7 +101,7 @@ def test_createsubdomain():
     yid = 1
     dx = 50000
     dy = 50000
-    x0, y0, x1, y1 = createsubdomain(xmin, ymin, xid, yid, dx, dy)
+    x0, x1, y0, y1 = createsubdomain(xmin, ymin, xid, yid, dx, dy)
     assert x1 == 400000
     assert y1 == -2480000
     assert x0 == 350000
@@ -112,7 +112,7 @@ def test_subdomainmask():
     ymin = -2580000
     xmax = 400000
     ymax = -2480000
-    subdomain = (xmin, ymin, xmax, ymax)
+    subdomain = (xmin, xmax, ymin,ymax)
     repoPath = os.path.dirname(__file__) + "/../examples/"
     appDataPath = os.path.join(repoPath, "dataset")
     path = os.path.join(appDataPath, "subdomain_bed.nc")

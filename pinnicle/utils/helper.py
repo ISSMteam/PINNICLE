@@ -130,11 +130,11 @@ def createsubdomain(xmin, ymin, xid, yid, dx=50000, dy=50000):
         dy (float, optional): height of the subdomain. Defaults to 50000.
 
     Returns:
-        tuple: (x0, y0, x1, y1) coordinates of the subdomain
+        tuple: (x0, x1, y0, y1) coordinates of the subdomain, this need to be consistent with domain.shapebox
     """
     x0 = xmin + xid * dx
     y0 = ymin + yid * dy
     x1 = xmin + (xid + 1) * dx
     y1 = ymin + (yid + 1) * dy
 
-    return x0, y0, x1, y1    
+    return x0, x1, y0, y1    
