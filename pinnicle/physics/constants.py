@@ -7,6 +7,7 @@ class Constants():
         self.rhow   = 1023.0            # sea water density (kg/m^3)
         self.g      = 9.81              # gravitational force (m/s^2)
         self.yts    = 3600.0*24*365     # year to second (s)
+        self.eps    = 1.0e-15           # constant epsilon
 
         # Typical range of variables
         self.variable_lb = {'u': -1.0e4/self.yts, 'v':-1.0e4/self.yts, 's':-1.0e3, 'H':10.0,   'C':0.01,  'a': -5.0/self.yts, 'B': 7.0e7}

@@ -65,7 +65,7 @@ class SSA(EquationBase): #{{{
         H = slice_column(nn_output_var, Hid)
         C = slice_column(nn_output_var, Cid)
 
-        eta = 0.5*self.B *(u_x**2.0 + v_y**2.0 + 0.25*(u_y+v_x)**2.0 + u_x*v_y+1.0e-15)**(0.5*(1.0-self.n)/self.n)
+        eta = 0.5*self.B *(u_x**2.0 + v_y**2.0 + 0.25*(u_y+v_x)**2.0 + u_x*v_y+self.eps)**(0.5*(1.0-self.n)/self.n)
         # stress tensor
         etaH = eta * H
         B11 = etaH*(4*u_x + 2*v_y)
@@ -81,11 +81,11 @@ class SSA(EquationBase): #{{{
 
 
         # compute the basal stress
-        u_norm = (u**2+v**2)**0.5
+        u_norm = (u**2+v**2+self.eps**2)**0.5
         alpha = C**2 * (u_norm)**(1.0/self.n)
 
-        f1 = sigma11 + sigma12 - alpha*u/(u_norm+1e-30) - self.rhoi*self.g*H*s_x
-        f2 = sigma21 + sigma22 - alpha*v/(u_norm+1e-30) - self.rhoi*self.g*H*s_y
+        f1 = sigma11 + sigma12 - alpha*u/(u_norm) - self.rhoi*self.g*H*s_x
+        f2 = sigma21 + sigma22 - alpha*v/(u_norm) - self.rhoi*self.g*H*s_y
 
         return [f1, f2] #}}}
     def _pde_jax(self, nn_input_var, nn_output_var): #{{{
@@ -114,7 +114,7 @@ class SSA(EquationBase): #{{{
         # get variable function
         H_func = lambda x: slice_function_jax(nn_output_var, x, Hid)
         # stress tensor
-        etaH = lambda x: 0.5*H_func(x)*self.B *(u_x(x)**2.0 + v_y(x)**2.0 + 0.25*(u_y(x)+v_x(x))**2.0 + u_x(x)*v_y(x)+1.0e-15)**(0.5*(1.0-self.n)/self.n)
+        etaH = lambda x: 0.5*H_func(x)*self.B *(u_x(x)**2.0 + v_y(x)**2.0 + 0.25*(u_y(x)+v_x(x))**2.0 + u_x(x)*v_y(x)+self.eps)**(0.5*(1.0-self.n)/self.n)
 
         B11 = lambda x: etaH(x)*(4*u_x(x) + 2*v_y(x))
         B22 = lambda x: etaH(x)*(4*v_y(x) + 2*u_x(x))
@@ -136,11 +136,11 @@ class SSA(EquationBase): #{{{
         s_x = jacobian(nn_output_var, nn_input_var, i=sid, j=xid)
         s_y = jacobian(nn_output_var, nn_input_var, i=sid, j=yid)
 
-        u_norm = (u**2+v**2)**0.5
+        u_norm = (u**2+v**2+self.eps**2)**0.5
         alpha = C**2 * (u_norm)**(1.0/self.n)
 
-        f1 = sigma11 + sigma12 - alpha*u/(u_norm+1e-30) - self.rhoi*self.g*H*s_x
-        f2 = sigma21 + sigma22 - alpha*v/(u_norm+1e-30) - self.rhoi*self.g*H*s_y
+        f1 = sigma11 + sigma12 - alpha*u/(u_norm) - self.rhoi*self.g*H*s_x
+        f2 = sigma21 + sigma22 - alpha*v/(u_norm) - self.rhoi*self.g*H*s_y
 
         return [f1, f2] #}}}
     #}}}
@@ -206,7 +206,7 @@ class SSA_Taub(EquationBase): #{{{
         H = slice_column(nn_output_var, Hid)
         taub = slice_column(nn_output_var, tauid)
 
-        eta = 0.5*self.B *(u_x**2.0 + v_y**2.0 + 0.25*(u_y+v_x)**2.0 + u_x*v_y+1.0e-15)**(0.5*(1.0-self.n)/self.n)
+        eta = 0.5*self.B *(u_x**2.0 + v_y**2.0 + 0.25*(u_y+v_x)**2.0 + u_x*v_y+self.eps)**(0.5*(1.0-self.n)/self.n)
         # stress tensor
         etaH = eta * H
         B11 = etaH*(4*u_x + 2*v_y)
@@ -222,10 +222,10 @@ class SSA_Taub(EquationBase): #{{{
 
 
         # compute the basal stress
-        u_norm = (u**2+v**2)**0.5
+        u_norm = (u**2+v**2+self.eps**2)**0.5
 
-        f1 = sigma11 + sigma12 - abs(taub)*u/(u_norm+1e-30) - self.rhoi*self.g*H*s_x
-        f2 = sigma21 + sigma22 - abs(taub)*v/(u_norm+1e-30) - self.rhoi*self.g*H*s_y
+        f1 = sigma11 + sigma12 - abs(taub)*u/(u_norm) - self.rhoi*self.g*H*s_x
+        f2 = sigma21 + sigma22 - abs(taub)*v/(u_norm) - self.rhoi*self.g*H*s_y
 
         return [f1, f2] #}}}
     def _pde_jax(self, nn_input_var, nn_output_var): #{{{
@@ -254,7 +254,7 @@ class SSA_Taub(EquationBase): #{{{
         # get variable function
         H_func = lambda x: slice_function_jax(nn_output_var, x, Hid)
         # stress tensor
-        etaH = lambda x: 0.5*H_func(x)*self.B *(u_x(x)**2.0 + v_y(x)**2.0 + 0.25*(u_y(x)+v_x(x))**2.0 + u_x(x)*v_y(x)+1.0e-15)**(0.5*(1.0-self.n)/self.n)
+        etaH = lambda x: 0.5*H_func(x)*self.B *(u_x(x)**2.0 + v_y(x)**2.0 + 0.25*(u_y(x)+v_x(x))**2.0 + u_x(x)*v_y(x)+self.eps)**(0.5*(1.0-self.n)/self.n)
 
         B11 = lambda x: etaH(x)*(4*u_x(x) + 2*v_y(x))
         B22 = lambda x: etaH(x)*(4*v_y(x) + 2*u_x(x))
@@ -276,10 +276,10 @@ class SSA_Taub(EquationBase): #{{{
         s_x = jacobian(nn_output_var, nn_input_var, i=sid, j=xid)
         s_y = jacobian(nn_output_var, nn_input_var, i=sid, j=yid)
 
-        u_norm = (u**2+v**2)**0.5
+        u_norm = (u**2+v**2+self.eps**2)**0.5
 
-        f1 = sigma11 + sigma12 - abs(taub)*u/(u_norm+1e-30) - self.rhoi*self.g*H*s_x
-        f2 = sigma21 + sigma22 - abs(taub)*v/(u_norm+1e-30) - self.rhoi*self.g*H*s_y
+        f1 = sigma11 + sigma12 - abs(taub)*u/(u_norm) - self.rhoi*self.g*H*s_x
+        f2 = sigma21 + sigma22 - abs(taub)*v/(u_norm) - self.rhoi*self.g*H*s_y
 
         return [f1, f2] #}}}
     #}}}
@@ -347,7 +347,7 @@ class SSAVariableB(EquationBase): # {{{
         v_y = jacobian(nn_output_var, nn_input_var, i=vid, j=yid)
         s_y = jacobian(nn_output_var, nn_input_var, i=sid, j=yid)
 
-        eta = 0.5*B *(u_x**2.0 + v_y**2.0 + 0.25*(u_y+v_x)**2.0 + u_x*v_y+1.0e-15)**(0.5*(1.0-self.n)/self.n)
+        eta = 0.5*B *(u_x**2.0 + v_y**2.0 + 0.25*(u_y+v_x)**2.0 + u_x*v_y+self.eps)**(0.5*(1.0-self.n)/self.n)
         # stress tensor
         etaH = eta * H
         B11 = etaH*(4*u_x + 2*v_y)
@@ -362,11 +362,11 @@ class SSAVariableB(EquationBase): # {{{
         sigma22 = jacobian(B22, nn_input_var, i=0, j=yid)
 
         # compute the basal stress
-        u_norm = (u**2+v**2)**0.5
+        u_norm = (u**2+v**2+self.eps**2)**0.5
         alpha = C**2 * (u_norm)**(1.0/self.n)
 
-        f1 = sigma11 + sigma12 - alpha*u/(u_norm+1e-30) - self.rhoi*self.g*H*s_x
-        f2 = sigma21 + sigma22 - alpha*v/(u_norm+1e-30) - self.rhoi*self.g*H*s_y
+        f1 = sigma11 + sigma12 - alpha*u/(u_norm) - self.rhoi*self.g*H*s_x
+        f2 = sigma21 + sigma22 - alpha*v/(u_norm) - self.rhoi*self.g*H*s_y
 
         return [f1, f2] # }}} 
     def _pde_jax(self, nn_input_var, nn_output_var): #{{{
@@ -397,7 +397,7 @@ class SSAVariableB(EquationBase): # {{{
         H_func = lambda x: slice_function_jax(nn_output_var, x, Hid)
         B_func = lambda x: slice_function_jax(nn_output_var, x, Bid)
         # stress tensor
-        etaH = lambda x: 0.5*H_func(x)*B_func(x)*(u_x(x)**2.0 + v_y(x)**2.0 + 0.25*(u_y(x)+v_x(x))**2.0 + u_x(x)*v_y(x)+1.0e-15)**(0.5*(1.0-self.n)/self.n)
+        etaH = lambda x: 0.5*H_func(x)*B_func(x)*(u_x(x)**2.0 + v_y(x)**2.0 + 0.25*(u_y(x)+v_x(x))**2.0 + u_x(x)*v_y(x)+self.eps)**(0.5*(1.0-self.n)/self.n)
 
         B11 = lambda x: etaH(x)*(4*u_x(x) + 2*v_y(x))
         B22 = lambda x: etaH(x)*(4*v_y(x) + 2*u_x(x))
@@ -419,11 +419,11 @@ class SSAVariableB(EquationBase): # {{{
         s_x = jacobian(nn_output_var, nn_input_var, i=sid, j=xid)
         s_y = jacobian(nn_output_var, nn_input_var, i=sid, j=yid)
 
-        u_norm = (u**2+v**2)**0.5
+        u_norm = (u**2+v**2+self.eps**2)**0.5
         alpha = C**2 * (u_norm)**(1.0/self.n)
 
-        f1 = sigma11 + sigma12 - alpha*u/(u_norm+1e-30) - self.rhoi*self.g*H*s_x
-        f2 = sigma21 + sigma22 - alpha*v/(u_norm+1e-30) - self.rhoi*self.g*H*s_y
+        f1 = sigma11 + sigma12 - alpha*u/(u_norm) - self.rhoi*self.g*H*s_x
+        f2 = sigma21 + sigma22 - alpha*v/(u_norm) - self.rhoi*self.g*H*s_y
 
         return [f1, f2] #}}}
 #}}}
@@ -519,7 +519,7 @@ class MOLHO(EquationBase): #{{{
             epsilon_eff2 = (ub_x + (u_x-ub_x)*shear_comp)**2.0 + (vb_y + (v_y-vb_y)*shear_comp)**2.0 + (0.5*(ub_y+vb_x+(u_y-ub_y+v_x-vb_x)*shear_comp))**2.0 \
                     + (0.5*(self.n+1)/H*(ushear)*(1-shear_comp))**2.0 + (0.5*(self.n+1)/H*(vshear)*(1-shear_comp))**2.0 + (ub_x + (u_x-ub_x)*shear_comp)*(vb_y + (v_y-vb_y)*shear_comp)
 
-            mu = 0.5*self.B*(epsilon_eff2 + 1.0e-15)**(0.5*(1.0-self.n)/self.n)
+            mu = 0.5*self.B*(epsilon_eff2 + self.eps)**(0.5*(1.0-self.n)/self.n)
             mu1 += 0.5*H*mu*self.constants["gauss_weights"][i]
             mu2 += 0.5*H*mu*self.constants["gauss_weights"][i]*(shear_comp)
             mu3 += 0.5*H*mu*self.constants["gauss_weights"][i]*(shear_comp**2.0)
@@ -549,11 +549,11 @@ class MOLHO(EquationBase): #{{{
         sigma42 = jacobian(B42, nn_input_var, i=0, j=yid)
 
         # compute the basal stress
-        u_norm = (ub**2+vb**2)**0.5
+        u_norm = (ub**2+vb**2+self.eps**2)**0.5
         alpha = C**2 * (u_norm)**(1.0/self.n)
 
-        f1 = sigma11 + sigma12 - alpha*ub/(u_norm+1e-30) - self.rhoi*self.g*H*s_x
-        f2 = sigma21 + sigma22 - alpha*vb/(u_norm+1e-30) - self.rhoi*self.g*H*s_y
+        f1 = sigma11 + sigma12 - alpha*ub/(u_norm) - self.rhoi*self.g*H*s_x
+        f2 = sigma21 + sigma22 - alpha*vb/(u_norm) - self.rhoi*self.g*H*s_y
         f3 = sigma31 + sigma32 + mu4*ushear - self.rhoi*self.g*H*s_x*(self.n+1.0)/(self.n+2.0)
         f4 = sigma41 + sigma42 + mu4*vshear - self.rhoi*self.g*H*s_y*(self.n+1.0)/(self.n+2.0)
 
