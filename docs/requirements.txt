@@ -9,7 +9,7 @@ scikit-learn==1.4.2
 scipy
 
 # TensorFlow 1.x
-tensorflow>=2.11.0
+tensorflow==2.11.0
 # TensorFlow 2.x
 tensorflow-probability>=0.19.0
 # PyTorch
