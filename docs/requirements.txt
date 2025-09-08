@@ -9,9 +9,9 @@ scikit-learn==1.4.2
 scipy
 
 # TensorFlow 1.x
-tensorflow>=2.07.0
+tensorflow>=2.7.0
 # TensorFlow 2.x
-tensorflow-probability>=0.11.0
+tensorflow-probability[tf]>=0.11.0
 # PyTorch
 torch #<2.0.0    # build fails on RTD with torch 2.0.0
 # JAX
