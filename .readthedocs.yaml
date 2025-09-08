@@ -28,5 +28,5 @@ build:
     python: "3.12"
   jobs:
     pre_build:
-      - python -m deepxde.backend.set_default_backend pytorch
+      - DDE_BACKEND=pytorch python -m deepxde.backend.set_default_backend pytorch
       - cat ~/.deepxde/config.json
