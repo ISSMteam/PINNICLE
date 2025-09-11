@@ -26,7 +26,7 @@ build:
   os: ubuntu-24.04
   tools:
     python: "3.12"
-      #jobs:
-    #    pre_build:
-    #  - DDE_BACKEND=pytorch python -m deepxde.backend.set_default_backend tensorflow
-    #  - cat ~/.deepxde/config.json
+  jobs:
+    pre_build:
+      - DDE_BACKEND=pytorch python -m deepxde.backend.set_default_backend pytorch
+      - cat ~/.deepxde/config.json
