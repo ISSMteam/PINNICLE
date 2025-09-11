@@ -118,7 +118,7 @@ def down_sample(points, data_size):
         idx = np.random.choice(ind, data_size, replace=False)
         return idx
 
-def createsubdomain(xmin, ymin, xid, yid, dx=50000, dy=50000):
+def createsubdomain(xmin, ymin, xid, yid, dx=50000, dy=50000, margin=0):
     """ Create a rectangle subdomain within the large domain defined by the bottom-left corner and x, y indices
 
     Args:
@@ -128,13 +128,17 @@ def createsubdomain(xmin, ymin, xid, yid, dx=50000, dy=50000):
         yid (int): y index of the subdomain (starting from 0)
         dx (float, optional): width of the subdomain. Defaults to 50000.
         dy (float, optional): height of the subdomain. Defaults to 50000.
+        margin (float, optional): between 0 and 1, percentage of the margin extended beyond the given subdomain size
 
     Returns:
         tuple: (x0, x1, y0, y1) coordinates of the subdomain, this need to be consistent with domain.shapebox
     """
-    x0 = xmin + xid * dx
-    y0 = ymin + yid * dy
-    x1 = xmin + (xid + 1) * dx
-    y1 = ymin + (yid + 1) * dy
+    if (margin < 0) or (margin > 1):
+        raise ValueError(f"margin={margin} need to be a percentage between 0 and 1")
+    
+    x0 = xmin + (xid-margin) * dx
+    y0 = ymin + (yid-margin) * dy
+    x1 = xmin + (xid + 1 + margin) * dx
+    y1 = ymin + (yid + 1 + margin) * dy
 
     return x0, x1, y0, y1    

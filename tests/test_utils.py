@@ -106,6 +106,16 @@ def test_createsubdomain():
     assert y1 == -2480000
     assert x0 == 350000
     assert y0 == -2530000
+    x0, x1, y0, y1 = createsubdomain(xmin, ymin, xid, yid, dx, dy, 0.1)
+    assert x1 == 405000
+    assert y1 == -2475000
+    assert x0 == 345000
+    assert y0 == -2535000
+    with pytest.raises(Exception):
+        createsubdomain(xmin, ymin, xid, yid, dx, dy, 1.1)
+    with pytest.raises(Exception):
+        createsubdomain(xmin, ymin, xid, yid, dx, dy, -0.1)
+
 
 def test_subdomainmask():
     xmin = 300000
