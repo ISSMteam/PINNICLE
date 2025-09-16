@@ -116,7 +116,6 @@ def test_createsubdomain():
     with pytest.raises(Exception):
         createsubdomain(xmin, ymin, xid, yid, dx, dy, -0.1)
 
-
 def test_subdomainmask():
     xmin = 300000
     ymin = -2580000
@@ -127,3 +126,12 @@ def test_subdomainmask():
     appDataPath = os.path.join(repoPath, "dataset")
     path = os.path.join(appDataPath, "subdomain_bed.nc")
     assert subdomainmask(subdomain, path) == True
+
+def test_rect_weights():
+    X, Y = np.meshgrid(np.linspace(-1, 2, 5), np.linspace(-1, 2, 5))
+    W = feathered_rect_weights(X.flatten(), Y.flatten(), rect=(0, 1, 0, 1), width=0.5)
+    assert W[1] == 0.0
+    assert W[12] == 1.0
+    assert W[13] == 0.5
+    assert W[24] == 0.0
+    

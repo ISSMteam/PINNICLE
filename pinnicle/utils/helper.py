@@ -142,3 +142,41 @@ def createsubdomain(xmin, ymin, xid, yid, dx=50000, dy=50000, margin=0):
     y1 = ymin + (yid + 1 + margin) * dy
 
     return x0, x1, y0, y1    
+
+def feathered_rect_weights(x, y, rect, width):
+    """ Compute 2D weights for points (x, y) relative to an axis-aligned rectangle.
+    Inside the rectangle:    weight = 1
+    Outside, within `width`: weight = 1 - d / width   (linear falloff)
+    Outside, beyond `width`: weight = 0
+    
+    Args:
+        x (float or array): x-coordinates
+        y (float or array): y-coordinates  
+        rect (tuple):Rectangle bounds (xmin, xmax, ymin, ymax).
+        width (float): Non-negative feather distance outside the rectangle over which the weight 
+        falls linearly from 1 to 0. If width <= 0, this reduces to a hard mask.
+    
+    Returns:
+        (ndarray): Weights in [0, 1] with shape broadcast from x and y.
+    """
+    xmin, xmax, ymin, ymax = rect
+    x = np.asarray(x)
+    y = np.asarray(y)
+
+    # Distance to rectangle (signed): negative inside, positive outside.
+    # Outside distance (Euclidean) to the rectangle:
+    dx_out = np.maximum(np.maximum(xmin - x, 0), x - xmax)
+    dy_out = np.maximum(np.maximum(ymin - y, 0), y - ymax)
+    dist_outside = np.hypot(dx_out, dy_out)
+
+    # Inside distance to the nearest edge (>= 0)
+    inside = (dx_out == 0) & (dy_out == 0)
+    dist_to_edge_inside = np.minimum.reduce([x - xmin, xmax - x, y - ymin, ymax - y])
+
+    # Signed distance: negative inside, positive outside
+    signed_d = np.where(inside, -dist_to_edge_inside, dist_outside)
+
+    # Linear falloff outside over `width`
+    w = 1.0 - np.clip(signed_d, 0, None) / width
+    w = np.clip(w, 0.0, 1.0)
+    return w
