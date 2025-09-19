@@ -51,6 +51,26 @@ def test_shapebox_domain():
     c = np.array([[1.5,0.5]])
     assert not d.inside(c)
 
+def test_shapebox_margin_domain():
+    hp = {}
+    hp["shapebox"] = [0,1,0,1]
+    hp["margin"] = 0.5
+
+    # define domain b shapebox
+    p = pinn.parameter.DomainParameter(hp)
+    d = pinn.domain.Domain(p)
+    assert type(d.geometry) == dde.geometry.Polygon
+
+    # inside
+    c = np.array([0.5*(d.geometry.bbox[0]+d.geometry.bbox[1])])
+    assert d.inside(c)
+    c = np.array([[0.5,0.5]])
+    assert d.inside(c)
+    c = np.array([[1.49,0.5]])
+    assert d.inside(c)
+    c = np.array([[1.51,0.5]])
+    assert not d.inside(c)
+
 def test_rectangle_domain():
     # dealing with rectangle domains
     expFileName = "testtile.exp"

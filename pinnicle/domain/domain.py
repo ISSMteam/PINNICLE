@@ -12,7 +12,14 @@ class Domain:
         if self.parameters.shapefile is None:
             # define the domain using a rectangle domain defined by shapebox =[xmin, xmax, ymin, ymax]
             xmin, xmax, ymin, ymax = self.parameters.shapebox
-            self.vertices = [[xmin,ymin], [xmin,ymax],[xmax,ymax],[xmax, ymin]]
+            # fraction of the margin
+            margin = self.parameters.margin
+            dx = xmax - xmin
+            dy = ymax - ymin
+            self.vertices = [[xmin-margin*dx, ymin-margin*dy],
+                             [xmin-margin*dx, ymax+margin*dy],
+                             [xmax+margin*dx, ymax+margin*dy],
+                             [xmax+margin*dx, ymin-margin*dy]]
         elif is_file_ext(self.parameters.shapefile, '.exp'):
             # create spatial domain
             self.vertices = self.get_polygon_vertices(self.parameters.shapefile)

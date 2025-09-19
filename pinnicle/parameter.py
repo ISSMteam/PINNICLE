@@ -81,6 +81,8 @@ class DomainParameter(ParameterBase):
         self.shapefile = None
         # shapebox = [xmin, xmax, ymin, ymax]
         self.shapebox = [None]*4
+        # save the margin
+        self.margin = 0
         # number of collocation points used in the domain
         self.num_collocation_points = 0
         # static or time dependent problem
