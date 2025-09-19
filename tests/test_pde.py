@@ -88,6 +88,17 @@ def test_MOLHO_pde_function():
     assert y[0].shape == (10,1)
     assert y[3].shape == (10,1)
 
+@pytest.mark.skipif(backend_name=="jax", reason="MOLHO Taub is not implemented for jax")
+def test_MOLHO_taub_pde_function():
+    hp_local = dict(hp)
+    hp_local["equations"] = {"MOLHO Taub":{}}
+    experiment = pinn.PINN(params=hp_local)
+    experiment.compile()
+    y = experiment.model.predict(experiment.model_data.X['u'], operator=experiment.physics.operator("MOLHO Taub"))
+    assert len(y) == 4
+    assert y[0].shape == (10,1)
+    assert y[3].shape == (10,1)
+
 def test_MC_pde_function():
     hp_local = dict(hp)
     hp_local["equations"] = {"MC":{}}
