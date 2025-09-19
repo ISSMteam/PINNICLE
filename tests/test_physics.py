@@ -110,6 +110,22 @@ def test_Physics_Thickness():
     assert len(phy.data_weights) == 4
     assert len(phy.pde_weights) == 1
 
+def test_Physics_MOLHO_taub():
+    MOLHO = {}
+    MOLHO["scalar_variables"] = {"B":1.26802073401e+08}
+    hp = {}
+    hp["equations"] = {"MOLHO Taub":MOLHO}
+    phy = Physics(PhysicsParameter(hp))
+
+    assert phy.input_var == ['x', 'y']
+    assert phy.output_var == ['u', 'v',  'u_base', 'v_base', 's', 'H', 'taub']
+    assert phy.residuals == ['fMOLHO Taub 1', 'fMOLHO Taub 2', 'fMOLHO Taub base 1', 'fMOLHO Taub base 2']
+    assert phy.equations[0].local_output_var == {'u': 0, 'v': 1, 'u_base': 2, 'v_base': 3, 's': 4, 'H': 5, 'taub': 6}
+    assert len(phy.output_lb) == 7
+    assert len(phy.output_ub) == 7
+    assert len(phy.data_weights) == 7
+    assert len(phy.pde_weights) == 4
+
 def test_Physics_MOLHO():
     MOLHO = {}
     MOLHO["scalar_variables"] = {"B":1.26802073401e+08}
@@ -207,7 +223,7 @@ def test_operator():
 
     hp = {}
     hp["equations"] = {"MC":{}, "SSA":SSA, "SSA_VB":{}, "SSA Taub":{}, "MOLHO":{}, "Mass transport":{}, "Time_Invariant":{}, 
-            "Weertman":{}}
+                       "Weertman":{}, "MOLHO Taub":{}}
     phy = Physics(PhysicsParameter(hp))
     
     assert phy.operator('mc')
@@ -220,6 +236,8 @@ def test_operator():
     assert phy.operator('ssa taub')
     assert phy.operator('molho')
     assert phy.operator('MOLHO')
+    assert phy.operator('molho taub')
+    assert phy.operator('MOLHO TAUB')
     assert phy.operator('MASS TRANSPORT')
     assert phy.operator('mass transport')
     assert phy.operator('Time_Invariant')
