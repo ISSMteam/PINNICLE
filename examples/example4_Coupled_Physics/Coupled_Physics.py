@@ -30,7 +30,7 @@ mat["source"] = "mat"
 hp["data"] = {"ISSM":issm, "MAT":mat}
 
 # domain
-hp["shapefile"] = "Deception.exp"
+hp["shapefile"] = "Narssap.exp"
 hp["num_collocation_points"] = 9000
 
 # additional loss function
