@@ -142,6 +142,7 @@ def test_train_only_data(tmp_path):
     experiment.train()
     assert experiment.loss_names == ['v', 'H']
 
+@pytest.mark.skipif(backend_name in ["jax"], reason="inverse time decay is not implemented in deepxde for jax")
 def test_train(tmp_path):
     hp_local = dict(hp)
     hp_local["is_save"] = False
@@ -154,6 +155,7 @@ def test_train(tmp_path):
     experiment.train()
     assert experiment.loss_names == ['fSSA1', 'fSSA2', 'u', 'v', 's', 'H', 'C']
 
+@pytest.mark.skipif(backend_name in ["jax"], reason="inverse time decay is not implemented in deepxde for jax")
 def test_train_decay(tmp_path):
     hp_local = dict(hp)
     hp_local["is_save"] = False
