@@ -18,6 +18,7 @@ expFileName = "fastflow_CF.exp"
 repoPath = os.path.dirname(__file__) + "/../examples/"
 appDataPath = os.path.join(repoPath, "dataset")
 path = os.path.join(appDataPath, inputFileName)
+ftpath = os.path.join(appDataPath, "flightTracks.mat")
 yts =3600*24*365
 loss_weights = [10**(-w) for w in weights]
 loss_weights[2] = loss_weights[2] * yts*yts
@@ -76,8 +77,13 @@ def test_add_loss():
     vel_loss['name'] = "vel log"
     vel_loss['function'] = "VEL_LOG"
     vel_loss['weight'] = 1.0
-    hp_local["additional_loss"] = {"vel":vel_loss}
+    hp_local["additional_loss"] = {"vel":vel_loss, "sx":{"function":"MSE"},"sy":{"function":"MAE"}}
     issm["data_size"] = {"u":4000, "v":4000, "s":4000, "H":4000, "C":None}
+    fakeflighttrack = {}
+    fakeflighttrack["data_path"] = ftpath
+    fakeflighttrack["data_size"] = {"sx":"Max", "sy":"MAX"}
+    fakeflighttrack["name_map"] = {"sx":"thickness", "sy":"x"}
+    fakeflighttrack["source"] = "mat"
     hp_local["data"] = {"ISSM": issm}
     experiment = pinn.PINN(params=hp_local)
     assert len(experiment.training_data) == 5
@@ -87,14 +93,14 @@ def test_add_loss():
     assert experiment.params.training.loss_functions == ["MSE"]*7
 
     issm["data_size"] = {"u":4000, "v":4000, "s":4000, "H":4000, "C":None, "vel":4000}
-    hp_local["data"] = {"ISSM": issm}
+    hp_local["data"] = {"ISSM": issm, "ft": fakeflighttrack}
     experiment = pinn.PINN(params=hp_local)
-    assert len(experiment.training_data) == 6
+    assert len(experiment.training_data) == 8
     assert type(experiment.training_data[-1]) == dde.icbc.boundary_conditions.PointSetOperatorBC
-    assert len(experiment.loss_names) == 8
-    assert len(experiment.params.training.loss_weights) == 8
-    assert len(experiment.params.training.loss_functions) == 8
-    assert experiment.params.training.loss_functions == ["MSE"]*7 + [data_misfit.get("VEL_LOG")]
+    assert len(experiment.loss_names) == 10
+    assert len(experiment.params.training.loss_weights) == 10
+    assert len(experiment.params.training.loss_functions) == 10
+    assert experiment.params.training.loss_functions == ["MSE"]*7 + [data_misfit.get("VEL_LOG")] + ["MSE", "MAE"]
 
     vel_loss['function'] = "MAPE"
     hp_local["additional_loss"] = {"vel":vel_loss}
@@ -124,7 +130,7 @@ def test_train_only_data(tmp_path):
     hp_local["is_save"] = False
     hp_local["num_collocation_points"] = 100
     issm["data_size"] = {"u":100, "v":100, "s":100, "H":100}
-    hp_local["num_neurons"] = [4,10];
+    hp_local["num_neurons"] = [4,10]
     hp_local["data"] = {"ISSM": issm}
     dummy = {}
     dummy["output"] = ['v', 'H']
@@ -228,7 +234,7 @@ def test_save_and_load_train(tmp_path):
     vel_loss['name'] = "vel log"
     vel_loss['function'] = "VEL_LOG"
     vel_loss['weight'] = 1.0
-    hp_local["additional_loss"] = {"vel":vel_loss}
+    hp_local["additional_loss"] = {"vel":vel_loss, "sx":{"function":"MSE"},"sy":{"function":"MAE"}}
     experiment = pinn.PINN(params=hp_local)
     experiment.compile()
     experiment.train()
