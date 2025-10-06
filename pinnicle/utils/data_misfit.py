@@ -13,11 +13,6 @@ def mean_squared_log_error_tf(y_true, y_pred):
     """ use tensorflow function to compute mean squared log error
     """
     return tf.keras.losses.MeanSquaredLogarithmicError()(y_true, y_pred)
-
-def mean_absolute_percentage_error_tf(y_true, y_pred):
-    """Calculates the Mean Absolute Percentage Error (MAPE) in PyTorch.
-    """
-    return tf.keras.losses.MeanAbsolutePercentageError()(y_true, y_pred)
 #}}}
 # ---- jax {{{
 def surface_log_vel_misfit_jax(v_true, v_pred):
@@ -30,13 +25,6 @@ def mean_squared_log_error_jax(y_true, y_pred):
     """ use jax/numpy function to compute mean squared log error
     """
     return bkd.reduce_mean(bkd.square(jax.numpy.log(y_true+1.0) - jax.numpy.log(y_pred+1.0)))
-def mean_absolute_percentage_error_jax(y_true, y_pred):
-    """Calculates the Mean Absolute Percentage Error (MAPE) in PyTorch.
-    """
-    # Ensure y_true is not zero to avoid division by zero
-    # Add a small epsilon to the denominator to prevent NaN values
-    epsvel=2.220446049250313e-16
-    return bkd.reduce_mean(jax.numpy.abs((y_true - y_pred) / (y_true + epsvel))) * 100
 #}}}
 # ---- pytorch {{{
 def surface_log_vel_misfit_pytorch(v_true, v_pred):
@@ -49,35 +37,34 @@ def mean_squared_log_error_pytorch(y_true, y_pred):
     """ use jax/numpy function to compute mean squared log error
     """
     return bkd.reduce_mean(bkd.square(torch.log(y_true+1.0) - torch.log(y_pred+1.0)))
-
-def mean_absolute_percentage_error_pytorch(y_true, y_pred):
-    """Calculates the Mean Absolute Percentage Error (MAPE) in PyTorch.
+#}}}
+def mean_absolute_percentage_error(y_true, y_pred):
+    """Calculates the Mean Absolute Percentage Error (MAPE).
     """
     # Ensure y_true is not zero to avoid division by zero
     # Add a small epsilon to the denominator to prevent NaN values
     epsvel=2.220446049250313e-16
     return bkd.reduce_mean(bkd.abs((y_true - y_pred) / (y_true + epsvel))) * 100
-#}}}
 # ---------------
 def loss_dict_tf():
     return {
             "VEL_LOG": surface_log_vel_misfit_tf,
             "MEAN_SQUARE_LOG": mean_squared_log_error_tf,
-            "MAPE":mean_absolute_percentage_error_tf,
+            "MAPE":mean_absolute_percentage_error,
             }
 
 def loss_dict_jax():
     return {
             "VEL_LOG": surface_log_vel_misfit_jax,
             "MEAN_SQUARE_LOG": mean_squared_log_error_jax,
-            "MAPE":mean_absolute_percentage_error_jax,
+            "MAPE":mean_absolute_percentage_error,
             }
 
 def loss_dict_pytorch():
     return {
             "VEL_LOG": surface_log_vel_misfit_pytorch,
             "MEAN_SQUARE_LOG": mean_squared_log_error_pytorch,
-            "MAPE":mean_absolute_percentage_error_pytorch,
+            "MAPE":mean_absolute_percentage_error,
             }
 
 if backend_name ==  "tensorflow":
