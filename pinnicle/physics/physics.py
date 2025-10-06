@@ -79,7 +79,7 @@ class Physics:
         vid = self.output_var.index('v')
         u = slice_column(nn_output_var, uid)
         v = slice_column(nn_output_var, vid) 
-        vel = (u**2.0 + v**2.0) ** 0.5
+        vel = (u**2.0 + v**2.0 + 1.0e-15**2) ** 0.5
         return vel
 
     def surf_x(self, nn_input_var, nn_output_var, X):

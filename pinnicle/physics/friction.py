@@ -56,7 +56,7 @@ class WeertmanFriction(EquationBase): #{{{
         taub = slice_column(nn_output_var, tauid)
 
         # compute the basal stress
-        u_norm = (u**2+v**2)**0.5
+        u_norm = (u**2+v**2+self.eps**2)**0.5
         f1 = C**2*(u_norm)**(1.0/self.m) - taub
 
         return [f1] #}}}
