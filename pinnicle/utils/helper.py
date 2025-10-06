@@ -103,10 +103,10 @@ def down_sample(points, data_size):
     data_size = min(points.shape[0], data_size)
 
     # start with double resolution
-    resolution = 2*int(np.ceil(data_size**0.5))
+    resolution = 2*int(np.ceil(data_size**(1.0/points.shape[1])))
     ind = down_sample_core(points, resolution=resolution)
 
-    while (resolution**2 < points.shape[0]) and (ind.shape[0]< data_size):
+    while (resolution**points.shape[1] < points.shape[0]) and (ind.shape[0]< data_size):
         resolution *= 2
         ind = down_sample_core(points, resolution=resolution)
 
