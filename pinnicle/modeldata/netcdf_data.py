@@ -14,13 +14,13 @@ class NetCDFData(DataBase, Constants):
         Constants.__init__(self)
         super().__init__(parameters)
 
-    def get_ice_coordinates(self, mask_name=""):
+    def get_ice_coordinates(self, mask=None):
         """ stack the coordinates `x` and `y`, assuming all the data in .mat 
             are in the ice covered region. This function is currently only 
             called by plotting to generate ice covered region.
         """
         # get the coordinates
-        X_mask = np.hstack([self.X_dict[k].flatten()[:,None] for k in self.parameters.X_map if k in self.X_dict])
+        X_mask = np.hstack([self.X_dict[k][mask].flatten()[:,None] for k in self.parameters.X_map if k in self.X_dict])
 
         return X_mask
 
@@ -98,17 +98,19 @@ class NetCDFData(DataBase, Constants):
         self.X = {}
         self.sol = {}
 
-        # prepare x,y coordinates
-        X_temp = self.get_ice_coordinates()
-        max_data_size = X_temp.shape[0]
-
         # go through all keys in data_dict
         for k in self.data_dict:
             # if datasize has the key, then add to X and sol
             if k in data_size:
                 if data_size[k] is not None:
-                    # apply ice mask
-                    sol_temp = self.data_dict[k].flatten()[:,None]
+                    # apply nan mask
+                    _temp = self.data_dict[k].flatten()[:,None]
+                    mask = ~np.isnan(_temp)
+                    sol_temp = _temp[mask].flatten()[:,None]
+
+                    # prepare x,y coordinates
+                    X_temp = self.get_ice_coordinates(mask=mask)
+
                     # random choose to a downscale sampling of the scatter data
                     idx = down_sample(X_temp, data_size[k])
                     self.X[k] = X_temp[idx, :]
