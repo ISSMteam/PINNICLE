@@ -17,7 +17,7 @@ def mean_squared_log_error_tf(y_true, y_pred):
 def mean_absolute_percentage_error_tf(y_true, y_pred):
     """Calculates the Mean Absolute Percentage Error (MAPE) in PyTorch.
     """
-    return tf.keras.losses.MAPE()(y_true, y_pred)
+    return tf.keras.losses.MeanAbsolutePercentageError()(y_true, y_pred)
 #}}}
 # ---- jax {{{
 def surface_log_vel_misfit_jax(v_true, v_pred):
