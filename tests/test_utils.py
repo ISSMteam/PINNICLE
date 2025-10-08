@@ -83,6 +83,12 @@ def test_slice_column():
     assert c.shape == (1,)
     assert c[0] == 2
 
+def test_ppow():
+    a = backend.as_tensor([2.0])
+    c = pinnicle.utils.backends_specified.ppow(a, 2.0)
+    assert c == 4.0
+
+
 def test_interpfrombedmachine():
     x = np.array([300025,301025,302025])
     y = np.array([-2579975, -2578975, -2577975])

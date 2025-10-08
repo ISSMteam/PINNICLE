@@ -45,9 +45,11 @@ if backend_name in ["tensorflow", "pytorch"]:
     slice_column = slice_column_tf
     jacobian = jacobian_tf
     matmul = matmul_tf
+    ppow = bkd.pow
 elif backend_name == "jax":
     slice_column = slice_column_jax
     jacobian = jacobian_jax
     matmul = matmul_jax
+    ppow = jax.numpy.pow
 else:
     raise ValueError(f"{backend_name} is not supported by PINNICLE")

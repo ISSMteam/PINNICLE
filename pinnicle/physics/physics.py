@@ -3,7 +3,7 @@ import deepxde.backend as bkd
 from ..parameter import PhysicsParameter
 from . import EquationBase
 import itertools
-from ..utils import slice_column, jacobian
+from ..utils import slice_column, jacobian, ppow
 
 class Physics:
     """ All the physics in used as constraint in the PINN
@@ -80,7 +80,7 @@ class Physics:
         vid = self.output_var.index('v')
         u = slice_column(nn_output_var, uid)
         v = slice_column(nn_output_var, vid) 
-        vel = bkd.pow((bkd.square(u) + bkd.square(v) + 1.0e-30), 0.5)
+        vel = ppow((bkd.square(u) + bkd.square(v) + 1.0e-30), 0.5)
         return vel
 
     def surf_x(self, nn_input_var, nn_output_var, X):
