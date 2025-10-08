@@ -57,7 +57,7 @@ This term compares predicted quantities to ground-truth data using predefined er
    * - ``"MEAN_SQUARE_LOG"``
      - :math:`\frac{1}{n} \sum_{i=1}^N \left( \log(|d_i| + 1) - \log(|\hat{d}_i| + 1) \right)^2`
    * - ``"VEL_LOG"``
-     - :math:`\frac{1}{n} \sum_{i=1}^N \log(|\hat{u}_i| + \epsilon) / \log(|u_i| + \epsilon)`
+     - :math:`\frac{1}{n} \sum_{i=1}^N \log((|\hat{u}_i| + \epsilon) / (|u_i| + \epsilon))`
 
 Here, :math:`d_i` is the ground truth, :math:`\hat{d}_i` is the predicted value, and :math:`\epsilon` is a small constant to avoid divide-by-zero.
 
