@@ -1,4 +1,5 @@
 import deepxde as dde
+import deepxde.backend as bkd
 from ..parameter import PhysicsParameter
 from . import EquationBase
 import itertools
@@ -79,7 +80,7 @@ class Physics:
         vid = self.output_var.index('v')
         u = slice_column(nn_output_var, uid)
         v = slice_column(nn_output_var, vid) 
-        vel = (u**2.0 + v**2.0 + 1.0e-15**2) ** 0.5
+        vel = bkd.pow((bkd.square(u) + bkd.square(v) + 1.0e-30), 0.5)
         return vel
 
     def surf_x(self, nn_input_var, nn_output_var, X):
