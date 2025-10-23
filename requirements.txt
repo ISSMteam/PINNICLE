@@ -1,7 +1,7 @@
 deepxde
 mat73
 matplotlib
-netCDF4
+netCDF4==1.7.2 # fallback to previous version to avoid h5py=3.15.1 incompatible
 h5py
 numpy
 pandas
