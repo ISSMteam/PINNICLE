@@ -38,7 +38,7 @@ def test_update_cid():
 
 def test_Physics_SSA():
     SSA = {}
-    SSA["scalar_variables"] = {"B":1.26802073401e+08}
+    SSA["scalar_variables"] = {"B":1.0}
     hp = {}
     hp["equations"] = {"SSA":SSA}
     phy = Physics(PhysicsParameter(hp))
@@ -51,6 +51,7 @@ def test_Physics_SSA():
     assert len(phy.data_weights) == 5
     assert phy.data_weights[3] == 1e-6
     assert len(phy.pde_weights) == 2
+    assert phy.equations[0].B == 1.0
 
 def test_Physics_SSAVB():
     SSA = {}
