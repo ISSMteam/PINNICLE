@@ -2,7 +2,7 @@ deepxde
 mat73
 matplotlib
 netCDF4==1.7.2 # fallback to previous version to avoid h5py=3.15.1 incompatible
-h5py
+h5py==3.14.0
 numpy
 pandas
 scikit-learn==1.4.2
