@@ -21,7 +21,10 @@ jobs:
       matrix:
         python-version: ['3.9', '3.10', '3.11', '3.12']
         backend: ['tensorflow', 'jax', 'pytorch', 'paddle']
-
+        exclude:
+          # exclude a wired bug can not import paddle
+          - python-version: '3.12'
+            backend: 'paddle' 
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python ${{ matrix.python-version }}
