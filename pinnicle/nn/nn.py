@@ -21,7 +21,7 @@ class FNN:
         # by default, use min-max scale for the input
         if self.parameters.is_input_scaling():
             # force the input and output lb and ub to be tensors
-            if bkd.backend_name == "pytorch":
+            if bkd.backend_name == "pytorch" or bkd.backend_name == "paddle":
                 self.parameters.input_lb = bkd.as_tensor(self.parameters.input_lb, dtype=default_float_type())
                 self.parameters.input_ub = bkd.as_tensor(self.parameters.input_ub, dtype=default_float_type())
 

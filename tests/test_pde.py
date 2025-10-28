@@ -44,6 +44,8 @@ if backend_name == "tensorflow":
     extension = "weights.h5"
 elif backend_name == "pytorch":
     extension = "pt"
+elif backend_name == "paddle":
+    extension = "pdparams"
 elif backend_name == "jax":
     jax.config.update("jax_enable_x64", True) # force jax to use float64
 

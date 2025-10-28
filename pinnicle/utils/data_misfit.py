@@ -1,6 +1,6 @@
 import deepxde as dde
 import deepxde.backend as bkd
-from deepxde.backend import backend_name, tf, jax, torch
+from deepxde.backend import backend_name, tf, jax, torch, paddle
 
 # ---- tensorflow {{{
 def surface_log_vel_misfit_tf(v_true, v_pred):
@@ -34,9 +34,21 @@ def surface_log_vel_misfit_pytorch(v_true, v_pred):
     return bkd.reduce_mean(bkd.square((torch.log((bkd.abs(v_pred)+epsvel)/(bkd.abs(v_true)+epsvel)))))
 
 def mean_squared_log_error_pytorch(y_true, y_pred):
-    """ use jax/numpy function to compute mean squared log error
+    """ use log function to compute mean squared log error
     """
     return bkd.reduce_mean(bkd.square(torch.log(y_true+1.0) - torch.log(y_pred+1.0)))
+#}}}
+# ---- paddle {{{
+def surface_log_vel_misfit_paddle(v_true, v_pred):
+    """Compute SurfaceLogVelMisfit: This function is for paddle backend
+    """
+    epsvel=2.220446049250313e-16
+    return bkd.reduce_mean(bkd.square((paddle.log((bkd.abs(v_pred)+epsvel)/(bkd.abs(v_true)+epsvel)))))
+
+def mean_squared_log_error_paddle(y_true, y_pred):
+    """ use log function to compute mean squared log error
+    """
+    return bkd.reduce_mean(bkd.square(paddle.log(y_true+1.0) - paddle.log(y_pred+1.0)))
 #}}}
 def mean_absolute_percentage_error(y_true, y_pred):
     """Calculates the Mean Absolute Percentage Error (MAPE).
@@ -67,12 +79,21 @@ def loss_dict_pytorch():
             "MAPE":mean_absolute_percentage_error,
             }
 
+def loss_dict_paddle():
+    return {
+            "VEL_LOG": surface_log_vel_misfit_paddle,
+            "MEAN_SQUARE_LOG": mean_squared_log_error_paddle,
+            "MAPE":mean_absolute_percentage_error,
+            }
+
 if backend_name ==  "tensorflow":
     LOSS_DICT = loss_dict_tf()
 elif backend_name == "jax":
     LOSS_DICT = loss_dict_jax()
 elif backend_name == "pytorch":
     LOSS_DICT = loss_dict_pytorch()
+elif backend_name == "paddle":
+    LOSS_DICT = loss_dict_paddle()
 
 def get(identifier):
     """Retrieves a loss function.

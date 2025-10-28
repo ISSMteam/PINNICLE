@@ -6,7 +6,7 @@ def minmax_scale(x, lb, ub, scale=2.0, offset=1.0):
     """
     min-max scale
     """
-    return scale*(x - lb)/(ub - lb) - offset
+    return 1.0/(ub - lb)*scale*(x -lb) - offset
 
 def up_scale(x, lb, ub, scale=0.5, offset=1.0):
     """

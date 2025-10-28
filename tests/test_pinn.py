@@ -56,6 +56,8 @@ if backend_name == "tensorflow":
     extension = "weights.h5"
 elif backend_name == "pytorch":
     extension = "pt"
+elif backend_name == "paddle":
+    extension = "pdparams"
 
 def test_compile_no_data():
     hp_local = dict(hp)
@@ -211,7 +213,7 @@ def test_train_PFNN(tmp_path):
     experiment.train()
     assert experiment.loss_names == ['fSSA1', 'fSSA2', 'u', 'v', 's', 'H', 'C', "vel log"]
     assert experiment.params.nn.num_layers == 2
-    if backend_name == "pytorch":
+    if backend_name == "pytorch" or backend_name == "paddle":
         assert len(experiment.model.net.layers) == 3
         assert len(experiment.model.net.layers[0]) == 5
         assert len(experiment.model.net.layers[1]) == 5

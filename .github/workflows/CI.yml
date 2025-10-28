@@ -20,7 +20,7 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ['3.9', '3.10', '3.11', '3.12']
-        backend: ['tensorflow', 'jax', 'pytorch']
+        backend: ['tensorflow', 'jax', 'pytorch', 'paddle']
 
     steps:
     - uses: actions/checkout@v3
@@ -46,6 +46,10 @@ jobs:
       if: ${{matrix.backend == 'pytorch'}}
       run: |
         python -m pip install torch
+    - name: Install paddle
+      if: ${{matrix.backend == 'paddle'}}
+      run: |
+        python -m pip install paddlepaddle
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names

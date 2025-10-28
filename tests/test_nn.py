@@ -113,6 +113,8 @@ def test_pfnn():
         assert p.net.layer_sizes == [2, 4, 4, 4, 4, 4, 3]
     elif backend_name == "pytorch":
         assert [k.in_features for k in p.net.linears] == [2, 4, 4, 4, 4, 4]
+    elif backend_name == "paddle":
+        assert [k.weight.shape[0] for k in p.net.linears] == [2, 4, 4, 4, 4, 4]
     else:
         assert len(p.net.layers) == 6
     hp['is_parallel'] = True
@@ -122,6 +124,8 @@ def test_pfnn():
         assert p.net.layer_sizes == [2, [4, 4, 4], [4, 4, 4], [4, 4, 4], [4, 4, 4], [4, 4, 4], 3]
     elif backend_name == "pytorch":
         assert [[i.in_features for i in k] for k in p.net.layers] == [[2, 2, 2], [4, 4, 4], [4, 4, 4], [4, 4, 4], [4, 4, 4], [4, 4, 4]]
+    elif backend_name == "paddle":
+        assert [[i.weight.shape[0] for i in k] for k in p.net.layers] == [[2, 2, 2], [4, 4, 4], [4, 4, 4], [4, 4, 4], [4, 4, 4], [4, 4, 4]]
     else:
         assert len(p.net.layers) == 18
 
@@ -138,6 +142,8 @@ def test_pfnn_list_neuron():
         assert p.net.layer_sizes == [2, 3, 4, 5, 3]
     elif backend_name == "pytorch":
         assert [k.in_features for k in p.net.linears] == [2, 3, 4, 5]
+    elif backend_name == "paddle":
+        assert [k.weight.shape[0] for k in p.net.linears] == [2, 3, 4, 5]
     else:
         assert len(p.net.layers) == 4
     hp['is_parallel'] = True
@@ -147,5 +153,7 @@ def test_pfnn_list_neuron():
         assert p.net.layer_sizes == [2, [3, 3, 3], [4, 4, 4], [5, 5, 5], 3]
     elif backend_name == "pytorch":
         assert [[i.in_features for i in k] for k in p.net.layers] == [[2, 2, 2], [3, 3, 3], [4, 4, 4], [5, 5, 5]]
+    elif backend_name == "paddle":
+        assert [[i.weight.shape[0] for i in k] for k in p.net.layers] == [[2, 2, 2], [3, 3, 3], [4, 4, 4], [5, 5, 5]]
     else:
         assert len(p.net.layers) == 12

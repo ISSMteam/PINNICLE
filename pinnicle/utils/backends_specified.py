@@ -41,7 +41,7 @@ def matmul_tf(A, B):
 def matmul_jax(A, B):
     return jax.numpy.matmul(A,B)
 
-if backend_name in ["tensorflow", "pytorch"]:
+if backend_name in ["tensorflow", "pytorch", "paddle"]:
     slice_column = slice_column_tf
     jacobian = jacobian_tf
     matmul = matmul_tf
