@@ -19,7 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['3.9', '3.10', '3.11', '3.12.1']
+        python-version: ['3.9', '3.10', '3.11', '3.12']
         backend: ['tensorflow', 'jax', 'pytorch', 'paddle']
 
     steps:
@@ -28,12 +28,6 @@ jobs:
       uses: actions/setup-python@v3
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        python -m pip install flake8 pytest pytest-cov
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-        python -m pip install git+https://github.com/lululxvi/deepxde.git
     - name: Install tensorflow
       if: ${{matrix.backend == 'tensorflow'}}
       run: |
@@ -50,6 +44,12 @@ jobs:
       if: ${{matrix.backend == 'paddle'}}
       run: |
         python -m pip install paddlepaddle
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install flake8 pytest pytest-cov
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        python -m pip install git+https://github.com/lululxvi/deepxde.git
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
