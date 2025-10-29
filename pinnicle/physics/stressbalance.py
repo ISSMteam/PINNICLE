@@ -301,7 +301,7 @@ class SSAFirstEquationParameter(EquationParameter, Constants):
         self.output_ub = [self.variable_ub[k] for k in self.output]
         self.data_weights = [1.0e-8*self.yts**2.0, 1.0e-8*self.yts**2.0, 1.0e-6, 1.0e-6, 1.0e-10, 0.0, 0.0, 0.0]
         self.residuals = ["f"+self._EQUATION_TYPE+"1", "f"+self._EQUATION_TYPE+"2", "dB11", "dB12", "dB22"]
-        self.pde_weights = [1.0e-10, 1.0e-10, 1e-10, 1e-10, 1e-10]
+        self.pde_weights = [1.0e-10, 1.0e-10, 1.0e-20, 1.0e-20, 1.0e-20]
 
         # scalar variables: name:value
         self.scalar_variables = {
