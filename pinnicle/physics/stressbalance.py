@@ -284,6 +284,98 @@ class SSA_Taub(EquationBase): #{{{
         return [f1, f2] #}}}
     #}}}
 #}}}
+# SSA first order {{{
+class SSAFirstEquationParameter(EquationParameter, Constants):
+    """ default parameters for SSA first order form
+    """
+    _EQUATION_TYPE = 'SSA First' 
+    def __init__(self, param_dict={}):
+        # load necessary constants
+        Constants.__init__(self)
+        super().__init__(param_dict)
+
+    def set_default(self):
+        self.input = ['x', 'y']
+        self.output = ['u', 'v', 's', 'H', 'taub', 'B11', 'B12', 'B22']
+        self.output_lb = [self.variable_lb[k] for k in self.output]
+        self.output_ub = [self.variable_ub[k] for k in self.output]
+        self.data_weights = [1.0e-8*self.yts**2.0, 1.0e-8*self.yts**2.0, 1.0e-6, 1.0e-6, 1.0e-10, 0.0, 0.0, 0.0]
+        self.residuals = ["f"+self._EQUATION_TYPE+"1", "f"+self._EQUATION_TYPE+"2", "dB11", "dB12", "dB22"]
+        self.pde_weights = [1.0e-10, 1.0e-10, 1e-10, 1e-10, 1e-10]
+
+        # scalar variables: name:value
+        self.scalar_variables = {
+                'n': 3.0,               # exponent of Glen's flow law
+                'B':1.26802073401e+08   # -8 degree C, cuffey
+                }
+class SSA_First(EquationBase): #{{{
+    """ SSA on 2D problem with uniform B, no friction law, but use taub
+    """
+    _EQUATION_TYPE = 'SSA First' 
+    def __init__(self, parameters=SSATauEquationParameter()):
+        super().__init__(parameters)
+    def _pde(self, nn_input_var, nn_output_var): #{{{
+        """ residual of SSA 2D PDEs
+
+        Args:
+            nn_input_var: global input to the nn
+            nn_output_var: global output from the nn
+        """
+        # get the ids
+        xid = self.local_input_var["x"]
+        yid = self.local_input_var["y"]
+
+        uid = self.local_output_var["u"]
+        vid = self.local_output_var["v"]
+        sid = self.local_output_var["s"]
+        Hid = self.local_output_var["H"]
+        tauid = self.local_output_var["taub"]
+        B11id = self.local_output_var["B11"]
+        B12id = self.local_output_var["B12"]
+        B22id = self.local_output_var["B22"]
+
+        # spatial derivatives
+        u_x = jacobian(nn_output_var, nn_input_var, i=uid, j=xid)
+        v_x = jacobian(nn_output_var, nn_input_var, i=vid, j=xid)
+        u_y = jacobian(nn_output_var, nn_input_var, i=uid, j=yid)
+        v_y = jacobian(nn_output_var, nn_input_var, i=vid, j=yid)
+        s_x = jacobian(nn_output_var, nn_input_var, i=sid, j=xid)
+        s_y = jacobian(nn_output_var, nn_input_var, i=sid, j=yid)
+
+        # unpacking normalized output
+        u = slice_column(nn_output_var, uid)
+        v = slice_column(nn_output_var, vid)
+        H = slice_column(nn_output_var, Hid)
+        taub = slice_column(nn_output_var, tauid)
+        B11 = slice_column(nn_output_var, B11id)
+        B12 = slice_column(nn_output_var, B12id)
+        B22 = slice_column(nn_output_var, B22id)
+
+        eta = 0.5*self.B *(u_x**2.0 + v_y**2.0 + 0.25*(u_y+v_x)**2.0 + u_x*v_y+self.eps)**(0.5*(1.0-self.n)/self.n)
+        # stress tensor
+        etaH = eta * H
+        dB11 = B11 - etaH*(4*u_x + 2*v_y)
+        dB22 = B22 - etaH*(4*v_y + 2*u_x)
+        dB12 = B12 - etaH*(  u_y +   v_x)
+
+        # Getting the other derivatives
+        sigma11 = jacobian(nn_output_var, nn_input_var, i=B11id, j=xid)
+        sigma12 = jacobian(nn_output_var, nn_input_var, i=B12id, j=yid)
+
+        sigma21 = jacobian(nn_output_var, nn_input_var, i=B12id, j=xid)
+        sigma22 = jacobian(nn_output_var, nn_input_var, i=B22id, j=yid)
+
+        # compute the basal stress
+        u_norm = (u**2+v**2+self.eps**2)**0.5
+
+        f1 = sigma11 + sigma12 - abs(taub)*u/(u_norm) - self.rhoi*self.g*H*s_x
+        f2 = sigma21 + sigma22 - abs(taub)*v/(u_norm) - self.rhoi*self.g*H*s_y
+
+        return [f1, f2, dB11, dB12, dB22] #}}}
+    def _pde_jax(self, nn_input_var, nn_output_var): #{{{
+        return self._pde(nn_input_var, nn_output_var) #}}}
+    #}}}
+#}}}
 # SSA variable B {{{
 class SSAVariableBEquationParameter(EquationParameter, Constants):
     """ default parameters for SSA, with spatially varying rheology B

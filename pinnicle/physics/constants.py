@@ -14,6 +14,12 @@ class Constants():
         self.variable_ub = {'u': 1.0e4/self.yts,  'v':1.0e4/self.yts,  's':3.6e3,  'H':3500.0, 'C':1.0e4, 'a':  5.0/self.yts, 'B': 7.0e8}
         self.variable_lb['taub'] = 0.0
         self.variable_ub['taub'] = 1.0e6
+        self.variable_lb['B11'] = -1.0e10
+        self.variable_ub['B11'] = 1.0e10
+        self.variable_lb['B12'] = -1.0e10
+        self.variable_ub['B12'] = 1.0e10
+        self.variable_lb['B22'] = -1.0e10
+        self.variable_ub['B22'] = 1.0e10
         # add more if needed
         self.variable_lb['u_base'] = -1.0e4/self.yts
         self.variable_ub['u_base'] =  1.0e4/self.yts

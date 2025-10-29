@@ -59,6 +59,16 @@ def test_SSA_pde_function():
     assert y[0].shape == (10,1)
     assert y[1].shape == (10,1)
 
+def test_SSA_first_pde_function():
+    hp_local = dict(hp)
+    hp_local["equations"] = {"SSA First":{}}
+    experiment = pinn.PINN(params=hp_local)
+    experiment.compile()
+    y = experiment.model.predict(experiment.model_data.X['u'], operator=experiment.physics.operator("SSA First"))
+    assert len(y) == 5
+    assert y[0].shape == (10,1)
+    assert y[1].shape == (10,1)
+
 def test_SSA_VB_pde_function():
     hp_local = dict(hp)
     hp_local["equations"] = {"SSA_VB":{}}
