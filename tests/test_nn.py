@@ -61,6 +61,7 @@ def test_input_fft_nn():
     y = bkd.to_numpy(p.net._input_transform(x))
     z = y**2
     assert np.all(abs(z[:,1:10]+z[:,11:20]-1.0)+np.finfo(float).eps)
+    assert d.sigma_size == 1
 
     hp['B'] = [[1,2,3]]
     hp['num_fourier_feature'] = 3
@@ -69,6 +70,11 @@ def test_input_fft_nn():
     d.input_ub = 10.0
     p = pinn.nn.FNN(d)
     assert np.all(hp['B'] == bkd.to_numpy(p.B))
+
+    hp['sigma'] = [1.0, 10.0]
+    hp['B'] = [[1,2,3,4,5,6]]
+    d = NNParameter(hp)
+    assert d.sigma_size == 2
 
 def test_input_scale_nn():
     hp={}

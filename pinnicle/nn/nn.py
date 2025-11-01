@@ -30,7 +30,9 @@ class FNN:
                 if self.parameters.B is not None: 
                     self.B = bkd.as_tensor(self.parameters.B, dtype=default_float_type())
                 else:
-                    self.B = bkd.as_tensor(np.random.normal(0.0, self.parameters.sigma, [len(self.parameters.input_variables), self.parameters.num_fourier_feature]), dtype=default_float_type())
+                    self.B = bkd.as_tensor(
+                            np.reshape(np.random.normal(0.0, self.parameters.sigma, [len(self.parameters.input_variables), self.parameters.num_fourier_feature, self.parameters.sigma_size]), [len(self.parameters.input_variables), self.parameters.num_fourier_feature*self.parameters.sigma_size]),
+                            dtype=default_float_type())
                 def wrapper(x):
                     """a wrapper function to add fourier feature transform to the input
                     """

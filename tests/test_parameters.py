@@ -93,6 +93,7 @@ def test_nn_parameter():
 
     d = NNParameter({"fft":True})
     assert d.input_size == 2*d.num_fourier_feature
+    assert isinstance(d.sigma, list)
     assert d.is_input_scaling()
     assert d.B is None
 
@@ -101,6 +102,19 @@ def test_nn_parameter():
     with pytest.raises(Exception):
         d = NNParameter({"fft":True, "num_fourier_feature":4, "B":1})
         d = NNParameter({"fft":True, "num_fourier_feature":4, "B":[[1,2]]})
+
+    with pytest.raises(Exception):
+        d = NNParameter({"fft":True, "is_parallel":True})
+
+    d = NNParameter({"fft":True, "sigma":[1,10], "num_neurons":10, "num_layers":3})
+    assert d.sigma_size == 2
+    assert d.input_size == 2*d.num_fourier_feature*d.sigma_size
+    assert isinstance(d.num_neurons, list)
+    assert d.num_layers == 3+1
+    assert len(d.num_neurons) == d.num_layers
+    assert d.num_neurons[-1] == d.num_fourier_feature*d.sigma_size
+    assert isinstance(d.activation, list)
+    assert d.activation[-1] is None
 
 def test_parameters():
     p = Parameters()

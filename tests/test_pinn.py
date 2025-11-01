@@ -177,6 +177,7 @@ def test_fft_training(tmp_path):
     hp_local['fft'] = True
     hp_local["is_save"] = False
     hp_local["num_collocation_points"] = 10
+    hp_local["sigma"] = [1.0, 10.0]
     issm["data_size"] = {"u":10, "v":10, "s":10, "H":10, "C":None}
     hp_local["data"] = {"ISSM": issm}
     hp_local["equations"] = {"SSA":SSA}
@@ -188,7 +189,7 @@ def test_fft_training(tmp_path):
     experiment2 = pinn.PINN(loadFrom=tmp_path)
     assert experiment.params.param_dict == experiment2.params.param_dict
     assert len(experiment2.params.nn.B) == 2
-    assert len(experiment2.params.nn.B[1]) == 10    
+    assert len(experiment2.params.nn.B[1]) == 20    
     experiment.compile()
     experiment.train()
     assert experiment.loss_names == ['fSSA1', 'fSSA2', 'u', 'v', 's', 'H', 'C']
