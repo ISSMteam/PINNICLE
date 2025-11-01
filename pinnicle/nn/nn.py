@@ -11,6 +11,20 @@ class FNN:
         general class for constructing nerual network
         """
         self.parameters = parameters
+        # update necesarry parameters for fourier feature transform
+        # NOTE: these changes will not be saved to the param file, 
+        # so that the change will not accumulate and loading the previous param file will create the same nn
+        if self.parameters.fft :
+            # Then add an additional layer before the output node
+            self.num_neurons = parameters.num_neurons + [parameters.num_fourier_feature*parameters.sigma_size]
+            self.num_layers = len(self.num_neurons)
+            # append linear transform for the output
+            self.activation = self.parameters.activation + [None]
+        else:
+            # just to avoid modify parameters
+            self.num_neurons = self.parameters.num_neurons
+            self.num_layers = self.parameters.num_layers
+            self.activation = self.parameters.activation
 
         # create new NN
         if self.parameters.is_parallel:
@@ -58,32 +72,32 @@ class FNN:
         """
         create a fully connected neural network
         """
-        if isinstance(self.parameters.num_neurons, list):
+        if isinstance(self.num_neurons, list):
             # directly use the given list of num_neurons
             layer_size = [self.parameters.input_size] + \
-                        self.parameters.num_neurons + \
+                        self.num_neurons + \
                         [self.parameters.output_size]
         else:
             # repeat num_layers times
             layer_size = [self.parameters.input_size] + \
-                        [self.parameters.num_neurons] * self.parameters.num_layers + \
+                        [self.num_neurons] * self.num_layers + \
                         [self.parameters.output_size]
 
-        return dde.nn.FNN(layer_size, self.parameters.activation, self.parameters.initializer)
+        return dde.nn.FNN(layer_size, self.activation, self.parameters.initializer)
 
     def createPFNN(self):
         """
         create a parallel fully connected neural network
         """
-        if isinstance(self.parameters.num_neurons, list):
+        if isinstance(self.num_neurons, list):
             layer_size = [self.parameters.input_size] + \
-                        [[n]*self.parameters.output_size for n in self.parameters.num_neurons] + \
+                        [[n]*self.parameters.output_size for n in self.num_neurons] + \
                         [self.parameters.output_size]
         else:
             layer_size = [self.parameters.input_size] + \
-                        [[self.parameters.num_neurons]*self.parameters.output_size] * self.parameters.num_layers + \
+                        [[self.num_neurons]*self.parameters.output_size] * self.num_layers + \
                         [self.parameters.output_size]
-        return dde.nn.PFNN(layer_size, self.parameters.activation, self.parameters.initializer)
+        return dde.nn.PFNN(layer_size, self.activation, self.parameters.initializer)
         
     def _add_input_transform(self, func):
         """

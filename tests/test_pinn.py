@@ -190,6 +190,7 @@ def test_fft_training(tmp_path):
     assert experiment.params.param_dict == experiment2.params.param_dict
     assert len(experiment2.params.nn.B) == 2
     assert len(experiment2.params.nn.B[1]) == 20    
+    assert experiment2.params.nn.num_layers == 4
     experiment.compile()
     experiment.train()
     assert experiment.loss_names == ['fSSA1', 'fSSA2', 'u', 'v', 's', 'H', 'C']

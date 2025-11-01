@@ -289,15 +289,11 @@ class NNParameter(ParameterBase):
             # cover num_neurons to list
             if not isinstance(self.num_neurons, list):
                 self.num_neurons = [self.num_neurons]*self.num_layers
-            # Then add an additional layer before the output node
-            self.num_neurons = self.num_neurons + [self.num_fourier_feature*self.sigma_size]
-            self.num_layers = len(self.num_neurons)
-
-            # convert activation function to list
+            
+            # convert activation function to list, nlayer+, because the output layer
             if not isinstance(self.activation, list):
-                self.activation = [self.activation]*(self.num_layers) 
-            # append linear transform for the output
-            self.activation = self.activation + [None]
+                self.activation = [self.activation]*(self.num_layers+1)
+
 
 class PhysicsParameter(ParameterBase):
     """ parameter of physics

@@ -46,6 +46,29 @@ def test_new_nn():
     p = pinn.nn.FNN(d)
     assert (p.parameters.__dict__ == d.__dict__)
 
+def test_input_msfft_nn():
+    hp={}
+    hp['input_variables'] = ['x']
+    hp['output_variables'] = ['u']
+    hp['num_neurons'] = 7
+    hp['num_layers'] = 3
+    hp['fft'] = True
+    hp['sigma'] = [1.0,2.0,3.0]
+    hp['num_fourier_feature'] = 11
+    d = NNParameter(hp)
+    d.input_lb = 1.0
+    d.input_ub = 10.0
+    p = pinn.nn.FNN(d)
+    x = bkd.reshape(bkd.as_tensor(np.linspace(1.0, 10.0, 100), dtype=default_float_type()), [100,1])
+    y = bkd.to_numpy(p.net._input_transform(x))
+    z = y**2
+    assert np.all(abs(z[:,1:11]+z[:,12:22]-1.0)+np.finfo(float).eps)
+    assert y.shape[1] == 11*2*3
+    assert d.sigma_size == 3
+    assert p.num_neurons == d.num_neurons + [11*3]
+    assert p.num_layers == 4
+    assert p.activation == ['tanh']*4+[None]
+
 def test_input_fft_nn():
     hp={}
     hp['input_variables'] = ['x']
