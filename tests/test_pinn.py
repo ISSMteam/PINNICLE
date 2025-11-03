@@ -172,6 +172,7 @@ def test_train_decay(tmp_path):
     experiment.train()
     assert experiment.loss_names == ['fSSA1', 'fSSA2', 'u', 'v', 's', 'H', 'C']
 
+@pytest.mark.skipif(backend_name in ["jax"], reason="There is a bug in deepxde (jax backend), when assigning a list of activation function, it reads in as a tuple!")
 def test_fft_training(tmp_path):
     hp_local = dict(hp)
     hp_local['fft'] = True
