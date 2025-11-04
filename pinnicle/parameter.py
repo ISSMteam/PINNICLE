@@ -231,12 +231,12 @@ class NNParameter(ParameterBase):
 
     def check_consistency(self):
         if self.fft:
-            if self.input_size != self.num_fourier_feature*2:
+            if self.input_size != self.num_fourier_feature*self.sigma_size*2:
                 raise ValueError("'input_size' does not match the number of fourier feature")
             if self.B is not None:
                 if not isinstance(self.B, list):
                     raise TypeError("'B' matrix need to be input in a list")
-                if len(self.B[0]) != self.num_fourier_feature:
+                if len(self.B[0]) != self.num_fourier_feature*self.sigma_size:
                     raise ValueError("Number of columns of 'B' matrix does not match the number of fourier feature")
         else:
             # input size of nn equals to dependent in physics
@@ -273,16 +273,27 @@ class NNParameter(ParameterBase):
         if isinstance(self.num_neurons, list):
             self.num_layers = len(self.num_neurons)
 
-        # need check again after updating params
-        self.update()
-
-    def update(self):
-        """ update the input_size for fourier feature transform
-        """
+        # update necesarry parameters for fourier feature transform
         if self.fft:
-            self.input_size = self.num_fourier_feature*2
+            if self.is_parallel:
+                raise ValueError("FFT currently does not support parallel nets")
 
-        self.check_consistency()
+            # always convert sigma to a list
+            if not isinstance(self.sigma, list):
+                self.sigma = [self.sigma]
+
+            # we need to know this size, to create and reshape B in nn.py
+            self.sigma_size = len(self.sigma)
+            self.input_size = self.num_fourier_feature*self.sigma_size*2
+
+            # cover num_neurons to list
+            if not isinstance(self.num_neurons, list):
+                self.num_neurons = [self.num_neurons]*self.num_layers
+            
+            # convert activation function to list, nlayer+, because the output layer
+            if not isinstance(self.activation, list):
+                self.activation = [self.activation]*(self.num_layers+1)
+
 
 class PhysicsParameter(ParameterBase):
     """ parameter of physics

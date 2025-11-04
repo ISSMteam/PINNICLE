@@ -74,7 +74,7 @@ class PINN:
         # TODO: remove this step
         # need to predict once, otherwise the weights can not be restored to the nn
         self.compile()
-        self.model.predict(np.zeros([1, self.params.nn.input_size]))
+        self.model.predict(np.zeros([1, len(self.params.nn.input_variables)]))
 
         # now the weights can be loaded
         if dde.backend.backend_name == "pytorch":

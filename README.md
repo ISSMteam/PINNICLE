@@ -4,7 +4,7 @@
 [![CI](https://github.com/ISSMteam/PINNICLE/actions/workflows/CI.yml/badge.svg)](https://github.com/ISSMteam/PINNICLE/actions/workflows/CI.yml)
 [![codecov](https://codecov.io/gh/ISSMteam/PINNICLE/graph/badge.svg?token=S7REK0IKJH)](https://codecov.io/gh/ISSMteam/PINNICLE)
 [![Documentation Status](https://readthedocs.org/projects/pinnicle/badge/?version=latest)](https://pinnicle.readthedocs.io/en/latest/?badge=latest)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15643042.svg)](https://doi.org/10.5281/zenodo.15643042)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17513545.svg)](https://doi.org/10.5281/zenodo.17513545)
 [![License](https://img.shields.io/github/license/ISSMteam/PINNICLE)](https://pypi.org/project/PINNICLE/)
 [![PyPI](https://img.shields.io/pypi/v/pinnicle)](https://pypi.org/project/PINNICLE/)
 
@@ -106,7 +106,7 @@ Full documentation is available in the `docs/` folder or at:
 
 If you use PINNICLE in your research, please cite:
 
-> Cheng, G., Krishna, M., and Morlighem, M.: A Python library for solving ice sheet modeling problems using physics-informed neural networks, PINNICLE v1.0, Geosci. Model Dev., 18, 5311–5327, https://doi.org/10.5194/gmd-18-5311-2025, 2025.
+> [Cheng, G., Krishna, M., and Morlighem, M.: A Python library for solving ice sheet modeling problems using physics-informed neural networks, PINNICLE v1.0, Geosci. Model Dev., 18, 5311–5327, https://doi.org/10.5194/gmd-18-5311-2025, 2025](https://doi.org/10.5194/gmd-18-5311-2025)
 
 **BibTeX**:
 
