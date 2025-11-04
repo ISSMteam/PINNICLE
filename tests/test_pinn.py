@@ -176,7 +176,8 @@ def test_train_decay(tmp_path):
 def test_fft_training(tmp_path):
     hp_local = dict(hp)
     hp_local['fft'] = True
-    hp_local["is_save"] = False
+    hp_local["is_save"] = True
+    hp_local["save_path"] = str(tmp_path)
     hp_local["num_collocation_points"] = 10
     hp_local["sigma"] = [1.0, 10.0]
     issm["data_size"] = {"u":10, "v":10, "s":10, "H":10, "C":None}
@@ -195,6 +196,7 @@ def test_fft_training(tmp_path):
     experiment.compile()
     experiment.train()
     assert experiment.loss_names == ['fSSA1', 'fSSA2', 'u', 'v', 's', 'H', 'C']
+    experiment.load_model(path=tmp_path, epochs=hp_local['epochs'])
 
 @pytest.mark.skipif(backend_name in ["jax"], reason="save model is not implemented in deepxde for jax")
 def test_train_PFNN(tmp_path):
