@@ -125,3 +125,85 @@ class Physics:
             if p._EQUATION_TYPE.lower() == pname.lower():
                 return p.pde
 
+
+
+### some functions for mass-conserving stressbalance:
+    def DR_xy(self, nn_input_var, nn_output_var):
+        """ transform D,R scalar fields of mass-conserving stressbalance
+            to u,v,a
+        """
+
+        xid = self.input_var.index('x')
+        yid = self.input_var.index('y')
+        
+        Rid = self.output_var.index["R"]
+        R_x = jacobian(nn_output_var, nn_input_var, i=Rid, j=xid)
+        R_y = jacobian(nn_output_var, nn_input_var, i=Rid, j=yid)
+        
+        if "D" in self.output_var:
+            # for MC_exact
+            Did = self.output_var.index["D"]
+            D_x = jacobian(nn_output_var, nn_input_var, i=Did, j=xid)
+            D_y = jacobian(nn_output_var, nn_input_var, i=Did, j=yid)
+        else:
+            # for MCSteady_exact
+            D_x = R_x*1e-40
+            D_y = R_y*1e-40
+
+        return [D_x, D_y, R_x, R_y]
+    
+    def DR_to_u(self, nn_input_var, nn_output_var):
+        """recover u from scalar fields D,R
+        """
+        Hid = self.output_var.index["H"]
+        H = slice_column(nn_output_var, Hid)
+        D_x, D_y, R_x, R_y = DR_xy(nn_input_var,nn_output_var)
+        u = (D_x - R_y) / H
+        return u
+    
+    def DR_to_v(self, nn_input_var, nn_output_var):
+        """recover v from scalar fields D,R
+        """
+        Hid = self.output_var.index["H"]
+        H = slice_column(nn_output_var, Hid)
+        D_x, D_y, R_x, R_y = DR_xy(nn_input_var,nn_output_var)
+        v = (D_y + R_x) / H
+        return v
+    
+    def DR_to_a(self, nn_input_var, nn_output_var):
+        """recover v from scalar fields D,R
+        """
+        D_x, D_y, R_x, R_y = DR_xy(nn_input_var,nn_output_var)
+        a = D_x + D_y ## == div(Hv)
+        return a
+
+    def vel_mag_MC(self, nn_input_var, nn_output_var, X):
+        """ a wrapper for PointSetOperatorBC func call, Args need to follow the requirment by deepxde
+
+        Args: 
+            nn_input_var:  input tensor to the nn
+            nn_output_var: output tensor from the nn
+            X:  NumPy array of the collocation points defined on the boundary, required by deepxde
+        """
+        u = DR_to_u(nn_input_var,nn_output_var)
+        v = DR_to_v(nn_input_var,nn_output_var)
+        vel = ppow((bkd.square(u) + bkd.square(v) + 1.0e-30), 0.5)
+        return vel
+    
+    def a_MC(self, nn_input_var, nn_output_var, X):
+        """ a wrapper for PointSetOperatorBC func call, Args need to follow the requirment by deepxde
+        """
+        a = DR_to_a(nn_input_var,nn_output_var)
+        return a
+    
+    def u_MC(self, nn_input_var, nn_output_var, X):
+        """ a wrapper for PointSetOperatorBC func call, Args need to follow the requirment by deepxde
+        """
+        u = DR_to_u(nn_input_var,nn_output_var)
+        return u
+    
+    def v_MC(self, nn_input_var, nn_output_var, X):
+        """ a wrapper for PointSetOperatorBC func call, Args need to follow the requirment by deepxde
+        """
+        v = DR_to_v(nn_input_var,nn_output_var)
+        return v

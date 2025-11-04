@@ -147,3 +147,111 @@ class Thickness(EquationBase): #{{{
         return self._pde(nn_input_var, nn_output_var) #}}}
     #}}}
 #}}}
+
+
+# D-HNN exact mass conservation {{{
+class MCexactEquationParameter(EquationParameter, Constants):
+    """ default parameters for mass conservation
+    """
+    _EQUATION_TYPE = 'MC_exact' 
+    def __init__(self, param_dict={}):
+        # load necessary constants
+        Constants.__init__(self)
+        super().__init__(param_dict)
+
+    def set_default(self):
+        self.input = ['x', 'y']
+        self.output = ['D', 'R', 'H']
+        self.output_lb = [self.variable_lb[k] for k in self.output]
+        self.output_ub = [self.variable_ub[k] for k in self.output]
+        self.data_weights = [1.0, 1.0, 1.0*self.yts**2, 1.0e-6]
+        self.residuals = ["f"+self._EQUATION_TYPE]
+        self.pde_weights = [1.0]
+
+        # scalar variables: name:value
+        self.scalar_variables = {}
+class MC_exact(EquationBase): #{{{
+    """ MC on 2D problem
+        u,v,a are defined based on two scalar fields D,R
+        in a way that automatically satisfies the MC
+    """
+    _EQUATION_TYPE = 'MC_exact' 
+    def __init__(self, parameters=MCexactEquationParameter()):
+        super().__init__(parameters)
+
+    def _pde(self, nn_input_var, nn_output_var): #{{{
+        """ no pde loss required
+            use data losses vel_mag_MC, u_MC, v_MC, a_MC
+
+        Args:
+            nn_input_var: global input to the nn
+            nn_output_var: global output from the nn
+        """
+        return 0. #}}}
+    
+    def _pde_jax(self, nn_input_var, nn_output_var): #{{{
+        """ residual of MC 2D PDE, jax version
+
+        Args:
+            nn_input_var: global input to the nn
+            nn_output_var: global output from the nn
+        """
+        return self._pde(nn_input_var, nn_output_var) #}}}
+    #}}}
+#}}}
+
+
+# D-HNN exact mass conservation {{{
+class MCSteadyexactEquationParameter(EquationParameter, Constants):
+    """ default parameters for mass conservation
+    """
+    _EQUATION_TYPE = 'MCSteady_exact' 
+    def __init__(self, param_dict={}):
+        # load necessary constants
+        Constants.__init__(self)
+        super().__init__(param_dict)
+
+    def set_default(self):
+        self.input = ['x', 'y']
+        self.output = ['R', 'H']
+        self.output_lb = [self.variable_lb[k] for k in self.output]
+        self.output_ub = [self.variable_ub[k] for k in self.output]
+        self.data_weights = [1.0, 1.0*self.yts**2, 1.0e-6]
+        self.residuals = ["f"+self._EQUATION_TYPE]
+        self.pde_weights = [1.0]
+
+        # scalar variables: name:value
+        self.scalar_variables = {}
+class MCSteady_exact(EquationBase): #{{{
+    """ MC on 2D problem
+
+        for domains with negligible smb and dH/dt
+
+        u,v,a are defined based on two scalar fields D,R
+        in a way that automatically satisfies the MC
+    """
+    _EQUATION_TYPE = 'MCSteady_exact' 
+    def __init__(self, parameters=MCSteadyexactEquationParameter()):
+        super().__init__(parameters)
+
+    def _pde(self, nn_input_var, nn_output_var): #{{{
+        """ no pde loss required
+            use data losses vel_mag_MC, u_MC, v_MC, a_MC
+
+        Args:
+            nn_input_var: global input to the nn
+            nn_output_var: global output from the nn
+        """
+        return 0. #}}}
+    
+    def _pde_jax(self, nn_input_var, nn_output_var): #{{{
+        """ residual of MC 2D PDE, jax version
+
+        Args:
+            nn_input_var: global input to the nn
+            nn_output_var: global output from the nn
+        """
+        return self._pde(nn_input_var, nn_output_var) #}}}
+    #}}}
+#}}}
+
