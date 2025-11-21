@@ -140,26 +140,36 @@ class Physics:
         R_x = jacobian(nn_output_var, nn_input_var, i=Rid, j=xid)
         R_y = jacobian(nn_output_var, nn_input_var, i=Rid, j=yid)
         
-        if "D" in self.output_var:
+        if "D_dH" in self.output_var:
             # for MC_exact
-            Did = self.output_var.index('D')
-            D_x = jacobian(nn_output_var, nn_input_var, i=Did, j=xid)
-            D_y = jacobian(nn_output_var, nn_input_var, i=Did, j=yid)
+            Did = self.output_var.index('D_dH')
+            DdH_x = jacobian(nn_output_var, nn_input_var, i=Did, j=xid)
+            DdH_y = jacobian(nn_output_var, nn_input_var, i=Did, j=yid)
         else:
             # for MCSteady_exact
-            D_x = R_x*1e-32
-            D_y = R_y*1e-32
+            DdH_x = R_x*1e-32
+            DdH_y = R_y*1e-32
 
-        return [D_x, D_y, R_x, R_y]
+        if "D_smb" in self.output_var:
+            # for MC_exact
+            Did = self.output_var.index('D_smb')
+            DdH_x = jacobian(nn_output_var, nn_input_var, i=Did, j=xid)
+            DdH_y = jacobian(nn_output_var, nn_input_var, i=Did, j=yid)
+        else:
+            # for MCSteady_exact
+            Dsmb_x = R_x*1e-32
+            Dsmb_y = R_y*1e-32
+
+        return [Dsmb_x, Dsmb_y, DdH_x, DdH_y, R_x, R_y]
     
     def DR_to_u(self, nn_input_var, nn_output_var):
         """ recover u from scalar fields D,R
         """
         Hid = self.output_var.index('H')
         H = slice_column(nn_output_var, Hid)
-        D_x, _, _, R_y = self.DR_xy(nn_input_var,nn_output_var)
+        Dsmb_x, _, DdH_x, _, _, R_y = self.DR_xy(nn_input_var,nn_output_var)
         # Hd = H.detach()
-        u = (D_x - R_y) / H # divide D_x by yts if dHdt in m/a
+        u = (Dsmb_x + DdH_x - R_y) / H 
         return u
     
     def DR_to_v(self, nn_input_var, nn_output_var):
@@ -167,22 +177,34 @@ class Physics:
         """
         Hid = self.output_var.index('H')
         H = slice_column(nn_output_var, Hid)
-        _, D_y, R_x, _ = self.DR_xy(nn_input_var,nn_output_var)
+        _, Dsmb_y, _, DdH_y, R_x, _ = self.DR_xy(nn_input_var,nn_output_var)
         # Hd = H.detach()
-        v = (D_y + R_x) / H # divide D_x by yts if dHdt in m/a
+        v = (Dsmb_y + DdH_y + R_x) / H # divide D_x by yts if dHdt in m/a
         return v
     
-    def DR_to_a(self, nn_input_var, nn_output_var):
+    def DR_to_dH(self, nn_input_var, nn_output_var):
         """ recover a from scalar fields D,R
             a = div(grad(D))
         """
         xid = self.input_var.index('x')
         yid = self.input_var.index('y')
-        D_x, D_y, _, _ = self.DR_xy(nn_input_var,nn_output_var)
-        D_xx = jacobian(D_x, nn_input_var, i=0, j=xid)
-        D_yy = jacobian(D_y, nn_input_var, i=0, j=yid)
-        a = D_xx + D_yy ## == div(Hv)
-        return -a
+        DdH_x, DdH_y, _, _ = self.DR_xy(nn_input_var,nn_output_var)
+        DdH_xx = jacobian(DdH_x, nn_input_var, i=0, j=xid)
+        DdH_yy = jacobian(DdH_y, nn_input_var, i=0, j=yid)
+        dH = -1. * (DdH_xx + DdH_yy) ## == div(Hv)
+        return dH
+    
+    def DR_to_smb(self, nn_input_var, nn_output_var):
+        """ recover a from scalar fields D,R
+            a = div(grad(D))
+        """
+        xid = self.input_var.index('x')
+        yid = self.input_var.index('y')
+        Dsmb_x, Dsmb_y, _, _, _, _ = self.DR_xy(nn_input_var,nn_output_var)
+        Dsmb_xx = jacobian(Dsmb_x, nn_input_var, i=0, j=xid)
+        Dsmb_yy = jacobian(Dsmb_y, nn_input_var, i=0, j=yid)
+        smb = Dsmb_xx + Dsmb_yy ## == div(Hv)
+        return smb
 
     def vel_mag_MC(self, nn_input_var, nn_output_var, X):
         """ a wrapper for PointSetOperatorBC func call, Args need to follow the requirment by deepxde
@@ -197,11 +219,17 @@ class Physics:
         vel = ppow((bkd.square(u) + bkd.square(v) + 1.0e-30), 0.5)
         return vel
     
-    def a_MC(self, nn_input_var, nn_output_var, X):
+    def dH_MC(self, nn_input_var, nn_output_var, X):
         """ a wrapper for PointSetOperatorBC func call, Args need to follow the requirment by deepxde
         """
-        a = self.DR_to_a(nn_input_var,nn_output_var)
-        return a
+        dH = self.DR_to_dH(nn_input_var,nn_output_var)
+        return dH
+    
+    def smb_MC(self, nn_input_var, nn_output_var, X):
+        """ a wrapper for PointSetOperatorBC func call, Args need to follow the requirment by deepxde
+        """
+        smb = self.DR_to_smb(nn_input_var,nn_output_var)
+        return smb
     
     def u_MC(self, nn_input_var, nn_output_var, X):
         """ a wrapper for PointSetOperatorBC func call, Args need to follow the requirment by deepxde

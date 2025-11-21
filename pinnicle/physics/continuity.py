@@ -237,10 +237,10 @@ class MCexactEquationParameter(EquationParameter, Constants):
 
     def set_default(self):
         self.input = ['x', 'y']
-        self.output = ['D','R', 'H']
+        self.output = ['D_smb','D_dH','R', 'H']
         self.output_lb = [self.variable_lb[k] for k in self.output]
         self.output_ub = [self.variable_ub[k] for k in self.output]
-        self.data_weights = [1.0, 1.0, 1.0e-6]
+        self.data_weights = [1.0, 1.0, 1.0, 1.0e-6]
         self.residuals = []
         self.pde_weights = []
 
