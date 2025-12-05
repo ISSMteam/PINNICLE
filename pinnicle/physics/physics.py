@@ -188,7 +188,7 @@ class Physics:
         """
         xid = self.input_var.index('x')
         yid = self.input_var.index('y')
-        DdH_x, DdH_y, _, _ = self.DR_xy(nn_input_var,nn_output_var)
+        _, _, DdH_x, DdH_y, _, _ = self.DR_xy(nn_input_var,nn_output_var)
         DdH_xx = jacobian(DdH_x, nn_input_var, i=0, j=xid)
         DdH_yy = jacobian(DdH_y, nn_input_var, i=0, j=yid)
         dH = -1. * (DdH_xx + DdH_yy) ## == div(Hv)
