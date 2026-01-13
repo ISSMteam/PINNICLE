@@ -115,7 +115,7 @@ class NetCDFData(DataBase, Constants):
                 if data_size[k] is not None:
                     # apply nan mask
                     _temp = self.data_dict[k].flatten()[:,None]
-                    mask = ~np.isnan(_temp)
+                    mask = (~np.isnan(_temp) & (~_temp.mask))
                     sol_temp = _temp[mask].flatten()[:,None]
 
                     # prepare x,y coordinates
