@@ -246,6 +246,29 @@ def test_MatData_domain():
     icoord = data_loader.get_ice_coordinates()
     assert icoord.shape == (673,2)
 
+def test_MatData_domain_polygon_sampling():
+    filename = "flightTracks.mat"
+    expFileName = "fastflow_CF.exp"
+    repoPath = os.path.dirname(__file__) + "/../examples/"
+    appDataPath = os.path.join(repoPath, "dataset")
+    path = os.path.join(appDataPath, filename)
+    
+    hp = {}
+    hp["data_path"] = path
+    hp["data_size"] = {"H":"Max"}
+    hp["name_map"] = {"H":"thickness"}
+    hp["source"] = "mat"
+    hp["X_map"] = {"x1":"x", "x2":"y"}
+    hp["shapefile"] = os.path.join(repoPath, "dataset", expFileName)
+    hp["sample_only_inside"] = True
+
+    d = pinn.domain.Domain( pinn.parameter.DomainParameter(hp))
+    p = SingleDataParameter(hp)
+    data_loader = MatData(p)
+    data_loader.load_data(d)
+    icoord = data_loader.get_ice_coordinates()
+    assert icoord.shape == (502,2)
+
 def test_MatData_physics():
     filename = "flightTracks.mat"
     expFileName = "fastflow_CF.exp"
@@ -319,6 +342,29 @@ def test_h5Data_domain():
     assert(data_loader.sol['a'].shape == (10,1))
     icoord = data_loader.get_ice_coordinates()
     assert icoord.shape == (51800,2)
+
+def test_h5Data_domain_polygon_sampling():
+    filename = "subdomain_data.h5"
+    expFileName = "fastflow_CF.exp"
+    repoPath = os.path.dirname(__file__) + "/../examples/"
+    appDataPath = os.path.join(repoPath, "dataset")
+    path = os.path.join(appDataPath, filename)
+
+    hp = {}
+    hp["data_path"] = path
+    hp["data_size"] = {"u":300, "v":100, "s":2, "b":100, "a":10}
+    hp["X_map"] = {"x":"surf_x", "y":"surf_y" }
+    hp["name_map"] = {"s":"surf_elv", "u":"surf_vx", "v":"surf_vy", "a":"surf_SMB", "b":"bed_BedMachine"}
+    hp["source"] = "h5"
+    hp["shapefile"] = os.path.join(repoPath, "dataset", expFileName)
+    hp["sample_only_inside"] = True
+
+    d = pinn.domain.Domain( pinn.parameter.DomainParameter(hp))
+    p = SingleDataParameter(hp)
+    data_loader = H5Data(p)
+    data_loader.load_data(d)
+    icoord = data_loader.get_ice_coordinates()
+    assert icoord.shape == (38771,2)
 
 def test_h5Data_physics():
     filename = "subdomain_data.h5"
@@ -405,6 +451,29 @@ def test_ncData_domain():
 
     with pytest.raises(Exception):
         data_loader.load_data(d)
+
+def test_ncData_domain_polygon_sampling():
+    filename = "subdomain_bed.nc"
+    expFileName = "fastflow_CF.exp"
+    repoPath = os.path.dirname(__file__) + "/../examples/"
+    appDataPath = os.path.join(repoPath, "dataset")
+    path = os.path.join(appDataPath, filename)
+    
+    hp = {}
+    hp["data_path"] = path
+    hp["data_size"] = {"s":300, "H":"MAX", "b":10}
+    hp["X_map"] = {"x":"x", "y":"y" }
+    hp["name_map"] = {"s":"surface", "H":"thickness", "b":"bed"}
+    hp["source"] = "nc"
+    hp["shapefile"] = os.path.join(repoPath, "dataset", expFileName)
+    hp["sample_only_inside"] = True
+
+    d = pinn.domain.Domain( pinn.parameter.DomainParameter(hp))
+    p = SingleDataParameter(hp)
+    data_loader = NetCDFData(p)
+    data_loader.load_data(d)
+    icoord = data_loader.get_ice_coordinates()
+    assert icoord.shape == (9381, 2)
 
 def test_ncData_physics():
     filename = "subdomain_bed.nc"
