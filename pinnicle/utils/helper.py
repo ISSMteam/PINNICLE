@@ -24,11 +24,8 @@ def save_dict_to_json(data, path, filename):
     """
     if not filename.endswith('.json'):
         filename += '.json'
-    data2 = {}
-    for k,v in data.items():
-        data2[k] = [round(float(x),8) for x in v]
     with open(os.path.join(path,filename), "w") as fp:
-        json.dump(data2, fp)
+        json.dump(data, fp)
 
 def load_dict_from_json(path, filename):
     """ Load a dict data from a .json file 
