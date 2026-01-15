@@ -115,6 +115,22 @@ class Physics:
 
         return _wrapper
 
+    def calving_front(self, nx, ny):
+        """ calculate the calving front boundary condition from each equations, return a function wrapper for PointSetOperatorBC
+            TODO: implement jax version
+
+        Args: 
+            nx: x component of the outpointing normal vector
+            ny: y component of the outpointing normal vector
+        """
+        def _wrapper(nn_input_var, nn_output_var, X):
+            for p in self.equations:
+                if p._EQUATION_TYPE.upper() == "SSA_SHELF_VB":
+                    [fc1, fc2] = p._bc(nn_input_var, nn_output_var, nx, ny)
+                    return fc1+fc2
+
+        return _wrapper
+
     def operator(self, pname):
         """ grab the pde operator, used for testing the pdes and plotting
 

@@ -251,6 +251,8 @@ class PINN:
         else:
             loss_functions = self.params.training.loss_functions
 
+        # only do nx of ny once
+        normflag = False
         # if additional_loss is not empty
         if self.params.training.additional_loss:
             for d in self.params.training.additional_loss:
@@ -266,6 +268,10 @@ class PINN:
                     elif d == "vel":
                         training_temp.append(dde.icbc.PointSetOperatorBC(training_data.X[d], training_data.sol[d], self.physics.vel_mag,
                                                                          batch_size=min_or_none(self.params.training.mini_batch, training_data.sol[d].shape[0]), shuffle=True))
+                    elif (not normflag) and ((d == "nx") or (d =="ny")):
+                        normflag = True
+                        training_temp.append(dde.icbc.PointSetOperatorBC(training_data.X[d], np.zeros_like(training_data.sol[d]), self.physics.cavling_front(training_data.sol['nx'], training_data.sol['ny']),
+                                                                         batch_size=None))
                     elif d == "sx":
                         training_temp.append(dde.icbc.PointSetOperatorBC(training_data.X[d], training_data.sol[d], self.physics.user_defined_gradient('s','x'),
                                                                          batch_size=min_or_none(self.params.training.mini_batch, training_data.sol[d].shape[0]), shuffle=True))
