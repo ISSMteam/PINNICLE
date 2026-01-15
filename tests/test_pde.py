@@ -221,14 +221,14 @@ def test_user_defined_grad():
     surfy1 = experiment.model.predict(experiment.model_data.X['u'], operator=op5)
     assert np.all(surfy == surfy1)
 
-#def test_calving_front():
-#    hp_local = dict(hp)
-#    hp_local["equations"] = {"SSA_SHELF_VB": {}}
-#    experiment = pinn.PINN(params=hp_local)
-#    experiment.compile()
-#    nx = bkd.as_tensor(experiment.model_data.sol['u'])
-#    ny = bkd.as_tensor(experiment.model_data.sol['v'])
-#    def op(i,o):
-#        return experiment.physics.calving_front(nx, ny)(i, o, None)
-#    cf = experiment.model.predict(experiment.model_data.X['u'], operator=op)
-#
+def test_calving_front():
+    hp_local = dict(hp)
+    hp_local["equations"] = {"SSA_SHELF_VB": {}}
+    experiment = pinn.PINN(params=hp_local)
+    experiment.compile()
+    nx = bkd.as_tensor(experiment.model_data.sol['u'])
+    ny = bkd.as_tensor(experiment.model_data.sol['v'])
+    def op(i,o):
+        return experiment.physics.calving_front(nx, ny)(i, o, None)
+    cf = experiment.model.predict(experiment.model_data.X['u'], operator=op)
+
