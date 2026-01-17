@@ -19,6 +19,7 @@ repoPath = os.path.dirname(__file__) + "/../examples/"
 appDataPath = os.path.join(repoPath, "dataset")
 path = os.path.join(appDataPath, inputFileName)
 ftpath = os.path.join(appDataPath, "flightTracks.mat")
+cfpath = os.path.join(appDataPath, "calvingfront.mat")
 yts =3600*24*365
 loss_weights = [10**(-w) for w in weights]
 loss_weights[2] = loss_weights[2] * yts*yts
@@ -199,13 +200,34 @@ def test_fft_training(tmp_path):
     experiment.load_model(path=tmp_path, epochs=hp_local['epochs'])
 
 @pytest.mark.skipif(backend_name in ["jax"], reason="save model is not implemented in deepxde for jax")
+def test_train_calvingfront(tmp_path):
+    hp_local = dict(hp)
+    hp_local["num_collocation_points"] = 10
+    issm["data_size"] = {"u":10, "v":10, "s":10, "H":10, "C":None, "vel":10}
+    hp_local["num_neurons"] = [4,10]
+    # data
+    cfdata = {}
+    cfdata["data_path"] = cfpath
+    cfdata["data_size"] = {"nx":"MAX", "ny":"MAX"}
+    cfdata["source"] = "mat"
+    hp_local["data"] = {"ISSM": issm, "cf":cfdata}
+    # additional loss
+    cf = {}
+    cf['name'] = "cf"
+    cf['weight'] = 1.0
+    hp_local["additional_loss"] = {"calvingfront":cf}
+    experiment = pinn.PINN(params=hp_local)
+    experiment.compile()
+    experiment.train()
+
+@pytest.mark.skipif(backend_name in ["jax"], reason="save model is not implemented in deepxde for jax")
 def test_train_PFNN(tmp_path):
     hp_local = dict(hp)
     hp_local["is_parallel"] = True
     hp_local["is_save"] = False
     hp_local["num_collocation_points"] = 10
     issm["data_size"] = {"u":10, "v":10, "s":10, "H":10, "C":None, "vel":10}
-    hp_local["num_neurons"] = [4,10];
+    hp_local["num_neurons"] = [4,10]
     hp_local["data"] = {"ISSM": issm}
     # additional loss
     vel_loss = {}

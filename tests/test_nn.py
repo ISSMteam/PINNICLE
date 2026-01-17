@@ -1,5 +1,6 @@
 import pinnicle as pinn
-from pinnicle.nn.helper import minmax_scale, up_scale, fourier_feature, default_float_type
+from pinnicle.nn.helper import minmax_scale, up_scale, fourier_feature
+from pinnicle.utils import default_float_type
 from pinnicle.parameter import NNParameter
 import deepxde as dde
 import deepxde.backend as bkd
@@ -30,11 +31,6 @@ def test_fourier_feature():
     y = bkd.to_numpy(fourier_feature(x, B))
     z = y**2
     assert np.all((z[:,1]+z[:,3]) < 1.0+100**np.finfo(float).eps)
-
-def test_default_float_type():
-    assert default_float_type() is not None
-    assert default_float_type() in bkd.data_type_dict.values()
-    assert default_float_type() == bkd.data_type_dict['float64']
 
 def test_new_nn():
     hp={}

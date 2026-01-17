@@ -232,3 +232,4 @@ def test_calving_front():
         return experiment.physics.calving_front(nx, ny)(i, o, None)
     cf = experiment.model.predict(experiment.model_data.X['u'], operator=op)
 
+    assert cf.shape == nx.shape

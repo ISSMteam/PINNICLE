@@ -3,7 +3,7 @@ import deepxde.backend as bkd
 from ..parameter import PhysicsParameter
 from . import EquationBase
 import itertools
-from ..utils import slice_column, jacobian, ppow
+from ..utils import slice_column, jacobian, ppow, default_float_type
 
 class Physics:
     """ All the physics in used as constraint in the PINN
@@ -123,11 +123,13 @@ class Physics:
             nx: x component of the outpointing normal vector
             ny: y component of the outpointing normal vector
         """
+        nx = bkd.as_tensor(nx, dtype=default_float_type())
+        ny = bkd.as_tensor(ny, dtype=default_float_type())
         def _wrapper(nn_input_var, nn_output_var, X):
             for p in self.equations:
                 if p._EQUATION_TYPE.upper() == "SSA_SHELF_VB":
                     [fc1, fc2] = p._bc(nn_input_var, nn_output_var, nx, ny)
-                    return fc1+fc2
+                    return fc1**2.0+fc2**2.0
 
         return _wrapper
 

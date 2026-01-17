@@ -1,12 +1,17 @@
 import pytest
+import pinnicle
 import os
 import numpy as np
-from deepxde import backend
-import pinnicle
+import deepxde as dde
+import deepxde.backend as bkd
+from deepxde.backend import backend_name, jax
 from pinnicle.utils import *
 
-data = {"s":1, "v":[1, 2, 3]}
+dde.config.set_default_float('float64')
+if backend_name == "jax":
+    jax.config.update("jax_enable_x64", True) # force jax to use float64
 
+data = {"s":1, "v":[1, 2, 3]}
 
 def test_save_and_load_dict(tmp_path):
     save_dict_to_json(data, tmp_path, "temp.json")
@@ -26,9 +31,9 @@ def test_data_misfit_functions():
     assert data_misfit.get("VEL_LOG") != None
     assert data_misfit.get("MEAN_SQUARE_LOG") != None
     assert data_misfit.get("MAPE") != None
-    assert data_misfit.get("VEL_LOG")(backend.as_tensor([1.0]),backend.as_tensor([1.0])) == 0.0
-    assert data_misfit.get("MEAN_SQUARE_LOG")(backend.as_tensor([1.0]),backend.as_tensor([1.0])) == 0.0
-    assert data_misfit.get("MAPE")(backend.as_tensor([1.0]),backend.as_tensor([1.0])) == 0.0
+    assert data_misfit.get("VEL_LOG")(bkd.as_tensor([1.0]),bkd.as_tensor([1.0])) == 0.0
+    assert data_misfit.get("MEAN_SQUARE_LOG")(bkd.as_tensor([1.0]),bkd.as_tensor([1.0])) == 0.0
+    assert data_misfit.get("MAPE")(bkd.as_tensor([1.0]),bkd.as_tensor([1.0])) == 0.0
 
 def test_loadmat():
     filename = "flightTracks.mat"
@@ -84,7 +89,7 @@ def test_slice_column():
     assert c[0] == 2
 
 def test_ppow():
-    a = backend.as_tensor([2.0])
+    a = bkd.as_tensor([2.0])
     c = pinnicle.utils.backends_specified.ppow(a, 2.0)
     assert c == 4.0
 
@@ -143,3 +148,7 @@ def test_rect_weights():
     assert W[13] == 0.5
     assert W[24] == 0.0
     
+def test_default_float_type():
+    assert default_float_type() is not None
+    assert default_float_type() in bkd.data_type_dict.values()
+    assert default_float_type() == bkd.data_type_dict['float64']
