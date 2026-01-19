@@ -282,9 +282,8 @@ class PINN:
                     # append loss functions
                     loss_functions.append(self.params.training.additional_loss[d].function)
                 else:
-                    if d == "calvingfront":
-                        training_temp.append(dde.icbc.PointSetOperatorBC(training_data.X['nx'], np.zeros_like(training_data.sol['nx']), 
-                                                                         self.physics.calving_front(training_data.sol['nx'], training_data.sol['ny']),
+                    if d.lower() == "calvingfront":
+                        training_temp.append(dde.icbc.PointSetOperatorBC(training_data.X['nx'], np.zeros_like(training_data.sol['nx']), self.physics.calving_front,
                                                                          batch_size=None))
                         # loss name
                         loss_names.append(self.params.training.additional_loss[d].name)
