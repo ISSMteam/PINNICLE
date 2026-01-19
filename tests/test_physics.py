@@ -280,3 +280,17 @@ def test_Physics_dummy():
     assert len(phy.output_ub) == 3
     assert len(phy.data_weights) == 3
     assert len(phy.pde_weights) == 0
+
+def test_Physics_BC():
+    hp = {}
+    hp["equations"] = {"BC":{}}
+    phy = Physics(PhysicsParameter(hp))
+
+    assert phy.input_var == ['x', 'y']
+    assert phy.output_var == ['nx', 'ny']
+    assert phy.residuals == []
+    assert phy.equations[0].local_output_var == {'nx': 0, 'ny': 1}
+    assert len(phy.output_lb) == 2
+    assert len(phy.output_ub) == 2
+    assert len(phy.data_weights) == 2
+    assert len(phy.pde_weights) == 0
