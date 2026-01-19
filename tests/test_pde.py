@@ -181,6 +181,15 @@ def test_weertman_pde_function():
     assert len(y) == 1
     assert y[0].shape == (10,1)
 
+def test_calvingfront_pde_function():
+    hp_local = dict(hp)
+    hp_local["equations"] = {"CalvingFront":{}}
+    experiment = pinn.PINN(params=hp_local)
+    experiment.compile()
+    y = experiment.model.predict(experiment.model_data.X['u'], operator=experiment.physics.operator("CalvingFront"))
+
+    assert len(y) == 0
+
 def test_vel_mag():
     hp_local = dict(hp)
     hp_local["equations"] = {"SSA": {}}

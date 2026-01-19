@@ -127,7 +127,7 @@ def test_update_parameters():
     experiment.update_parameters({"add_param": 2})
     assert experiment.params.param_dict["add_param"] == 2
 
-def test_train_only_data(tmp_path):
+def test_train_only_data():
     hp_local = dict(hp)
     hp_local["is_parallel"] = False
     hp_local["is_save"] = False
@@ -146,7 +146,7 @@ def test_train_only_data(tmp_path):
     assert experiment.loss_names == ['v', 'H']
 
 @pytest.mark.skipif(backend_name in ["jax"], reason="inverse time decay is not implemented in deepxde for jax")
-def test_train(tmp_path):
+def test_train():
     hp_local = dict(hp)
     hp_local["is_save"] = False
     hp_local["num_collocation_points"] = 100
@@ -159,7 +159,7 @@ def test_train(tmp_path):
     assert experiment.loss_names == ['fSSA1', 'fSSA2', 'u', 'v', 's', 'H', 'C']
 
 @pytest.mark.skipif(backend_name in ["jax"], reason="inverse time decay is not implemented in deepxde for jax")
-def test_train_decay(tmp_path):
+def test_train_decay():
     hp_local = dict(hp)
     hp_local["is_save"] = False
     hp_local["num_collocation_points"] = 100
@@ -200,7 +200,7 @@ def test_fft_training(tmp_path):
     experiment.load_model(path=tmp_path, epochs=hp_local['epochs'])
 
 @pytest.mark.skipif(backend_name in ["jax"], reason="calving front boundary is not implemented for jax")
-def test_train_calvingfront(tmp_path):
+def test_train_calvingfront():
     hp_local = dict(hp)
     hp_local["is_save"] = False
     hp_local["num_collocation_points"] = 10
@@ -224,7 +224,7 @@ def test_train_calvingfront(tmp_path):
     assert experiment.loss_names == ['fSSA1', 'fSSA2', 'u', 'v', 's', 'H', 'C', 'nx','ny','cf']
 
 @pytest.mark.skipif(backend_name in ["jax"], reason="save model is not implemented in deepxde for jax")
-def test_train_PFNN(tmp_path):
+def test_train_PFNN():
     hp_local = dict(hp)
     hp_local["is_parallel"] = True
     hp_local["is_save"] = False
