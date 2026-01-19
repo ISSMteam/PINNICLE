@@ -278,7 +278,7 @@ class SSAShelfVariableB(EquationBase): # {{{
         f2 = sigma21 + sigma22 - self.rhoi*self.g*H*s_y
 
         return [f1, f2] #}}}
-    def _bc(self, nn_input_var, nn_output_var, nx, ny): #{{{
+    def _bc(self, nn_input_var, nn_output_var): #{{{
         """ compute the residual of calving front boundary condition of SSA 2D
 
         Args:
@@ -296,6 +296,8 @@ class SSAShelfVariableB(EquationBase): # {{{
         sid = self.local_output_var["s"]
         Hid = self.local_output_var["H"]
         Bid = self.local_output_var["B"]
+        nxid = self.local_output_var["nx"]
+        nyid = self.local_output_var["ny"]
 
         # unpacking normalized output
         u = slice_column(nn_output_var, uid)
@@ -303,6 +305,8 @@ class SSAShelfVariableB(EquationBase): # {{{
         H = slice_column(nn_output_var, Hid)
         B = slice_column(nn_output_var, Bid)
         s = slice_column(nn_output_var, sid)
+        nx = slice_column(nn_output_var, nxid)
+        ny = slice_column(nn_output_var, nyid)
         base = s - H
 
         # spatial derivatives
