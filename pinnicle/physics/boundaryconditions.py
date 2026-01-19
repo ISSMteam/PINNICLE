@@ -1,6 +1,8 @@
 import deepxde as dde
+from deepxde.backend import jax
 from . import EquationBase, Constants
 from ..parameter import EquationParameter
+from ..utils import slice_column, jacobian, slice_function_jax
 
 class CalvingFrontBCEquationParameter(EquationParameter, Constants):
     """ default parameters for Boundary Conditions
@@ -77,8 +79,9 @@ class CalvingFrontBC(EquationBase): #{{{
         # pde residual
         bc1 = B11*nx + B12*ny - 0.5*self.g*(self.rhoi*H*H - self.rhow*base*base)*nx
         bc2 = B12*nx + B22*ny - 0.5*self.g*(self.rhoi*H*H - self.rhow*base*base)*ny
+        bc = (bc1**2.0+bc2**2.0)**0.5
 
-        return [bc1, bc2] # }}}
+        return bc # }}}
     def _pde(self, nn_input_var, nn_output_var): #{{{
         """ Dummy PDE returns nothing, to train the NN with data only
 

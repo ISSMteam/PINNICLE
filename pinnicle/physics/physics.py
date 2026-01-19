@@ -115,23 +115,16 @@ class Physics:
 
         return _wrapper
 
-    def calving_front(self, nx, ny):
-        """ calculate the calving front boundary condition from each equations, return a function wrapper for PointSetOperatorBC
-            TODO: implement jax version
+    def calving_front(self, nn_input_var, nn_output_var, X):
+        """ calculate the calving front boundary condition
 
-        Args: 
-            nx: x component of the outpointing normal vector
-            ny: y component of the outpointing normal vector
+        Args:             
+            nn_input_var:  input tensor to the nn
+            nn_output_var: output tensor from the nn
+            X:  NumPy array of the collocation points defined on the boundary, required by deepxde
         """
-        nx = bkd.as_tensor(nx, dtype=default_float_type())
-        ny = bkd.as_tensor(ny, dtype=default_float_type())
-        def _wrapper(nn_input_var, nn_output_var, X):
-            for p in self.equations:
-                if p._EQUATION_TYPE.upper() == "SSA_SHELF_VB":
-                    [fc1, fc2] = p._bc(nn_input_var, nn_output_var, nx, ny)
-                    return fc1**2.0+fc2**2.0
-
-        return _wrapper
+        eqind = next((i for i,p in enumerate(self.equations) if p._EQUATION_TYPE.upper() == "CALVINGFRONT"), None)
+        return self.equations[eqind]._bc(nn_input_var, nn_output_var)
 
     def operator(self, pname):
         """ grab the pde operator, used for testing the pdes and plotting

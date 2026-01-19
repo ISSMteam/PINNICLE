@@ -223,13 +223,11 @@ def test_user_defined_grad():
 
 def test_calving_front():
     hp_local = dict(hp)
-    hp_local["equations"] = {"SSA_SHELF_VB": {}}
+    hp_local["equations"] = {"CalvingFront": {}}
     experiment = pinn.PINN(params=hp_local)
     experiment.compile()
-    nx = bkd.as_tensor(experiment.model_data.sol['u'])
-    ny = bkd.as_tensor(experiment.model_data.sol['v'])
     def op(i,o):
-        return experiment.physics.calving_front(nx, ny)(i, o, None)
-    cf = experiment.model.predict(experiment.model_data.X['u'], operator=op)
+        return experiment.physics.calving_front(i, o, None)
 
-    assert cf.shape == nx.shape
+    cf = experiment.model.predict(experiment.model_data.X['u'], operator=op)
+    assert cf.shape == (10, 1)
