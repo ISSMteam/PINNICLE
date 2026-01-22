@@ -117,6 +117,8 @@ def test_save_and_load_setting(tmp_path):
     assert os.path.isdir(f"{tmp_path}/pinn/")
     experiment2 = pinn.PINN(loadFrom=tmp_path)
     assert experiment.params.param_dict == experiment2.params.param_dict
+    with pytest.raises(Exception):
+        experiment3 = pinn.PINN(loadFrom=tmp_path+"notexist")
 
 def test_update_parameters():
     experiment = pinn.PINN(params=hp)

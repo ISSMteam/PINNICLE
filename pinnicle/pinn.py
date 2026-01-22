@@ -14,11 +14,15 @@ from .modeldata import Data
 class PINN:
     """ a basic PINN model
     """
-    def __init__(self, params={}, loadFrom=""):
+    def __init__(self, params={}, loadFrom=None):
         # load setup parameters
-        if os.path.exists(loadFrom):
-            # overwrite params with saved params.json file
-            params = self.load_setting(path=loadFrom)
+        if loadFrom is not None:
+            if os.path.exists(loadFrom):
+                # overwrite params with saved params.json file
+                params = self.load_setting(path=loadFrom)
+            else:
+                raise ValueError(f"File {loadFrom} is not found, please double check the settings!")
+
         self.params = Parameters(params)
 
         # set up the model according to self.params

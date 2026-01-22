@@ -19,6 +19,8 @@ def test_save_and_load_dict(tmp_path):
     assert data == load_dict_from_json(tmp_path, "temp.json")
     assert data == load_dict_from_json(tmp_path, "temp")
     assert data == load_dict_from_json(tmp_path, "noextension.json")
+    with pytest.raises(Exception):
+        load_dict_from_json(tmp_path, "notexist")
 
 def test_data_misfit():
     with pytest.raises(Exception):
