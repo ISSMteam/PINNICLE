@@ -1,5 +1,6 @@
 import deepxde as dde
-from deepxde.backend import jax, abs
+from deepxde.backend import jax
+from deepxde.backend.backend import abs
 from . import EquationBase, Constants
 from ..parameter import EquationParameter
 from ..utils import slice_column, jacobian, slice_function_jax
