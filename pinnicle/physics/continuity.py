@@ -147,3 +147,85 @@ class Thickness(EquationBase): #{{{
         return self._pde(nn_input_var, nn_output_var) #}}}
     #}}}
 #}}}
+# mass conservation with vertical shear {{{
+class MC4MOLHOEquationParameter(EquationParameter, Constants):
+    """ default parameters for mass conservation with vertical shear
+    """
+    _EQUATION_TYPE = 'MC4MOLHO'
+    def __init__(self, param_dict={}):
+        # load necessary constants
+        Constants.__init__(self)
+        super().__init__(param_dict)
+
+    def set_default(self):
+        self.input = ['x', 'y']
+        self.output = ['u', 'v', 'u_base', 'v_base', 'a', 'H']
+        self.output_lb = [self.variable_lb[k] for k in self.output]
+        self.output_ub = [self.variable_ub[k] for k in self.output]
+        self.data_weights = [1.0e-8*self.yts**2, 1.0e-8*self.yts**2, 1.0e-8*self.yts**2, 1.0e-8*self.yts**2, 1.0*self.yts**2, 1.0e-6]
+        self.residuals = ["f"+self._EQUATION_TYPE]
+        self.pde_weights = [1.0e10]
+
+        # scalar variables: name:value
+        self.scalar_variables = {
+                'n':3.0
+                }
+class MC4MOLHO(EquationBase): #{{{
+    """ MC include vertical shear
+    """
+    _EQUATION_TYPE = 'MC4MOLHO'
+    def __init__(self, parameters=MC4MOLHOEquationParameter()):
+        super().__init__(parameters)
+
+    def _pde(self, nn_input_var, nn_output_var): #{{{
+        """ residual of MC PDE, adapted to include vertical shear
+
+        Args:
+            nn_input_var: global input to the nn
+            nn_output_var: global output from the nn
+        """
+        # get the ids
+        xid = self.local_input_var["x"]
+        yid = self.local_input_var["y"]
+
+        uid = self.local_output_var["u"]
+        vid = self.local_output_var["v"]
+        ubid = self.local_output_var["u_base"]
+        vbid = self.local_output_var["v_base"]
+        aid = self.local_output_var["a"]
+        Hid = self.local_output_var["H"]
+
+        # unpacking normalized output
+        u = slice_column(nn_output_var, uid)
+        v = slice_column(nn_output_var, vid)
+        ub = slice_column(nn_output_var, ubid)
+        vb = slice_column(nn_output_var, vbid)
+        a = slice_column(nn_output_var, aid)
+        H = slice_column(nn_output_var, Hid)
+
+        # depth-averaged velocities
+        ubar = ub + (u - ub)*((self.n+1)/(self.n+2))
+        vbar = vb + (v - vb)*((self.n+1)/(self.n+2))
+
+        # calculate ice flux
+        Hu = H*ubar
+        Hv = H*vbar
+
+       # spatial derivatives
+        Dx = jacobian(Hu, nn_input_var, i=0, j=xid)
+        Dy = jacobian(Hv, nn_input_var, i=0, j=yid)
+
+        # residual
+        f = Dx + Dy - a
+
+        return [f] #}}}
+    def _pde_jax(self, nn_input_var, nn_output_var): #{{{
+        """ residual of MC PDE with vertical shear, jax version
+
+        Args:
+            nn_input_var: global input to the nn
+            nn_output_var: global output from the nn
+        """
+        return self._pde(nn_input_var, nn_output_var) #}}}
+    #}}}
+#}}}
