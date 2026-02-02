@@ -121,6 +121,15 @@ def test_MC_pde_function():
     assert len(y) == 1
     assert y[0].shape == (10,1)
 
+def test_MC4MOLHO_pde_function():
+    hp_local = dict(hp)
+    hp_local["equations"] = {"MC4MOLHO":{}}
+    experiment = pinn.PINN(params=hp_local)
+    experiment.compile()
+    y = experiment.model.predict(experiment.model_data.X['u'], operator=experiment.physics.operator("MC4MOLHO"))
+    assert len(y) == 1
+    assert y[0].shape == (10,1)
+
 def test_thickness_pde_function():
     hp_local = dict(hp)
     hp_local["equations"] = {"Mass transport":{}}

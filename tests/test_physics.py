@@ -113,6 +113,19 @@ def test_Physics_MC():
     assert len(phy.data_weights) == 4
     assert len(phy.pde_weights) == 1
 
+def test_Physics_MC4MOLHO():
+    hp = {}
+    hp["equations"] = {"MC4MOLHO":{}}
+    phy = Physics(PhysicsParameter(hp))
+
+    assert phy.input_var == ['x', 'y']
+    assert phy.output_var == ['u', 'v', 'u_base', 'v_base', 'a', 'H']
+    assert phy.residuals == ['fMC4MOLHO']
+    assert len(phy.output_lb) == 6
+    assert len(phy.output_ub) == 6
+    assert len(phy.data_weights) == 6
+    assert len(phy.pde_weights) == 1
+
 def test_Physics_Thickness():
     hp = {}
     hp["equations"] = {"Mass transport":{}}
@@ -239,7 +252,7 @@ def test_operator():
 
     hp = {}
     hp["equations"] = {"MC":{}, "SSA":SSA, "SSA_VB":{}, "SSA Taub":{}, "SSA First":{}, "MOLHO":{}, "Mass transport":{}, "Time_Invariant":{}, 
-                       "Weertman":{}, "MOLHO Taub":{}}
+                       "Weertman":{}, "MOLHO Taub":{}, "MC4MOLHO":{}}
     phy = Physics(PhysicsParameter(hp))
     
     assert phy.operator('mc')
@@ -262,6 +275,8 @@ def test_operator():
     assert phy.operator('TIME_INVARIANT')
     assert phy.operator('Weertman')
     assert phy.operator('weertman')
+    assert phy.operator('MC4MOLHO')
+    assert phy.operator('mc4molho')
     # no pde defined
     assert phy.operator('DUMMY') == None
     assert phy.operator('dummy') == None
