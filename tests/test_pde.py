@@ -121,6 +121,7 @@ def test_MC_pde_function():
     assert len(y) == 1
     assert y[0].shape == (10,1)
 
+@pytest.mark.skipif(backend_name=="jax", reason="MC MOLHO is not implemented for jax")
 def test_MC4MOLHO_pde_function():
     hp_local = dict(hp)
     hp_local["equations"] = {"MC4MOLHO":{}}
