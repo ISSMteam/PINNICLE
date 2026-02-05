@@ -20,6 +20,7 @@ hp["num_layers"] = 6
 # data
 issm = {}
 issm["data_size"] = {'u':4000, 'v':4000, 'a':4000, 's':4000, 'vel':4000}
+issm["data_path"] = "Narssap_md.mat"
 
 mat = {}
 mat["data_size"] = {"H":4000}
