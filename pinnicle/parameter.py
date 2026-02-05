@@ -120,7 +120,9 @@ class DataParameter(ParameterBase):
         self.data = {}
 
     def check_consistency(self):
-        pass
+        for k in self.data:
+            if self.data[k].data_path == "":
+                raise ValueError(f"{k}[\"data_path\"] can not be empty!")
 
     def __str__(self):
         """
