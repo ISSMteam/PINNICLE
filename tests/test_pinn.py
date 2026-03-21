@@ -19,6 +19,7 @@ repoPath = os.path.dirname(__file__) + "/../examples/"
 appDataPath = os.path.join(repoPath, "dataset")
 path = os.path.join(appDataPath, inputFileName)
 ftpath = os.path.join(appDataPath, "flightTracks.mat")
+cfpath = os.path.join(appDataPath, "Helheim_calvingfront.mat")
 yts =3600*24*365
 loss_weights = [10**(-w) for w in weights]
 loss_weights[2] = loss_weights[2] * yts*yts
@@ -116,6 +117,8 @@ def test_save_and_load_setting(tmp_path):
     assert os.path.isdir(f"{tmp_path}/pinn/")
     experiment2 = pinn.PINN(loadFrom=tmp_path)
     assert experiment.params.param_dict == experiment2.params.param_dict
+    with pytest.raises(Exception):
+        experiment3 = pinn.PINN(loadFrom="notexist")
 
 def test_update_parameters():
     experiment = pinn.PINN(params=hp)
@@ -126,7 +129,7 @@ def test_update_parameters():
     experiment.update_parameters({"add_param": 2})
     assert experiment.params.param_dict["add_param"] == 2
 
-def test_train_only_data(tmp_path):
+def test_train_only_data():
     hp_local = dict(hp)
     hp_local["is_parallel"] = False
     hp_local["is_save"] = False
@@ -145,7 +148,7 @@ def test_train_only_data(tmp_path):
     assert experiment.loss_names == ['v', 'H']
 
 @pytest.mark.skipif(backend_name in ["jax"], reason="inverse time decay is not implemented in deepxde for jax")
-def test_train(tmp_path):
+def test_train():
     hp_local = dict(hp)
     hp_local["is_save"] = False
     hp_local["num_collocation_points"] = 100
@@ -158,7 +161,7 @@ def test_train(tmp_path):
     assert experiment.loss_names == ['fSSA1', 'fSSA2', 'u', 'v', 's', 'H', 'C']
 
 @pytest.mark.skipif(backend_name in ["jax"], reason="inverse time decay is not implemented in deepxde for jax")
-def test_train_decay(tmp_path):
+def test_train_decay():
     hp_local = dict(hp)
     hp_local["is_save"] = False
     hp_local["num_collocation_points"] = 100
@@ -198,14 +201,38 @@ def test_fft_training(tmp_path):
     assert experiment.loss_names == ['fSSA1', 'fSSA2', 'u', 'v', 's', 'H', 'C']
     experiment.load_model(path=tmp_path, epochs=hp_local['epochs'])
 
+@pytest.mark.skipif(backend_name in ["jax"], reason="calving front boundary is not implemented for jax")
+def test_train_calvingfront():
+    hp_local = dict(hp)
+    hp_local["is_save"] = False
+    hp_local["num_collocation_points"] = 10
+    issm["data_size"] = {"u":10, "v":10, "s":10, "H":10, "C":None, "vel":10}
+    hp_local["num_neurons"] = [4,10]
+    # data
+    cfdata = {}
+    cfdata["data_path"] = cfpath
+    cfdata["data_size"] = {"nx":20, "ny":20}
+    cfdata["source"] = "mat"
+    hp_local["data"] = {"ISSM": issm, "cf":cfdata}
+    hp_local["equations"] = {"SSA":SSA, "CalvingFront": {}}
+    # additional loss
+    cf = {}
+    cf['name'] = "cf"
+    cf['weight'] = 1.0
+    hp_local["additional_loss"] = {"CalvingFront":cf}
+    experiment = pinn.PINN(params=hp_local)
+    experiment.compile()
+    experiment.train()
+    assert experiment.loss_names == ['fSSA1', 'fSSA2', 'u', 'v', 's', 'H', 'C', 'nx','ny','cf']
+
 @pytest.mark.skipif(backend_name in ["jax"], reason="save model is not implemented in deepxde for jax")
-def test_train_PFNN(tmp_path):
+def test_train_PFNN():
     hp_local = dict(hp)
     hp_local["is_parallel"] = True
     hp_local["is_save"] = False
     hp_local["num_collocation_points"] = 10
     issm["data_size"] = {"u":10, "v":10, "s":10, "H":10, "C":None, "vel":10}
-    hp_local["num_neurons"] = [4,10];
+    hp_local["num_neurons"] = [4,10]
     hp_local["data"] = {"ISSM": issm}
     # additional loss
     vel_loss = {}

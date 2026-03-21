@@ -3,7 +3,7 @@ import deepxde.backend as bkd
 from ..parameter import PhysicsParameter
 from . import EquationBase
 import itertools
-from ..utils import slice_column, jacobian, ppow
+from ..utils import slice_column, jacobian, ppow, default_float_type
 
 class Physics:
     """ All the physics in used as constraint in the PINN
@@ -114,6 +114,17 @@ class Physics:
             return dydx
 
         return _wrapper
+
+    def calving_front(self, nn_input_var, nn_output_var, X):
+        """ calculate the calving front boundary condition
+
+        Args:             
+            nn_input_var:  input tensor to the nn
+            nn_output_var: output tensor from the nn
+            X:  NumPy array of the collocation points defined on the boundary, required by deepxde
+        """
+        eqind = next((i for i,p in enumerate(self.equations) if p._EQUATION_TYPE.upper() == "CALVINGFRONT"), None)
+        return self.equations[eqind]._bc(nn_input_var, nn_output_var)
 
     def operator(self, pname):
         """ grab the pde operator, used for testing the pdes and plotting

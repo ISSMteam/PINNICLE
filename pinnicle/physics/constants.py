@@ -20,6 +20,12 @@ class Constants():
         self.variable_ub['B12'] = 1.0e10
         self.variable_lb['B22'] = -1.0e10
         self.variable_ub['B22'] = 1.0e10
+        # normal vectors
+        self.variable_lb['nx'] = -1.0
+        self.variable_ub['nx'] = 1.0
+        self.variable_lb['ny'] = -1.0
+        self.variable_ub['ny'] = 1.0
+
         # add more if needed
         self.variable_lb['u_base'] = -1.0e4/self.yts
         self.variable_ub['u_base'] =  1.0e4/self.yts

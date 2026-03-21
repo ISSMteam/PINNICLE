@@ -1,4 +1,5 @@
 from .helper import *
+from .dde_helper import *
 from .backends_specified import slice_column, jacobian, slice_function_jax, matmul, ppow
 from .history import History
 from .data_misfit import get

@@ -2,7 +2,8 @@ import deepxde as dde
 import deepxde.backend as bkd
 import numpy as np
 from deepxde.backend import tf
-from .helper import minmax_scale, up_scale, fourier_feature, default_float_type
+from .helper import minmax_scale, up_scale, fourier_feature
+from ..utils import default_float_type
 from ..parameter import NNParameter
 
 class FNN:

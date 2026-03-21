@@ -60,6 +60,15 @@ class H5Data(DataBase, Constants):
         for k in self.parameters.name_map:
             self.data_dict[k] = data[self.parameters.name_map[k]][boxflag].flatten()[:,None]
 
+        if self.parameters.sample_only_inside:
+            P = np.hstack((self.X_dict[xkeys[0]],self.X_dict[xkeys[1]]))
+            inside = domain.inside(P)
+            mask = np.where(inside!=0)
+            for k in X.keys():
+                self.X_dict[k] = self.X_dict[k][mask]
+            for k,v in self.parameters.name_map.items():
+                self.data_dict[k] = self.data_dict[k][mask]
+
     def plot(self, data_names=[], vranges={}, axs=None, **kwargs):
         """ TODO: scatter plot of the selected data from data_names
         """

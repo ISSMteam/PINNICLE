@@ -2,6 +2,7 @@ import os
 import pinnicle as pinn
 import numpy as np
 import deepxde as dde
+import deepxde.backend as bkd
 from deepxde.backend import backend_name, jax
 from pinnicle.utils import data_misfit, plot_nn
 import pytest
@@ -120,6 +121,16 @@ def test_MC_pde_function():
     assert len(y) == 1
     assert y[0].shape == (10,1)
 
+@pytest.mark.skipif(backend_name=="jax", reason="MC MOLHO is not implemented for jax")
+def test_MC4MOLHO_pde_function():
+    hp_local = dict(hp)
+    hp_local["equations"] = {"MC4MOLHO":{}}
+    experiment = pinn.PINN(params=hp_local)
+    experiment.compile()
+    y = experiment.model.predict(experiment.model_data.X['u'], operator=experiment.physics.operator("MC4MOLHO"))
+    assert len(y) == 1
+    assert y[0].shape == (10,1)
+
 def test_thickness_pde_function():
     hp_local = dict(hp)
     hp_local["equations"] = {"Mass transport":{}}
@@ -180,6 +191,15 @@ def test_weertman_pde_function():
     assert len(y) == 1
     assert y[0].shape == (10,1)
 
+def test_calvingfront_pde_function():
+    hp_local = dict(hp)
+    hp_local["equations"] = {"CalvingFront":{}}
+    experiment = pinn.PINN(params=hp_local)
+    experiment.compile()
+    y = experiment.model.predict(experiment.model_data.X['u'], operator=experiment.physics.operator("CalvingFront"))
+
+    assert len(y) == 0
+
 def test_vel_mag():
     hp_local = dict(hp)
     hp_local["equations"] = {"SSA": {}}
@@ -219,3 +239,14 @@ def test_user_defined_grad():
         return experiment.physics.user_defined_gradient('s','y')(i, o, None)
     surfy1 = experiment.model.predict(experiment.model_data.X['u'], operator=op5)
     assert np.all(surfy == surfy1)
+
+def test_calving_front():
+    hp_local = dict(hp)
+    hp_local["equations"] = {"CalvingFront": {}}
+    experiment = pinn.PINN(params=hp_local)
+    experiment.compile()
+    def op(i,o):
+        return experiment.physics.calving_front(i, o, None)
+
+    cf = experiment.model.predict(experiment.model_data.X['u'], operator=op)
+    assert cf.shape == (10, 1)

@@ -43,7 +43,8 @@ def load_dict_from_json(path, filename):
         with open(f, 'r') as fp:
             data = json.load(fp)
     else:
-        data = {}
+        raise ValueError(f"File {filename} in the Path {path} is not found, please double check the settings!")
+
     return data
 
 def load_mat(file):

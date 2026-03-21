@@ -73,6 +73,12 @@ def test_data_parameter():
     assert d.data["mymat"].source == "mat"
     assert d.data["myh5"].source == "h5"
 
+    with pytest.raises(Exception):
+        nopath = {}
+        hp_local = {}
+        hp_local["data"] = {"nopath":nopath}
+        d = DataParameter(hp_local)
+
 def test_nn_parameter():
     d = NNParameter()
     assert hasattr(d, "param_dict"), "Default attribute 'param_dict' not found"

@@ -120,7 +120,9 @@ class DataParameter(ParameterBase):
         self.data = {}
 
     def check_consistency(self):
-        pass
+        for k in self.data:
+            if self.data[k].data_path == "":
+                raise ValueError(f"{k}[\"data_path\"] can not be empty!")
 
     def __str__(self):
         """
@@ -156,6 +158,8 @@ class SingleDataParameter(ParameterBase):
         self.name_map = {}
         # X name map k->v, k is the input names in the PINN, v is the coordinates name in the data file
         self.X_map = {}
+        # sample data points only inside the polygon domain, rather than the bbox
+        self.sample_only_inside = False
         # scaling factor, map using k->s, by default s=1, k is the same (or subset) as in data_size
         self.scaling = {}
         # source of the data

@@ -83,6 +83,16 @@ class NetCDFData(DataBase, Constants):
         self.X_dict[xkeys[0]] = X_mesh.flatten()[:,None]
         self.X_dict[xkeys[1]] = Y_mesh.flatten()[:,None]
 
+        if self.parameters.sample_only_inside:
+            P = np.hstack((self.X_dict[xkeys[0]],self.X_dict[xkeys[1]]))
+            inside = domain.inside(P)
+            mask = np.where(inside!=0)
+            self.X_dict[xkeys[0]] = self.X_dict[xkeys[0]][mask]
+            self.X_dict[xkeys[1]] = self.X_dict[xkeys[1]][mask]
+            for k,v in self.parameters.name_map.items():
+                self.data_dict[k] = self.data_dict[k][mask]
+
+
     def plot(self, data_names=[], vranges={}, axs=None, **kwargs):
         """ TODO: scatter plot of the selected data from data_names
         """

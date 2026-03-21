@@ -14,11 +14,15 @@ from .modeldata import Data
 class PINN:
     """ a basic PINN model
     """
-    def __init__(self, params={}, loadFrom=""):
+    def __init__(self, params={}, loadFrom=None):
         # load setup parameters
-        if os.path.exists(loadFrom):
-            # overwrite params with saved params.json file
-            params = self.load_setting(path=loadFrom)
+        if loadFrom is not None:
+            if os.path.exists(loadFrom):
+                # overwrite params with saved params.json file
+                params = self.load_setting(path=loadFrom)
+            else:
+                raise ValueError(f"File {loadFrom} is not found, please double check the settings!")
+
         self.params = Parameters(params)
 
         # set up the model according to self.params
@@ -314,6 +318,16 @@ class PINN:
                     loss_weights.append(self.params.training.additional_loss[d].weight)
                     # append loss functions
                     loss_functions.append(self.params.training.additional_loss[d].function)
+                else:
+                    if d.lower() == "calvingfront":
+                        training_temp.append(dde.icbc.PointSetOperatorBC(training_data.X['nx'], np.zeros_like(training_data.sol['nx']), self.physics.calving_front,
+                                                                         batch_size=min_or_none(self.params.training.mini_batch, training_data.sol['nx'].shape[0]), shuffle=True))
+                        # loss name
+                        loss_names.append(self.params.training.additional_loss[d].name)
+                        # weights
+                        loss_weights.append(self.params.training.additional_loss[d].weight)
+                        # append loss functions
+                        loss_functions.append(self.params.training.additional_loss[d].function)
 
         # load the callable loss functions
         loss_functions = [data_misfit.get(l) for l in loss_functions]
