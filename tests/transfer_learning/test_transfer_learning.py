@@ -3,30 +3,45 @@ import pinnicle as pinn
 import torch
 import pytest
 
-os.environ.setdefault("MPLBACKEND", "Agg")
-os.environ.setdefault("DDE_BACKEND", "pytorch")
+"""Purpose of Tests:
+    - Test 1 checks:
+        1. Weights are loaded correctly
+        2. Some paramaters are frozen
+        3. Some parameters remain trainable
+## Test 1 confirms transfer learning setup is working correctly ##
+    - Test 2 checks:
+        1. Frozen parameters do not change after training
+        2. Trainable parameters do change
+## Test 2 confirms freezing is actually enforced during training ##
+"""
 
-repoPath = os.path.dirname(__file__) + "/../examples/"
+# Backend and plotting defaults
+#os.environ.setdefault("MPLBACKEND", "Agg")
+#os.environ.setdefault("DDE_BACKEND", "pytorch")
+
+# path to dataset
+#repoPath = os.path.dirname(__file__) + "/../examples/"
+repoPath = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../examples"))
 appDataPath = os.path.join(repoPath, "dataset")
 path = os.path.join(appDataPath, "Helheim_fastflow.mat")
 
-
+# count how many parameters are frozen and how many are trainable
 def count_frozen(net):
     params = list(net.parameters())
     n_frozen = sum(1 for p in params if p.requires_grad is False)
     n_trainable = sum(1 for p in params if p.requires_grad is True)
     return n_frozen, n_trainable
 
-
+# helper to inspect parameter (debugging)
 def debug_param_names(net):
     return [(name, p.requires_grad, tuple(p.shape)) for name, p in net.named_parameters()]
 
-
+# forward pass to ensure network is initialized
 def materialize_net(experiment):
     x = torch.zeros((1, len(experiment.params.nn.input_variables)), dtype=torch.float32)
     _ = experiment.model.net(x)
-
-
+    
+# Base hyperparameter configuration 
 def base_hp(tmp_path):
     hp = {}
     hp["shapebox"] = [-1e7, 1e7, -1e7, 1e7]
@@ -54,6 +69,7 @@ def base_hp(tmp_path):
     hp["is_save"] = False
     hp["save_path"] = str(tmp_path)
 
+    # default transfer learning configuration
     hp["transfer_learning"] = {
         "enabled": True,
         "weights_path": "",
@@ -62,17 +78,17 @@ def base_hp(tmp_path):
         "freeze": {
             "mode": "fraction",
             "fraction": 0.8,
-            "first_n": 0,
+            "first_n": 0,   # not selected mode. set to zero.
             "target": "linears",
         },
     }
     return hp
 
-
+# Phase 1: train a model, save the weights
 def build_phase1_and_save_weights(tmp_path):
     hp = base_hp(tmp_path)
     hp["transfer_learning"] = dict(hp["transfer_learning"])
-    hp["transfer_learning"]["enabled"] = False
+    hp["transfer_learning"]["enabled"] = False  # disable transfer learning for phase 1
     hp["transfer_learning"]["weights_path"] = ""
 
     experiment = pinn.PINN(params=hp)
@@ -87,7 +103,7 @@ def build_phase1_and_save_weights(tmp_path):
     torch.save(experiment.model.net.state_dict(), weights_path)
     return hp, weights_path
 
-
+# Phase 2: load saved weights and apply transfer learning
 def build_phase2_with_tl(hp, weights_path):
     hp2 = dict(hp)
     hp2["transfer_learning"] = dict(hp["transfer_learning"])
@@ -99,31 +115,33 @@ def build_phase2_with_tl(hp, weights_path):
     materialize_net(experiment)
     return hp2, experiment
 
-
+# Verify weights are loaded and freezing is applied
 def test_transfer_learning_freeze_and_load(tmp_path):
-    hp, weights_path = build_phase1_and_save_weights(tmp_path)
-    hp2, experiment = build_phase2_with_tl(hp, weights_path)
+    hp, weights_path = build_phase1_and_save_weights(tmp_path)  # build phase 1 model and save the weights
+    hp2, experiment = build_phase2_with_tl(hp, weights_path)    # build phase 2 model with transfer learning    
 
     tl_enabled = hp2.get("transfer_learning", {}).get("enabled", False)
-    n_frozen, n_trainable = count_frozen(experiment.model.net)
+    n_frozen, n_trainable = count_frozen(experiment.model.net)  # count frozen vs. trainable parameters
 
-    if not tl_enabled:
+    if not tl_enabled:  # nothing should freeze if transfer learning is not enabled
         assert n_frozen == 0
         return
 
-    if n_frozen == 0:
+    if n_frozen == 0:   # ensure some parameters are frozen
         names = debug_param_names(experiment.model.net)
         raise AssertionError(
-            "Transfer learning was enabled, but no parameters were frozen.\n"
+            "Transfer learning was enabled but no parameters were frozen.\n"
             f"Frozen={n_frozen}, Trainable={n_trainable}\n"
             f"First params:\n{names[:10]}"
         )
 
+    # ensure some paramters remain trainable
     assert n_trainable > 0, (
-        "Expected some parameters to remain trainable in fraction mode, "
+        "Expected some parameters to remain trainable in fraction mode "
         f"but all were frozen. Frozen={n_frozen}, Trainable={n_trainable}"
     )
 
+    # verify weights were correctly loaded
     saved_sd = torch.load(weights_path, map_location="cpu")
     model_sd = experiment.model.net.state_dict()
 
@@ -131,24 +149,27 @@ def test_transfer_learning_freeze_and_load(tmp_path):
     model_first = next(iter(model_sd.values()))
 
     assert torch.allclose(saved_first, model_first), (
-        "Expected p2 weights to match saved p1 weights after auto-TL, but they do not."
+        "Expected weights in phase 2 to match exactly weights in phase 1."
     )
 
-
+# Ensure fozen parameters do not update during training
 def test_frozen_params_do_not_update(tmp_path):
     hp, weights_path = build_phase1_and_save_weights(tmp_path)
     _, experiment = build_phase2_with_tl(hp, weights_path)
 
+    # save parameter values before training step
     before = {
         name: p.detach().clone()
         for name, p in experiment.model.net.named_parameters()
     }
 
+    # optimizer only updates trainable parameters
     optimizer = torch.optim.Adam(
         [p for p in experiment.model.net.parameters() if p.requires_grad],
         lr=1e-3,
     )
 
+    # dummy training
     x = torch.randn(8, len(experiment.params.nn.input_variables))
     y = torch.randn(8, 1)
 
@@ -158,11 +179,13 @@ def test_frozen_params_do_not_update(tmp_path):
     loss.backward()
     optimizer.step()
 
+    # save parameter values after update
     after = {
         name: p.detach().clone()
         for name, p in experiment.model.net.named_parameters()
     }
 
+    # check the behavior of frozen vs. trainable paramters
     saw_frozen = False
     saw_trainable = False
     trainable_changed = False
@@ -177,7 +200,8 @@ def test_frozen_params_do_not_update(tmp_path):
         else:
             saw_frozen = True
             assert not changed, f"Frozen parameter changed after optimizer step: {name}"
-
+            
+    # final checks
     assert saw_frozen, "Expected at least one frozen parameter."
     assert saw_trainable, "Expected at least one trainable parameter."
     assert trainable_changed, "No trainable parameters changed after optimizer step."
