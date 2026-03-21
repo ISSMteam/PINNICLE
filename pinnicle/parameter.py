@@ -573,9 +573,14 @@ class Parameters(ParameterBase):
         """
         update parameters according to the input
         """
-        # set the size of variables not given in data to None
-        for x in self.nn.output_variables:
-            if x not in self.data.datasize:
-                self.data.datasize[x] = None
+       # Ensure each dataset has an entry in data_size for each output variable
+        # DataParameter stores datasets in self.data.data (dict of SingleDataParameter)
+        if hasattr(self.data, "data") and isinstance(self.data.data, dict):
+            for _, ds in self.data.data.items():
+                # ds should be a SingleDataParameter
+                if not hasattr(ds, "data_size") or ds.data_size is None:
+                    ds.data_size = {}
+                for x in self.nn.output_variables:
+                    ds.data_size.setdefault(x, None)
 
         pass

@@ -55,9 +55,24 @@ class PINN:
 
         # compile the model
         self.model.compile(opt, loss=loss, lr=lr, decay=decay, loss_weights=loss_weights)
+        
+    def apply_transfer_learning(self, cfg=None):
+        """load pretrained weights + freeze parameters based on cfg
+
+        cfg can be:
+        -dict (from params.param_dict["transfer_learning"])
+        -object with attributes (enabled, weights_path, freeze,etc)
+        """
+        from .utils.transfer_learning import apply_transfer_learning as _apply
+
+        if cfg is None:
+            #use parameter parsing logic from the model instead of PyTorch
+            cfg = getattr(self.params, "param_dict", {}).get("transfer_learning", None)
+
+        return _apply(self, cfg)
 
     def load_model(self, path="", epochs=-1, subfolder="pinn", name="model", fileformat=""):
-        """laod the neural network from saved model
+        """load the neural network from saved model
         """
         if epochs == -1:
             epochs = self.params.training.epochs
@@ -171,6 +186,24 @@ class PINN:
         # Step 7: setup the deepxde PINN model
         self.model = dde.Model(self.dde_data, self.nn.net)
 
+        # Run transfer learning automatically if enabled
+        tl_cfg = None
+        if hasattr(self, "params") and hasattr(self.params, "param_dict"):
+            tl_cfg = self.params.param_dict.get("transfer_learning", None)
+
+        if isinstance(tl_cfg, dict) and tl_cfg.get("enabled", False):
+            # Only auto run if the method exists 
+            if hasattr(self, "apply_transfer_learning") and callable(getattr(self, "apply_transfer_learning")):
+                # Only attempt the torch "materialize params" if torch is available
+                try:
+                    import torch
+                    in_dim = len(self.params.nn.input_variables)
+                    _ = self.model.net(torch.zeros((1, in_dim), dtype=torch.float32))
+                except Exception:
+                    pass
+
+                self.apply_transfer_learning(tl_cfg)
+            
     def train(self, iterations=0):
         """ train the model
         """
@@ -328,3 +361,4 @@ class PINN:
         # wrap output_lb and output_ub with np.array
         self.params.nn.output_lb = np.array(self.params.nn.output_lb)
         self.params.nn.output_ub = np.array(self.params.nn.output_ub)
+        
