@@ -5,6 +5,7 @@ import deepxde as dde
 from deepxde.backend import backend_name
 from pinnicle.utils import data_misfit, plot_nn
 import pytest
+import warnings
 
 dde.config.set_default_float('float64')
 #dde.config.disable_xla_jit()
@@ -64,6 +65,7 @@ def test_compile_no_data():
     hp_local = dict(hp)
     issm["data_size"] = {}
     hp_local["data"] = {"ISSM":issm}
+    hp_local["random_seed"] = 1234
     experiment = pinn.PINN(params=hp_local)
     experiment.compile()
     assert experiment.loss_names == ['fSSA1', 'fSSA2']
@@ -72,6 +74,25 @@ def test_compile_no_data():
     assert experiment.params.nn.output_ub[0]>0.0
     assert experiment.params.nn.output_lb[1]<0.0
     assert experiment.params.nn.output_ub[1]>0.0
+
+def test_random_seed():
+    with pytest.warns(UserWarning):
+        experiment = pinn.PINN(params=hp)
+        warnings.warn("Random seed is undefined by user (None). Generating random seed...", UserWarning)
+    with pytest.raises(TypeError):
+        hp["random_seed"] = '1234'
+        experiment = pinn.PINN(params=hp)
+    with pytest.raises(ValueError):
+        hp["random_seed"] = -1
+        experiment = pinn.PINN(params=hp)
+    with pytest.raises(ValueError):
+        hp["random_seed"] = 10000
+        experiment = pinn.PINN(params=hp)
+    hp["random_seed"] = 1234
+    experiment = pinn.PINN(params=hp)
+    experiment.compile()
+    assert type(experiment.params.training.random_seed) == int
+    assert experiment.params.training.random_seed == 1234
 
 def test_add_loss():
     hp_local = dict(hp)

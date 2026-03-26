@@ -2,6 +2,7 @@ import os
 import glob
 import deepxde as dde
 import numpy as np
+import warnings
 
 from .utils import save_dict_to_json, load_dict_from_json, History, plot_solutions, data_misfit
 from .nn import FNN
@@ -26,7 +27,22 @@ class PINN:
         self.params = Parameters(params)
 
         # set up the model according to self.params
-        self.setup()
+        self.setup() 
+        
+        # if random seed not defined, randomly choose
+        if self.params.training.random_seed is None:
+            warnings.warn('Random seed is undefined by user (None). Generating random seed...')
+            rand_seed = np.random.randint(1, 9999)
+            self.update_parameters({"random_seed":rand_seed})
+        # edge cases
+        if type(self.params.training.random_seed) is not int:
+            raise TypeError("Random seed must be an integer")
+        if (self.params.training.random_seed < 1) or (self.params.training.random_seed > 9999):
+            raise ValueError("Random seed not supported, must be between 1 and 9999")
+ 
+        # initialize random seed
+        print('Configuring random seed: '+str(self.params.training.random_seed))
+        dde.config.set_random_seed(self.params.training.random_seed)
 
     def check_path(self, path, loadOnly=False):
         """check the path, set to default, and create folder if needed
@@ -41,7 +57,7 @@ class PINN:
     def compile(self, opt=None, loss=None, lr=None, loss_weights=None, decay=None):
         """ compile the model  
         """
-        # load from params
+
         if opt is None:
             opt = self.params.training.optimizer
 
