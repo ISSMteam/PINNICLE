@@ -193,6 +193,7 @@ def test_training_parameters():
     assert p.decay_steps == 10
     assert p.decay_rate == 0.3
     assert p.additional_loss == {}
+
     u_loss = {}
     u_loss['name'] = "vel log"
     u_loss['function'] = "VEL_LOG"
@@ -200,6 +201,10 @@ def test_training_parameters():
     hp['additional_loss'] = {"u": u_loss}
     p = TrainingParameter(hp)
     assert p.additional_loss["u"].name == u_loss['name']
+
+    hp['random_seed'] = 1234
+    p = TrainingParameter(hp)
+    assert p.random_seed == 1234
 
 def test_training_callbacks():
     hp = {}

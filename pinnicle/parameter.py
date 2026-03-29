@@ -411,6 +411,8 @@ class TrainingParameter(ParameterBase):
 
 
     def set_default(self):
+        # random seed, set default to None
+        self.random_seed = None
         # number of epochs
         self.epochs = 0
         # optimization method
