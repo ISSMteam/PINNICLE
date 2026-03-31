@@ -1,4 +1,10 @@
+# export DDE_BACKEND=pytorch in terminal before running pytest
 import os
+
+# MUST be set before importing torch/deepxde/pinnicle
+os.environ.setdefault("MPLBACKEND", "Agg")
+os.environ.setdefault("DDE_BACKEND", "pytorch")
+
 import pinnicle as pinn
 import torch
 import pytest
@@ -15,13 +21,10 @@ import pytest
 ## Test 2 confirms freezing is actually enforced during training ##
 """
 
-# Backend and plotting defaults
-#os.environ.setdefault("MPLBACKEND", "Agg")
-#os.environ.setdefault("DDE_BACKEND", "pytorch")
+
 
 # path to dataset
-#repoPath = os.path.dirname(__file__) + "/../examples/"
-repoPath = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../examples"))
+repoPath = os.path.dirname(__file__) + "/../examples/"
 appDataPath = os.path.join(repoPath, "dataset")
 path = os.path.join(appDataPath, "Helheim_fastflow.mat")
 
