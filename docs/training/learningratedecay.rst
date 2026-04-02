@@ -36,7 +36,7 @@ To enable learning rate decay in PINNICLE, you can add the following keys to you
 .. code-block:: python
 
    hp["learning_rate"] = 1e-3
-   hp["decaay_steps"] = 10000
+   hp["decay_steps"] = 10000
    hp["decay_rate"] = 0.5
 
 
