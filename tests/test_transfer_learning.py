@@ -2,12 +2,14 @@
 import os
 
 # MUST be set before importing torch/deepxde/pinnicle
-os.environ.setdefault("MPLBACKEND", "Agg")
-os.environ.setdefault("DDE_BACKEND", "pytorch")
+#os.environ.setdefault("DDE_BACKEND", "pytorch")
 
 import pinnicle as pinn
-import torch
+from deepxde.backend import backend_name, torch
 import pytest
+
+if backend_name == "pytorch":
+    os.environ.setdefault("MPLBACKEND", "Agg")
 
 """Purpose of Tests:
     - Test 1 checks:
@@ -20,8 +22,6 @@ import pytest
         2. Trainable parameters do change
 ## Test 2 confirms freezing is actually enforced during training ##
 """
-
-
 
 # path to dataset
 repoPath = os.path.dirname(__file__) + "/../examples/"
@@ -119,6 +119,7 @@ def build_phase2_with_tl(hp, weights_path):
     return hp2, experiment
 
 # Verify weights are loaded and freezing is applied
+@pytest.mark.skipif(backend_name!="pytorch", reason="transfer learning only supports pytorch")
 def test_transfer_learning_freeze_and_load(tmp_path):
     hp, weights_path = build_phase1_and_save_weights(tmp_path)  # build phase 1 model and save the weights
     hp2, experiment = build_phase2_with_tl(hp, weights_path)    # build phase 2 model with transfer learning    
@@ -156,6 +157,7 @@ def test_transfer_learning_freeze_and_load(tmp_path):
     )
 
 # Ensure fozen parameters do not update during training
+@pytest.mark.skipif(backend_name!="pytorch", reason="transfer learning only supports pytorch")
 def test_frozen_params_do_not_update(tmp_path):
     hp, weights_path = build_phase1_and_save_weights(tmp_path)
     _, experiment = build_phase2_with_tl(hp, weights_path)
