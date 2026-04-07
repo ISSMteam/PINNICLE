@@ -20,7 +20,7 @@ pinnicle.utils.data_misfit module
 pinnicle.utils.helper module
 ----------------------------
 
-   .. automodule:: pinnicle.utils.helper
+.. automodule:: pinnicle.utils.helper
    :members:
    :undoc-members:
    :show-inheritance:

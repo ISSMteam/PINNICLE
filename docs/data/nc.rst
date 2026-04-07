@@ -1,7 +1,7 @@
 .. _nc_data:
 
 Using netCDF (.nc) Data
-=====================
+=======================
 
 PINNICLE supports reading observational or model data stored in the netCDF (`.nc`) format, a widely used standard in Earth science and machine learning for managing large, hierarchical datasets. 
 
