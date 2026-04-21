@@ -14,7 +14,7 @@ And in the data section, you can set the ``"data_size"`` to a large number or si
 
 .. code-block:: python
    
-   hp_local["data"] = {"ISSM": {"data_size": {"u":100, "v":"MAX", "s":100, "H":10, "C":None}}}
+   hp["data"] = {"ISSM": {"data_size": {"u":100, "v":"MAX", "s":100, "H":10, "C":None}}}
    hp["mini_batch"] = mini_batch
 
 - Avoid setting ``mini_batch`` too large, as this can lead to inefficiencies and excessive memory usage.

@@ -35,7 +35,7 @@ To activate Fourier features in your model, modify the neural network section of
 .. code-block:: python
 
    hp["fft"] = True                 # Enable Fourier Feature Transform
-   hp["sigma"] = 10                 # Standard deviation of Gaussian projection
+   hp["sigma"] = [1, 10, 100]       # List of standard deviation of Gaussian projection
    hp["num_fourier_feature"] = 30   # Number of frequency components (m)
 
 PINNICLE will automatically embed the input coordinates using the specified settings before passing them to the first layer of the network.
@@ -43,8 +43,8 @@ PINNICLE will automatically embed the input coordinates using the specified sett
 Typical Parameter Guidelines
 ----------------------------
 
-- **sigma**: A larger :math:`\sigma` increases the frequency range. Common values for glaciology application range from 5 to 30.
-- **num_fourier_feature**: Use 10–100 depending on problem size. More features capture finer details but increase computation.
+- **sigma**: A larger :math:`\sigma` is the frequency range, PINNICLE support multiple frequecies in FFT with a list of values. 
+- **num_fourier_feature**: Use 10–100 depending on problem size. A common choice is to use the same number of neurons. More features capture finer details but increase computation.
 - Inputs are automatically normalized using min–max scaling before Fourier embedding.
 
 Performance Considerations
