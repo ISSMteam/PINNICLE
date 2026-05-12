@@ -7,8 +7,6 @@ from deepxde.backend import backend_name, jax
 from pinnicle.utils import data_misfit, plot_nn
 import pytest
 
-dde.config.set_default_float('float64')
-
 inputFileName="Helheim_fastflow.mat"
 expFileName = "fastflow_CF.exp"
 

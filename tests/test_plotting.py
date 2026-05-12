@@ -6,8 +6,6 @@ from pinnicle.utils import tripcolor_similarity, tripcolor_residuals, diffplot, 
 import matplotlib.pyplot as plt
 import pytest
 
-dde.config.set_default_float('float64')
-
 weights = [7, 7, 5, 5, 3, 3, 5]
 
 inputFileName="Helheim_fastflow.mat"

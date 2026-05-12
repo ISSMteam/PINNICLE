@@ -7,9 +7,6 @@ from pinnicle.utils import data_misfit, plot_nn
 import pytest
 import warnings
 
-dde.config.set_default_float('float64')
-#dde.config.disable_xla_jit()
-
 weights = [7, 7, 5, 5, 3, 3, 5]
 
 inputFileName="Helheim_fastflow.mat"

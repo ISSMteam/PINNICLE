@@ -7,8 +7,6 @@ import matplotlib.pyplot as plt
 from pinnicle.utils import *
 import pytest
 
-dde.config.set_default_float('float64')
-
 weights = [7, 7, 5, 5, 3, 3, 5]
 
 inputFileName="Helheim_fastflow.mat"

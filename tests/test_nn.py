@@ -7,7 +7,6 @@ import deepxde.backend as bkd
 from deepxde.backend import backend_name, jax
 import numpy as np
 
-dde.config.set_default_float('float64')
 if backend_name == "jax":
     jax.config.update("jax_enable_x64", True) # force jax to use float64
 
