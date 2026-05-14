@@ -72,6 +72,7 @@ def test_compile_no_data():
     assert experiment.params.nn.output_lb[1]<0.0
     assert experiment.params.nn.output_ub[1]>0.0
 
+@pytest.mark.skipif(backend_name in ["jax"], reason="L-BFGS is not implemented in deepxde for jax")
 def test_compile_LBFGS():
     hp_local = dict(hp)
     issm["data_size"] = {}
