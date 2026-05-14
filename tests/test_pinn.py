@@ -72,6 +72,17 @@ def test_compile_no_data():
     assert experiment.params.nn.output_lb[1]<0.0
     assert experiment.params.nn.output_ub[1]>0.0
 
+def test_compile_LBFGS():
+    hp_local = dict(hp)
+    issm["data_size"] = {}
+    hp_local["data"] = {"ISSM":issm}
+    hp_local["random_seed"] = 1234
+    hp_local["optimizer"] = "L-BFGS"
+
+    experiment = pinn.PINN(params=hp_local)
+    experiment.compile()
+    assert experiment.model.opt_name == "L-BFGS"
+
 def test_random_seed():
     with pytest.warns(UserWarning):
         experiment = pinn.PINN(params=hp)

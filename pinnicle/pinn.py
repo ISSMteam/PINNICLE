@@ -60,6 +60,9 @@ class PINN:
 
         if opt is None:
             opt = self.params.training.optimizer
+            # L-BFGS
+            if opt == "L-BFGS":
+                dde.optimizers.config.set_LBFGS_options(maxiter=self.params.training.epochs)
 
         if loss is None:
             loss = self.params.training.loss_functions
