@@ -46,7 +46,7 @@ class PINN:
 
     def check_path(self, path, loadOnly=False):
         """check the path, set to default, and create folder if needed
-        """
+    """
         if path == "":
             path = self.params.training.save_path
         # recursively create paths
@@ -54,15 +54,19 @@ class PINN:
             os.makedirs(path, exist_ok=True)
         return path
 
-    def compile(self, opt=None, loss=None, lr=None, loss_weights=None, decay=None):
-        """ compile the model  
+    def compile(self, opt=None, epochs=None, loss=None, lr=None, loss_weights=None, decay=None):
+        """ compile the model, the main purpose is to check if the current setting works for the training 
         """
 
         if opt is None:
-            opt = self.params.training.optimizer
-            # L-BFGS
-            if opt == "L-BFGS":
-                dde.optimizers.config.set_LBFGS_options(maxiter=self.params.training.epochs)
+            opt = self.params.training.optimizers[0]
+
+        if epochs is None:
+            epochs = self.params.training.epochs[0]
+
+        # if start with L-BFGS
+        if opt == "L-BFGS":
+            dde.optimizers.config.set_LBFGS_options(maxiter=epochs)
 
         if loss is None:
             loss = self.params.training.loss_functions
@@ -230,8 +234,6 @@ class PINN:
     def train(self, iterations=0):
         """ train the model
         """
-        if iterations == 0:
-            iterations = self.params.training.epochs
         # save settings before training
         if self.params.training.is_save:
             self.save_setting()
@@ -240,8 +242,19 @@ class PINN:
         callbacks = self.update_callbacks()
 
         # start training
-        self._loss_history, self._train_state = self.model.train(iterations=iterations,
-                display_every=10000, disregard_previous_best=True, callbacks=callbacks)
+        if iterations == 0:
+            iterations = self.params.training.epochs
+
+        # make the input iteration to be a list
+        if isinstance(iterations, int):
+            iterations = [iterations]
+
+        for it, opt in zip(iterations, self.params.training.optimizers):
+            self.compile(opt=opt, epochs=it)
+            self._loss_history, self._train_state = self.model.train(iterations=it, 
+                                                                     display_every=10000, 
+                                                                     disregard_previous_best=True, 
+                                                                     callbacks=callbacks)
         
         # prepare history
         self.history = History(self._loss_history, self.loss_names)

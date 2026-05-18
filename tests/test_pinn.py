@@ -78,7 +78,7 @@ def test_compile_LBFGS():
     issm["data_size"] = {}
     hp_local["data"] = {"ISSM":issm}
     hp_local["random_seed"] = 1234
-    hp_local["optimizer"] = "L-BFGS"
+    hp_local["optimizers"] = "L-BFGS"
 
     experiment = pinn.PINN(params=hp_local)
     experiment.compile()
@@ -187,6 +187,21 @@ def test_train():
     hp_local["equations"] = {"SSA":SSA}
     experiment = pinn.PINN(params=hp_local)
     experiment.compile(decay=("inverse time", 5, 0.3))
+    experiment.train()
+    assert experiment.loss_names == ['fSSA1', 'fSSA2', 'u', 'v', 's', 'H', 'C']
+
+@pytest.mark.skipif(backend_name in ["jax"], reason="inverse time decay is not implemented in deepxde for jax")
+def test_train_series():
+    hp_local = dict(hp)
+    hp_local["is_save"] = False
+    hp_local["num_collocation_points"] = 100
+    issm["data_size"] = {"u":100, "v":100, "s":100, "H":100, "C":None}
+    hp_local["data"] = {"ISSM Light": issm}
+    hp_local["equations"] = {"SSA":SSA}
+    hp_local["epochs"] = [10, 10]
+    hp_local["optimizers"] = ["adam", "L-BFGS"]
+    experiment = pinn.PINN(params=hp_local)
+    experiment.compile()
     experiment.train()
     assert experiment.loss_names == ['fSSA1', 'fSSA2', 'u', 'v', 's', 'H', 'C']
 

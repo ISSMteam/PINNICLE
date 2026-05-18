@@ -416,7 +416,7 @@ class TrainingParameter(ParameterBase):
         # number of epochs
         self.epochs = 0
         # optimization method
-        self.optimizer = "adam"
+        self.optimizers = "adam"
         # general loss function
         self.loss_functions = "MSE"
         # additional loss functions, specified as a dict
@@ -448,7 +448,15 @@ class TrainingParameter(ParameterBase):
         self.is_plot = False
 
     def check_consistency(self):
-        pass
+        # convert epochs and optimizers to list
+        if not isinstance(self.epochs, list):
+            self.epochs = [self.epochs]
+        if not isinstance(self.optimizers, list):
+            self.optimizers = [self.optimizers]
+        # length of epochs should match optimizers
+        if len(self.epochs) != len(self.optimizers):
+            raise ValueError("Length of epochs does not match the length of optimizers")
+
 
     def check_callbacks(self):
         """ check if any of the following variable is given from setting

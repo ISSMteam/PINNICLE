@@ -205,6 +205,16 @@ def test_training_parameters():
     hp['random_seed'] = 1234
     p = TrainingParameter(hp)
     assert p.random_seed == 1234
+    assert len(p.epochs) == 1
+    assert len(p.optimizers) == 1
+
+    hp['epochs'] = [10, 10]
+    with pytest.raises(ValueError):
+        p = TrainingParameter(hp)
+
+    hp['optimizers'] = ['adam', 'L-BFGS']
+    p = TrainingParameter(hp)
+    assert len(p.epochs) == 2
 
 def test_training_callbacks():
     hp = {}
