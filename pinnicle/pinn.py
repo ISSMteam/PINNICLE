@@ -255,7 +255,6 @@ class PINN:
                                                                      display_every=10000, 
                                                                      disregard_previous_best=True, 
                                                                      callbacks=callbacks)
-        
         # prepare history
         self.history = History(self._loss_history, self.loss_names)
 

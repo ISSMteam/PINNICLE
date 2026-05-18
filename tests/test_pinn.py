@@ -190,7 +190,7 @@ def test_train():
     experiment.train()
     assert experiment.loss_names == ['fSSA1', 'fSSA2', 'u', 'v', 's', 'H', 'C']
 
-@pytest.mark.skipif(backend_name in ["jax"], reason="inverse time decay is not implemented in deepxde for jax")
+@pytest.mark.skipif(backend_name in ["jax"], reason="L-BFGS is not implemented in deepxde for jax")
 def test_train_series():
     hp_local = dict(hp)
     hp_local["is_save"] = False
@@ -242,7 +242,7 @@ def test_fft_training(tmp_path):
     assert len(experiment2.params.nn.B[1]) == 20    
     assert experiment2.params.nn.num_layers == 4
     experiment.compile()
-    experiment.train()
+    experiment.train(iterations=10)
     assert experiment.loss_names == ['fSSA1', 'fSSA2', 'u', 'v', 's', 'H', 'C']
     experiment.load_model(path=tmp_path, epochs=hp_local['epochs'])
 

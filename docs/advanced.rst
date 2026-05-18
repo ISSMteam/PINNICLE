@@ -35,6 +35,18 @@ PINNICLE supports the resampling of collocation points during training. To activ
 This will instruct PINNICLE to resample the collocation points every 100 epochs.
 
 
+Training with a list of optimizers
+----------------------------------
+PINNICLE now supports training with a list of optimizers, allowing users to combine the strengths of different optimization strategies within a single training workflow. Users can define an ordered sequence of optimizers, each with its own training configuration, such number of epochs.
+
+.. code-block:: python
+
+   hp["optimizers"] = ["adam", "L-BFGS"]
+   hp["epochs"] = [100000, 20000]
+
+.. note::
+   This feature is not supported by JAX due to the backend restriciton.
+
 
 Load Settings from Previous Experiment
 --------------------------------------
