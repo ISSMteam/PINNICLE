@@ -101,8 +101,9 @@ class PINN:
     def load_model(self, path="", epochs=-1, subfolder="pinn", name="model", fileformat=""):
         """load the neural network from saved model
         """
+        # take the final epochs
         if epochs == -1:
-            epochs = self.params.training.epochs
+            epochs = sum(self.params.training.epochs)
 
         # get the path
         path = self.check_path(path, loadOnly=True)
@@ -113,9 +114,10 @@ class PINN:
         else:
             filename = f"{path}/{subfolder}/{name}-{epochs}.{fileformat}"
 
-        # TODO: remove this step
+        # TODO: improve this step
         # need to predict once, otherwise the weights can not be restored to the nn
-        self.compile()
+        # use the last optimizer to compile
+        self.compile(opt=self.params.training.optimizers[-1])
         self.model.predict(np.zeros([1, len(self.params.nn.input_variables)]))
 
         # now the weights can be loaded
@@ -123,7 +125,9 @@ class PINN:
             self.model.restore(filename, device=dde.backend.torch.get_default_device())
         else:
             self.model.restore(filename)
-        self.compile()
+        
+        # compile again just to prepare for later use
+        self.compile(opt=self.params.training.optimizers[-1])
 
     def load_setting(self, path="", filename="params.json"):
         """ load the settings from file
