@@ -25,7 +25,7 @@ loss_weights[3] = loss_weights[3] * yts*yts
 
 hp = {}
 # General parameters
-hp["epochs"] = 10
+hp["epochs"] = [10]
 hp["loss_weights"] = loss_weights
 hp["learning_rate"] = 0.001
 hp["loss_functions"] = "MSE"
@@ -231,6 +231,7 @@ def test_fft_training(tmp_path):
     issm["data_size"] = {"u":10, "v":10, "s":10, "H":10, "C":None}
     hp_local["data"] = {"ISSM": issm}
     hp_local["equations"] = {"SSA":SSA}
+    hp_local["epochs"] = 10
     experiment = pinn.PINN(params=hp_local)
     experiment.save_setting(path=tmp_path)
     assert experiment.params.param_dict == experiment.load_setting(path=tmp_path)
@@ -310,6 +311,7 @@ def test_save_and_load_train(tmp_path):
     issm["data_size"] = {"u":10, "v":10, "s":10, "H":10, "C":None, "vel":10}
     hp_local["data"] = {"ISSM": issm}
     hp_local["is_parallel"] = False
+    hp_local["epochs"] = [10]
     # additional loss
     vel_loss = {}
     vel_loss['name'] = "vel log"
@@ -320,9 +322,9 @@ def test_save_and_load_train(tmp_path):
     experiment.compile()
     experiment.train()
     assert experiment.loss_names == ['fSSA1', 'fSSA2', 'u', 'v', 's', 'H', 'C', "vel log"]
-    assert os.path.isfile(f"{tmp_path}/pinn/model-{hp_local['epochs']}.{extension}")
+    assert os.path.isfile(f"{tmp_path}/pinn/model-10.{extension}")
     experiment_load = pinn.PINN(params=hp_local)
-    experiment_load.load_model(path=tmp_path, epochs=hp_local['epochs'])
+    experiment_load.load_model(path=tmp_path, fileformat=extension)
     assert np.all(experiment_load.model.predict(experiment.model_data.X['u'])==experiment.model.predict(experiment.model_data.X['u']))
 
 @pytest.mark.skipif(backend_name in ["jax"], reason="save model is not implemented in deepxde for jax")
