@@ -159,6 +159,39 @@ def test_update_parameters():
     experiment.update_parameters({"add_param": 2})
     assert experiment.params.param_dict["add_param"] == 2
 
+def test_find_closest_model_file(tmp_path):
+    experiment = pinn.PINN(params=hp)
+    model_dir = tmp_path / "pinn"
+    with pytest.raises(FileNotFoundError):
+        experiment.find_closest_model_file(tmp_path)
+
+    model_dir.mkdir()
+
+    with pytest.raises(FileNotFoundError):
+        experiment.find_closest_model_file(
+            path=tmp_path,
+            subfolder="pinn",
+            name="model",
+            epochs=500,
+            fileformat=extension,
+            )
+
+    (model_dir / f"model-1000.{extension}").touch()
+    result = experiment.find_closest_model_file(
+        path=tmp_path,
+        epochs=2000,
+        fileformat=extension,
+    )
+    assert result == str(model_dir / f"model-1000.{extension}")
+
+    (model_dir / f"model-2000.{extension}").touch()
+    result = experiment.find_closest_model_file(
+            path=tmp_path,
+            epochs=2000,
+            fileformat=extension,
+            )
+    assert result == str(model_dir / f"model-2000.{extension}")
+
 def test_train_only_data():
     hp_local = dict(hp)
     hp_local["is_parallel"] = False
