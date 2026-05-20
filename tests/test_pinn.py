@@ -159,6 +159,7 @@ def test_update_parameters():
     experiment.update_parameters({"add_param": 2})
     assert experiment.params.param_dict["add_param"] == 2
 
+@pytest.mark.skipif(backend_name in ["jax"], reason="save model is not implemented in deepxde for jax")
 def test_find_closest_model_file(tmp_path):
     experiment = pinn.PINN(params=hp)
     model_dir = tmp_path / "pinn"

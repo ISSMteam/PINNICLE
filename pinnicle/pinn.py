@@ -100,7 +100,7 @@ class PINN:
         # compile the model
         self.model.compile(opt, loss=loss, lr=lr, decay=decay, loss_weights=loss_weights)
 
-    def find_closest_model_file(self, path, subfolder="pinn", name="model", epochs=-1, fileformat=""):
+    def find_closest_model_file(self, path, subfolder="pinn", name="model", epochs=0, fileformat=""):
         """
         Find files in {path}/{subfolder}/ with filename format:
     
@@ -119,7 +119,7 @@ class PINN:
             fileformat = fileformat.lstrip(".")
             regex = re.compile(rf"^{re.escape(name)}-(\d+)\.{re.escape(fileformat)}$")
         else:
-            regex = re.compile(rf"^{re.escape(name)}-(\d+)\.([^.]+)$")
+            regex = re.compile(rf"^{re.escape(name)}-(\d+)\.(.+)$")
     
         candidates = []
     
