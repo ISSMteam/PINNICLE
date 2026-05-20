@@ -1,9 +1,11 @@
 import os
 import glob
+import re
 import deepxde as dde
 import numpy as np
 import warnings
 
+from pathlib import Path
 from .utils import save_dict_to_json, load_dict_from_json, History, plot_solutions, data_misfit
 from .nn import FNN
 from .physics import Physics
@@ -44,9 +46,24 @@ class PINN:
         print('Configuring random seed: '+str(self.params.training.random_seed))
         dde.config.set_random_seed(self.params.training.random_seed)
 
+    def apply_transfer_learning(self, cfg=None):
+        """load pretrained weights + freeze parameters based on cfg
+
+        cfg can be:
+        -dict (from params.param_dict["transfer_learning"])
+        -object with attributes (enabled, weights_path, freeze,etc)
+        """
+        from .utils.transfer_learning import apply_transfer_learning as _apply
+
+        if cfg is None:
+            #use parameter parsing logic from the model instead of PyTorch
+            cfg = getattr(self.params, "param_dict", {}).get("transfer_learning", None)
+
+        return _apply(self, cfg)
+
     def check_path(self, path, loadOnly=False):
         """check the path, set to default, and create folder if needed
-    """
+        """
         if path == "":
             path = self.params.training.save_path
         # recursively create paths
@@ -82,21 +99,50 @@ class PINN:
 
         # compile the model
         self.model.compile(opt, loss=loss, lr=lr, decay=decay, loss_weights=loss_weights)
-        
-    def apply_transfer_learning(self, cfg=None):
-        """load pretrained weights + freeze parameters based on cfg
 
-        cfg can be:
-        -dict (from params.param_dict["transfer_learning"])
-        -object with attributes (enabled, weights_path, freeze,etc)
+    def find_closest_model_file(self, path, subfolder="pinn", name="model", epochs=-1, fileformat=""):
         """
-        from .utils.transfer_learning import apply_transfer_learning as _apply
-
-        if cfg is None:
-            #use parameter parsing logic from the model instead of PyTorch
-            cfg = getattr(self.params, "param_dict", {}).get("transfer_learning", None)
-
-        return _apply(self, cfg)
+        Find files in {path}/{subfolder}/ with filename format:
+    
+            {name}-{integer_epoch}.{extension}
+    
+        Then return the file with the largest integer_epoch <= epochs.
+        """
+    
+        model_dir = Path(path) / subfolder
+    
+        if not model_dir.exists():
+            raise FileNotFoundError(f"Model directory does not exist: {model_dir}")
+    
+        # Match filenames like model-1000.keras, model-2000.h5, etc.
+        if fileformat:
+            fileformat = fileformat.lstrip(".")
+            regex = re.compile(rf"^{re.escape(name)}-(\d+)\.{re.escape(fileformat)}$")
+        else:
+            regex = re.compile(rf"^{re.escape(name)}-(\d+)\.([^.]+)$")
+    
+        candidates = []
+    
+        for file in model_dir.glob(f"{name}-*.*"):
+            match = regex.match(file.name)
+            if match is None:
+                continue
+    
+            file_epochs = int(match.group(1))
+    
+            if file_epochs <= epochs:
+                candidates.append((file_epochs, file))
+    
+        if not candidates:
+            raise FileNotFoundError(
+                f"No model file found in {model_dir} with format "
+                f"{name}-<epochs>.<extension> and epochs <= {epochs}"
+            )
+    
+        # Pick the largest epoch that is <= epochs
+        best_epochs, best_file = max(candidates, key=lambda x: x[0])
+    
+        return str(best_file)
 
     def load_model(self, path="", epochs=-1, subfolder="pinn", name="model", fileformat=""):
         """load the neural network from saved model
@@ -108,11 +154,13 @@ class PINN:
         # get the path
         path = self.check_path(path, loadOnly=True)
 
-        # find the model file 
-        if fileformat == "":
-            filename = glob.glob(f"{path}/{subfolder}/{name}-{epochs}.*")[0]
-        else:
-            filename = f"{path}/{subfolder}/{name}-{epochs}.{fileformat}"
+        filename = self.find_closest_model_file(
+            path=path,
+            subfolder=subfolder,
+            name=name,
+            epochs=epochs,
+            fileformat=fileformat,
+        )
 
         # TODO: improve this step
         # need to predict once, otherwise the weights can not be restored to the nn
