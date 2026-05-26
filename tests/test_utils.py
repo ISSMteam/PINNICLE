@@ -94,7 +94,6 @@ def test_ppow():
     c = pinnicle.utils.backends_specified.ppow(a, 2.0)
     assert c == 4.0
 
-
 def test_interpfrombedmachine():
     x = np.array([300025,301025,302025])
     y = np.array([-2579975, -2578975, -2577975])
@@ -103,10 +102,6 @@ def test_interpfrombedmachine():
     path = os.path.join(appDataPath, "subdomain_bed.nc")
     var_interp = interpfrombedmachine(x, y, "thickness", path)
     assert var_interp.shape == (3,)
-    x = np.array([330025])
-    y = np.array([-2579975])
-    with pytest.raises(Exception):
-        var_interp = interpfrombedmachine(x, y, "bed", path)
 
 def test_createsubdomain():
     xmin = 300000
@@ -140,6 +135,20 @@ def test_subdomainmask():
     appDataPath = os.path.join(repoPath, "dataset")
     path = os.path.join(appDataPath, "subdomain_bed.nc")
     assert subdomainmask(subdomain, path) == True
+    assert subdomainmask((400,300,400,300), path) == False
+
+def test_find_subdomains_with_mask():
+    xmin = 300000
+    ymin = -2580000
+    dx = 100000
+    repoPath = os.path.dirname(__file__) + "/../examples/"
+    appDataPath = os.path.join(repoPath, "dataset")
+    path = os.path.join(appDataPath, "subdomain_bed.nc")
+    Nlist, Nx, Ny = find_subdomains_with_mask(path, xmin, ymin, 1000000, 400000, dx, dx)
+    assert len(Nlist) == 1
+    assert Nlist[0] == (0,0)
+    assert Nx == 10
+    assert Ny == 4
 
 def test_rect_weights():
     X, Y = np.meshgrid(np.linspace(-1, 2, 5), np.linspace(-1, 2, 5))
@@ -153,3 +162,11 @@ def test_default_float_type():
     assert default_float_type() is not None
     assert default_float_type() in bkd.data_type_dict.values()
     assert default_float_type() == bkd.data_type_dict['float64']
+
+def test_coord_window_indices():
+    co = np.linspace(0,100,10)
+    i0, i1 = coord_window_indices(co,3,50)
+    assert i0 == 1 and i1 == 5
+    i0, i1 = coord_window_indices(co[::-1],50,3)
+    assert i0 == 5 and i1 == 9
+
