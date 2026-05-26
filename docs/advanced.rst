@@ -95,3 +95,12 @@ In this example, we define a ``dict`` with a key ``output``, where the value is 
 
 By default, the ``Dummy`` physics already has ``x`` and ``y`` as ``input``. If there is no need to change this, only the ``output`` needs to be defined.
 
+
+Manually Override Data Weights
+------------------------------
+
+When coupling different physics or observational constraints, the default data weights may not always produce the desired balance among loss terms. Users can manually override the weights for selected variables by setting ``manual_data_weights`` in the hyperparameter dictionary.
+
+.. code-block:: python
+
+   hp["manual_data_weights"] = {"H": 1.0e-6, "s": 1.0e-4}
