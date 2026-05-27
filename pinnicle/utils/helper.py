@@ -181,3 +181,35 @@ def feathered_rect_weights(x, y, rect, width):
     w = 1.0 - np.clip(signed_d, 0, None) / width
     w = np.clip(w, 0.0, 1.0)
     return w
+
+def coord_window_indices(coord, lo, hi, pad=0):
+    """ Return slice indices for coord values between lo and hi.
+    Works for both ascending and descending coordinate arrays.
+
+    Args: 
+        coord (array): a sorted coordinates, either ascending or descending
+        lo (float): lowest coordinate 
+        hi (float): highest coordinate
+        pad (int): number of pad
+    Returns:
+        i0, i1 (int): the indices of low and high values of the window
+    """
+    coord = np.asarray(coord)
+    lo, hi = min(lo, hi), max(lo, hi)
+    n = len(coord)
+
+    if coord[0] <= coord[-1]:
+        i0 = np.searchsorted(coord, lo, side="left")
+        i1 = np.searchsorted(coord, hi, side="right")
+    else:
+        coord_rev = coord[::-1]
+        j0 = np.searchsorted(coord_rev, lo, side="left")
+        j1 = np.searchsorted(coord_rev, hi, side="right")
+
+        i0 = n - j1
+        i1 = n - j0
+
+    i0 = max(0, i0 - pad)
+    i1 = min(n, i1 + pad)
+
+    return i0, i1
