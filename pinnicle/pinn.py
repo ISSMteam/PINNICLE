@@ -107,6 +107,9 @@ class PINN:
             {name}-{integer_epoch}.{extension}
     
         Then return the file with the largest integer_epoch <= epochs.
+        
+        If file not found, will chose a backup model such that the difference
+        in epochs is a tenth of the number of training epochs
         """
     
         model_dir = Path(path) / subfolder
@@ -122,7 +125,8 @@ class PINN:
             regex = re.compile(rf"^{re.escape(name)}-(\d+)\.(.+)$")
     
         candidates = []
-    
+        epochdiff = np.infty
+
         for file in model_dir.glob(f"{name}-*.*"):
             match = regex.match(file.name)
             if match is None:
@@ -132,13 +136,20 @@ class PINN:
     
             if file_epochs <= epochs:
                 candidates.append((file_epochs, file))
+
+            if abs(file_epochs-epochs) < epochdiff:
+                backup_candidate = (file_epochs, file)
+                epochdiff = abs(file_epochs - epochs)
     
         if not candidates:
-            raise FileNotFoundError(
-                f"No model file found in {model_dir} with format "
-                f"{name}-<epochs>.<extension> and epochs <= {epochs}"
-            )
-    
+            if epochdiff < epochs//10:
+                candidates.append(backup_candidate)
+            else:
+                raise FileNotFoundError(
+                    f"No model file found in {model_dir} with format "
+                    f"{name}-<epochs>.<extension> and epochs <= {epochs}"
+                )
+
         # Pick the largest epoch that is <= epochs
         best_epochs, best_file = max(candidates, key=lambda x: x[0])
     
