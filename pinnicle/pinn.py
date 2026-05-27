@@ -125,7 +125,7 @@ class PINN:
             regex = re.compile(rf"^{re.escape(name)}-(\d+)\.(.+)$")
     
         candidates = []
-        epochdiff = np.infty
+        epochdiff = np.inf
 
         for file in model_dir.glob(f"{name}-*.*"):
             match = regex.match(file.name)
