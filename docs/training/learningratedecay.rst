@@ -19,14 +19,14 @@ The decay follows the formula:
 
 .. math::
 
-   \eta(k) = \frac{\eta_0}{1 + \text{decay_rate} \cdot \left\lfloor \frac{k}{\text{decay_step}} \right\rfloor}
+   \eta(k) = \frac{\eta_0}{1 + \text{decay\_rate} \cdot \left\lfloor \frac{k}{\text{decay\_step}} \right\rfloor}
 
 where:
 
 - :math:`\eta_0` is the initial learning rate
 - :math:`k` is the current training step
-- :math:`\text{decay_rate}` is a small positive constant
-- :math:`\text{decay_step}` is the number of steps after which decay is applied
+- :math:`\text{decay\_rate}` is a small positive constant
+- :math:`\text{decay\_step}` is the number of steps after which decay is applied
 
 Configuration Example
 ---------------------
