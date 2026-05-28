@@ -4,199 +4,303 @@ from scipy.spatial import cKDTree as KDTree
 import deepxde.backend as bkd
 import numpy as np
 
+
 def plotmodel(pinn, path="", filename="", **kwargs):
-    """ plotmodel
-    """
+    """plotmodel"""
     pass
 
-def plotmodelcompare(model, dataname, output, scaling=1, diffrange=None, iscatter=False, **kwargs):
-    """ plot the comparison between the prediction of the keys from the pinn model and the data
 
-    Args:
-        model (pinnicle.pinn): PINNICLE model
-        dataname (str): name of the data in model.model_data.data
-        output (str): key of the output variable
-        scaling (float, optional): scaling factor for the data. Defaults to 1
-        diffrange (float, optional): range of the difference plot. If not provided, it will be set to the max value of the data. Defaults to None
-        iscatter (bool, optional): if True, use scatter plot for the data plot. Defaults to False
-    return:
-        axs (AxesSubplot): axes of the subplots
-    """
-    figsize = kwargs.pop('figsize', (12,5))
-    fig, axs = plt.subplots(1, 3 , figsize=figsize)
+def _as_1d_float_array(a):
+    """Return a 1-D ndarray; masked values are converted to NaN."""
+    if np.ma.isMaskedArray(a):
+        return np.asarray(np.ma.asarray(a).filled(np.nan)).ravel()
+    return np.asarray(a).ravel()
 
-    X = model.model_data.data[dataname].X_dict['x'].flatten()
-    Y = model.model_data.data[dataname].X_dict['y'].flatten()
-    data = model.model_data.data[dataname].data_dict[output].flatten()
 
-    # get the mask
-    if np.ma.is_masked(data):
-        mask = np.isnan(data).filled(True)
-    else:
-        mask = np.isnan(data)
+def _get_nan_mask(a):
+    """Return a 1-D boolean mask for masked or non-finite values."""
+    if np.ma.isMaskedArray(a):
+        arr = np.ma.asarray(a)
+        return (np.ma.getmaskarray(arr) | ~np.isfinite(arr.filled(np.nan))).ravel()
+    return ~np.isfinite(np.asarray(a).ravel())
 
-    # plot ref data
-    if iscatter:
-        im = plotscatter(axs[0], X, Y, data*scaling, **kwargs)
-    else:
-        im = plot2d(axs[0], X, Y, data, scaling=scaling, **kwargs)
 
-    axs[0].set_title(f'Data: {output}')
-    fig.colorbar(im, ax=axs[0], shrink=0.8, location='top')
+def _predict_in_batches(model, X_nn, batch_size=None):
+    """Call model.model.predict once, or in chunks to avoid memory spikes."""
+    if batch_size is None or X_nn.shape[0] <= batch_size:
+        return model.model.predict(X_nn)
 
-    # plot prediction
-    if iscatter:
-        im = plotprediction(axs[1], model, output, scaling=scaling, **kwargs)
-    else:
-        im = plotprediction(axs[1], model, output, X=X, Y=Y, mask=mask, scaling=scaling, **kwargs)
-    axs[1].set_title('Prediction')
-    fig.colorbar(im, ax=axs[1], shrink=0.8, location='top')
+    parts = []
+    for i in range(0, X_nn.shape[0], batch_size):
+        parts.append(model.model.predict(X_nn[i:i + batch_size]))
+    return np.concatenate(parts, axis=0)
 
-    # plot difference
-    if diffrange is None:
-        diffrange = np.nanmax(np.abs(data))*scaling
 
-    im = plotdiff(axs[2], model, X, Y, data, output, scaling=scaling, cmap='bwr', vmin=-0.1*diffrange, vmax=0.1*diffrange, iscatter=iscatter) 
-    axs[2].set_title('Difference')
-    fig.colorbar(im, ax=axs[2], shrink=0.8, location='top')
-
-    return axs
-
-def plotprediction(axs, model, key, X=None, Y=None, scaling=1, resolution=200, operator=None, **kwargs):
-    """ plot predictions of the keys from the pinn model
-
-    Args:
-        axs (AxesSubplot): handler for plotting
-        model (pinnicle.pinn): PINNICLE model
-        key (str): key of the output variable
-        X (np.array, optional): x-coordinates of the 2D plot. If not provided, a grid will be generated based on the domain bbox. Defaults to None
-        Y (np.array, optional): y-coordinates of the 2D plot. If not provided, a grid will be generated based on the domain bbox. Defaults to None
-        scaling (float, optional): scaling factor for the data. Defaults to 1
-        resolution (int, optional): resolution of the generated grid if X and Y are not provided. Defaults to 200
-    return:
-        axs (AxesSubplot): axes of the subplots
-    """
-    # prepare the grid, if not provided, generate a grid based on the domain bbox
-    if X is None or Y is None:
-        bbox = model.domain.bbox()
-        x = np.linspace(bbox[0,0], bbox[1,0], resolution)
-        y = np.linspace(bbox[0,1], bbox[1,1], resolution)
-        X, Y = np.meshgrid(x, y)
-        X = X.flatten()
-        Y = Y.flatten()
-    
-    # compute the prediction
-    X_nn = np.hstack((X.flatten()[:,None], Y.flatten()[:,None]))
-    sol_pred = model.model.predict(X_nn)
-
-    # get the index of the key
-    keylist = model.params.nn.output_variables
+def _extract_prediction(sol_pred, keylist, key):
+    """Extract a named output from the NN prediction matrix."""
     if key in keylist:
         ind = keylist.index(key)
-        data = scaling*sol_pred[:,ind:ind+1].flatten()
-    elif key == 'bed':
-        ind_s = keylist.index('s')
-        ind_H = keylist.index('H')
-        s = scaling*sol_pred[:,ind_s:ind_s+1].flatten()
-        H = scaling*sol_pred[:,ind_H:ind_H+1].flatten()
-        data = s - H
+        return sol_pred[:, ind].ravel()
+
+    if key == "bed":
+        ind_s = keylist.index("s")
+        ind_H = keylist.index("H")
+        return (sol_pred[:, ind_s] - sol_pred[:, ind_H]).ravel()
+
+    raise ValueError(f"Key {key} not found in model output variables and is not 'bed'.")
+
+
+def _build_plot_cache(X, Y, prefer_grid=True):
+    """Precompute either a regular-grid layout or one triangulation, then reuse it."""
+    cache = {
+        "X": X,
+        "Y": Y,
+        "is_grid": False,
+        "order": None,
+        "shape": None,
+        "Xg": None,
+        "Yg": None,
+        "triangles": None,
+    }
+
+    if prefer_grid:
+        x_unique = np.unique(X)
+        y_unique = np.unique(Y)
+        nx = x_unique.size
+        ny = y_unique.size
+
+        # This detects the common case where X/Y come from a flattened meshgrid.
+        if nx * ny == X.size:
+            order = np.lexsort((X, Y))
+            Xs = X[order].reshape(ny, nx)
+            Ys = Y[order].reshape(ny, nx)
+            if np.allclose(Xs, x_unique[None, :]) and np.allclose(Ys, y_unique[:, None]):
+                cache.update(
+                    {
+                        "is_grid": True,
+                        "order": order,
+                        "shape": (ny, nx),
+                        "Xg": Xs,
+                        "Yg": Ys,
+                    }
+                )
+                return cache
+
+    # Fallback for genuinely scattered points. Build this only once.
+    cache["triangles"] = mpl.tri.Triangulation(X, Y)
+    return cache
+
+
+def _plot_from_cache(ax, cache, data, mask=None, scaling=1.0, iscatter=False,
+                     rasterized=True, scatter_size=1, **kwargs):
+    """Fast plotting helper used by data, prediction, and difference panels."""
+    X = cache["X"]
+    Y = cache["Y"]
+    z = np.asarray(data).ravel().astype(float, copy=True) * scaling
+
+    if mask is None:
+        mask = ~np.isfinite(z)
     else:
-        raise ValueError(f"Key {key} not found in model output variables and is not 'bed'.")
-    
-    # apply operator if provided
+        mask = np.asarray(mask).ravel() | ~np.isfinite(z)
+
+    if iscatter:
+        # Avoid drawing invalid points; this is faster for large scatter plots.
+        keep = ~mask
+        scatter_kwargs = kwargs.copy()
+        scatter_kwargs.setdefault("s", scatter_size)
+        scatter_kwargs.setdefault("rasterized", rasterized)
+        return ax.scatter(X[keep], Y[keep], c=z[keep], **scatter_kwargs)
+
+    if cache["is_grid"]:
+        # Much faster than tripcolor for regular gridded data.
+        Zg = z[cache["order"]].reshape(cache["shape"])
+        Mg = mask[cache["order"]].reshape(cache["shape"])
+        Zg = np.where(Mg, np.nan, Zg)
+
+        mesh_kwargs = kwargs.copy()
+        shading = mesh_kwargs.pop("shading", "auto")
+        mesh_kwargs.setdefault("rasterized", rasterized)
+        return ax.pcolormesh(cache["Xg"], cache["Yg"], Zg, shading=shading, **mesh_kwargs)
+
+    # Scattered fallback: reuse one triangulation instead of rebuilding it.
+    z_ma = np.ma.array(z, mask=mask)
+    tri_kwargs = kwargs.copy()
+    tri_kwargs.setdefault("rasterized", rasterized)
+    return ax.tripcolor(cache["triangles"], z_ma, **tri_kwargs)
+
+
+def plotmodelcompare(model, dataname, output, scaling=1, diffrange=None,
+                     iscatter=False, **kwargs):
+    """Plot data, PINN prediction, and prediction-data difference.
+
+    Performance-oriented changes compared with the original version:
+      1. Predict only once at the data coordinates.
+      2. Reuse a single triangulation for all panels when the data are scattered.
+      3. Use pcolormesh automatically when X/Y form a regular grid.
+      4. Rasterize heavy artists by default, which keeps notebooks/PDFs responsive.
+
+    Extra kwargs
+    ------------
+    batch_size : int or None
+        Predict in chunks. Useful for very large grids to reduce memory use.
+    prefer_grid : bool
+        Try to detect a regular grid and use pcolormesh. Default is True.
+    rasterized : bool
+        Rasterize pcolormesh/tripcolor/scatter artists. Default is True.
+    scatter_size : float
+        Marker size used when iscatter=True. Default is 1.
+    max_points : int or None
+        Optional quick-look downsampling. If set and data contain more points,
+        an evenly spaced subset is plotted and predicted.
+    """
+    figsize = kwargs.pop("figsize", (12, 5))
+    batch_size = kwargs.pop("batch_size", None)
+    prefer_grid = kwargs.pop("prefer_grid", True)
+    rasterized = kwargs.pop("rasterized", True)
+    scatter_size = kwargs.pop("scatter_size", 1)
+    max_points = kwargs.pop("max_points", None)
+
+    fig, axs = plt.subplots(1, 3, figsize=figsize)
+
+    data_obj = model.model_data.data[dataname]
+    X = _as_1d_float_array(data_obj.X_dict["x"])
+    Y = _as_1d_float_array(data_obj.X_dict["y"])
+    data_raw = data_obj.data_dict[output]
+    data = _as_1d_float_array(data_raw).astype(float, copy=False)
+    mask = _get_nan_mask(data_raw)
+
+    # Remove points with invalid coordinates before triangulation/prediction.
+    valid_xy = np.isfinite(X) & np.isfinite(Y)
+    X = X[valid_xy]
+    Y = Y[valid_xy]
+    data = data[valid_xy]
+    mask = mask[valid_xy]
+
+    if max_points is not None and X.size > max_points:
+        idx = np.linspace(0, X.size - 1, int(max_points), dtype=int)
+        X = X[idx]
+        Y = Y[idx]
+        data = data[idx]
+        mask = mask[idx]
+
+    X_nn = np.column_stack((X, Y))
+    sol_pred = _predict_in_batches(model, X_nn, batch_size=batch_size)
+    keylist = model.params.nn.output_variables
+    pred = _extract_prediction(sol_pred, keylist, output)
+
+    if diffrange is None:
+        diffrange = np.nanmax(np.abs(data[~mask])) * scaling
+
+    cache = _build_plot_cache(X, Y, prefer_grid=(prefer_grid and not iscatter))
+
+    # Data
+    im = _plot_from_cache(
+        axs[0], cache, data, mask=mask, scaling=scaling,
+        iscatter=iscatter, rasterized=rasterized, scatter_size=scatter_size,
+        **kwargs,
+    )
+    axs[0].set_title(f"Data: {output}")
+    fig.colorbar(im, ax=axs[0], shrink=0.8, location="top")
+
+    # Prediction at the same coordinates as the data. This avoids a second
+    # expensive prediction on a separate plotting grid.
+    im = _plot_from_cache(
+        axs[1], cache, pred, mask=mask, scaling=scaling,
+        iscatter=iscatter, rasterized=rasterized, scatter_size=scatter_size,
+        **kwargs,
+    )
+    axs[1].set_title("Prediction")
+    fig.colorbar(im, ax=axs[1], shrink=0.8, location="top")
+
+    # Difference: prediction - data
+    diff_kwargs = kwargs.copy()
+    diff_kwargs.update({"cmap": "bwr", "vmin": -0.1 * diffrange, "vmax": 0.1 * diffrange})
+    im = _plot_from_cache(
+        axs[2], cache, pred - data, mask=mask, scaling=scaling,
+        iscatter=iscatter, rasterized=rasterized, scatter_size=scatter_size,
+        **diff_kwargs,
+    )
+    axs[2].set_title("Difference")
+    fig.colorbar(im, ax=axs[2], shrink=0.8, location="top")
+
+    for ax in axs:
+        ax.set_aspect("equal", adjustable="box")
+
+    return axs
+
+
+# Backward-compatible wrappers -------------------------------------------------
+
+def plotprediction(axs, model, key, X=None, Y=None, scaling=1, resolution=200,
+                   operator=None, **kwargs):
+    """Plot predictions of a model output variable."""
+    if X is None or Y is None:
+        bbox = model.domain.bbox()
+        x = np.linspace(bbox[0, 0], bbox[1, 0], resolution)
+        y = np.linspace(bbox[0, 1], bbox[1, 1], resolution)
+        X, Y = np.meshgrid(x, y)
+
+    X = _as_1d_float_array(X)
+    Y = _as_1d_float_array(Y)
+    valid_xy = np.isfinite(X) & np.isfinite(Y)
+    X = X[valid_xy]
+    Y = Y[valid_xy]
+
+    sol_pred = _predict_in_batches(model, np.column_stack((X, Y)), kwargs.pop("batch_size", None))
+    data = _extract_prediction(sol_pred, model.params.nn.output_variables, key)
+
     if operator is not None:
         data = operator(data)
-    
-    # plot
-    axs = plot2d(axs, X, Y, data, **kwargs)
-    return axs
+
+    return plot2d(axs, X, Y, data, scaling=scaling, **kwargs)
+
 
 def plotdiff(axs, model, X, Y, data, key, scaling=1, iscatter=False, **kwargs):
-    """ plot the difference between the prediction of the keys from the pinn model and the data
+    """Plot prediction minus data."""
+    X = _as_1d_float_array(X)
+    Y = _as_1d_float_array(Y)
+    data = _as_1d_float_array(data).astype(float, copy=False)
+    mask = _get_nan_mask(data)
 
-    Args:
-        axs (AxesSubplot): handler for plotting
-        model (pinnicle.pinn): PINNICLE model
-        X (np.array): x-coordinates of the 2D plot
-        Y (np.array): y-coordinates of the 2D plot
-        data (np.array): data for the 2D plot, it has the same size as X and Y
-        key (str): key of the output variable
-        scaling (float, optional): scaling factor for the data. Defaults to 1
-        iscatter (bool, optional): if True, use scatter plot for the data plot. Defaults to False
-    return:
-        axs (AxesSubplot): axes of the subplots
-    """
-    # compute the prediction
-    X_nn = np.hstack((X.flatten()[:,None], Y.flatten()[:,None]))
-    sol_pred = model.model.predict(X_nn)
+    valid_xy = np.isfinite(X) & np.isfinite(Y)
+    X = X[valid_xy]
+    Y = Y[valid_xy]
+    data = data[valid_xy]
+    mask = mask[valid_xy]
 
-    # get the index of the key
-    keylist = model.params.nn.output_variables
-    ind = keylist.index(key)
+    sol_pred = _predict_in_batches(model, np.column_stack((X, Y)), kwargs.pop("batch_size", None))
+    pred = _extract_prediction(sol_pred, model.params.nn.output_variables, key)
 
-    # plot
     if iscatter:
-        axs = plotscatter(axs, X, Y, scaling*(sol_pred[:,ind:ind+1].flatten()-data), **kwargs)
-    else:
-        axs = plot2d(axs, X, Y, scaling*(sol_pred[:,ind:ind+1].flatten()-data), **kwargs)
-        
-    return axs
+        return plotscatter(axs, X[~mask], Y[~mask], scaling * (pred[~mask] - data[~mask]), **kwargs)
+    return plot2d(axs, X, Y, pred - data, mask=mask, scaling=scaling, **kwargs)
+
 
 def plot2d(axs, X, Y, data, mask=None, scaling=1, **kwargs):
-    """ plot 2d scattered data, make a triangular mesh and plot the data on the mesh
+    """Plot 2D data using pcolormesh for regular grids and tripcolor otherwise."""
+    X = _as_1d_float_array(X)
+    Y = _as_1d_float_array(Y)
+    data = _as_1d_float_array(data).astype(float, copy=False)
 
-    Args:
-        axs (AxesSubplot): handler for plotting
-        X (np.array): x-coordinates of the 2D plot
-        Y (np.array): y-coordinates of the 2D plot
-        data (np.array): data for the 2D plot, it has the same size as X and Y
-        mask (np.array, optional): mask for the data, True for invalid data. Defaults to None
-        scaling (float, optional): scaling factor for the data. Defaults to 1
-    return:
-        axs (AxesSubplot): axes of the subplots
-    """
-    # generate triagular mesh, the plot all the 1d-array data, no matter if it has a grid or not
-    triangles = mpl.tri.Triangulation(X, Y)
+    valid_xy = np.isfinite(X) & np.isfinite(Y)
+    X = X[valid_xy]
+    Y = Y[valid_xy]
+    data = data[valid_xy]
+    if mask is not None:
+        mask = np.asarray(mask).ravel()[valid_xy]
 
-    # apply the mask    
-    if mask is None:
-        if np.ma.is_masked(data):
-            mask = np.isnan(data).filled(True)
-        else:
-            mask = np.isnan(data)
-        
-    data[mask] = np.nan
-    
-    # plot
-    axs = plottriangle(axs, triangles, scaling*data, **kwargs)
+    cache = _build_plot_cache(X, Y, prefer_grid=kwargs.pop("prefer_grid", True))
+    return _plot_from_cache(axs, cache, data, mask=mask, scaling=scaling, **kwargs)
 
-    return axs
 
-def plottriangle(axs, triangles,  data, **kwargs):
-    """ plot a triagular mesh
+def plottriangle(axs, triangles, data, **kwargs):
+    """Plot a triangular mesh."""
+    kwargs.setdefault("rasterized", True)
+    return axs.tripcolor(triangles, data, **kwargs)
 
-    Args:
-        axs (AxesSubplot): handler for plotting
-        triangles (ntri, 3): a triangluar mesh generated using mpl.tri.Triangulation
-        data (np.array): data for the 2D plot, it has the same size as X and Y
-    return:
-        axs (AxesSubplot): axes of the subplots
-    """
-    axs = axs.tripcolor(triangles, data, **kwargs)
-
-    return axs
 
 def plotscatter(axs, X, Y, data, **kwargs):
-    """ plot 2d data as scattered data
-
-    Args:
-        axs (AxesSubplot): handler for plotting
-        X (np.array): x-coordinates of the 2D plot
-        Y (np.array): y-coordinates of the 2D plot
-        data (np.array): data for the 2D plot, it has the same size as X and Y
-    return:
-        axs (AxesSubplot): axes of the subplots
-    """
-    axs = axs.scatter(X, Y, s=1, c=data, **kwargs)
-
-    return axs
+    """Plot 2D data as scattered points."""
+    kwargs.setdefault("s", 1)
+    kwargs.setdefault("rasterized", True)
+    return axs.scatter(X, Y, c=data, **kwargs)

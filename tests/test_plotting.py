@@ -3,6 +3,8 @@ import pinnicle as pinn
 import numpy as np
 import deepxde as dde
 from pinnicle.utils import tripcolor_similarity, tripcolor_residuals, diffplot, resplot, plot_tracks
+import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import pytest
 
@@ -48,6 +50,11 @@ hp["num_collocation_points"] = 100
 SSA = {}
 SSA["scalar_variables"] = {"B":1.26802073401e+08}
 hp["equations"] = {"SSA":SSA}
+
+@pytest.fixture(autouse=True)
+def close_figures():
+    yield
+    plt.close("all")
 
 def test_cmap_Rignot():
     cr = pinn.utils.plotting.cmap_Rignot()
