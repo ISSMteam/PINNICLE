@@ -4,12 +4,18 @@ __pycache__/
 *$py.class
 .coverage
 
+# results file
+*.pt
+
 # Sphinx documentation
 docs/_build/
 docs/build/
 
 # Jupyter Notebook
 .ipynb_checkpoints
+
+# codex
+.codex/
 
 # VSCode
 .vscode/
