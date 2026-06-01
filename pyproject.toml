@@ -7,7 +7,7 @@ name = "PINNICLE"
 dynamic = ["version"]
 description = "A Python library for solving ice sheet modeling problems using Physics Informed Neural Networks"
 readme = "README.md"
-license = {file = "LICENSE.txt"}
+license = {file = "LICENSE"}
 authors = [
 { name = "Cheng Gong", email = "gong.cheng@dartmouth.edu" },
 { name = "Mansa Krishna", email = "mansa.krishna.gr@dartmouth.edu" },
