@@ -27,47 +27,84 @@ class H5Data(DataBase, Constants):
     def load_data(self, domain=None, physics=None):
         """ load grid data from a `.h5` file, based on the domain, return a dict with the required data
         """
-        # Reading .h5 data handler
-        data = h5py.File(self.parameters.data_path, 'r')
+        with h5py.File(self.parameters.data_path, 'r') as data:
+            # pre load x, y, then use inside() to further get the inflag
+            X = {}
+            for k, v in self.parameters.X_map.items():
+                if v in data.keys():
+                    X[k] = data[v]
+                else:
+                    raise KeyError(
+                        f"{v} is not found in the data from {self.parameters.data_path}, "
+                        "please specify the mapping in 'X_map'"
+                    )
 
-        # pre load x, y, then use inside() to further get the inflag
-        X = {}
-        for k, v in self.parameters.X_map.items():
-            if v in data.keys():
-                X[k] = data[v]
+            # use the order in physics.input_var to determine x and y names
+            if physics:
+                xkeys = physics.input_var[0:2]
             else:
-                print(f"{v} is not found in the data from {self.parameters.data_path}, please specify the mapping in 'X_map'")
+                xkeys = list(X.keys())
 
-        # use the order in physics.input_var to determine x and y names
-        if physics:
-            xkeys = physics.input_var[0:2]
-        else:
-            xkeys = list(X.keys()) 
+            X_arrays = {k: np.asarray(X[k]) for k in X.keys()}
 
-        # get the bbox from domain, set the rectangle, works for both static and time dependent domain
-        if domain:
-            bbox = domain.bbox()
-            # set the flag based on the bbox region
-            boxflag = (X[xkeys[0]]>=bbox[0][0]) & (X[xkeys[0]]<=bbox[1][0]) & (X[xkeys[1]]>=bbox[0][1]) & (X[xkeys[1]]<=bbox[1][1])
-        else:
-            boxflag = np.ones_like(X[xkeys[0]], dtype=bool)
+            # get the bbox from domain, set the rectangle, works for both static and time dependent domain
+            if domain:
+                bbox = domain.bbox()
+                boxflag = (
+                    (X_arrays[xkeys[0]] >= bbox[0][0])
+                    & (X_arrays[xkeys[0]] <= bbox[1][0])
+                    & (X_arrays[xkeys[1]] >= bbox[0][1])
+                    & (X_arrays[xkeys[1]] <= bbox[1][1])
+                )
+            else:
+                boxflag = np.ones_like(X_arrays[xkeys[0]], dtype=bool)
 
-        # load the coordinates
-        for k in X.keys():
-            self.X_dict[k] = X[k][boxflag].flatten()[:,None]
+            if not np.any(boxflag):
+                raise ValueError("No HDF5 coordinates found in domain range.")
 
-        # load all variables from parameters.name_map
-        for k in self.parameters.name_map:
-            self.data_dict[k] = data[self.parameters.name_map[k]][boxflag].flatten()[:,None]
+            data_selection = tuple(slice(None) for _ in boxflag.shape)
+            selection_mask = None
+            if domain and boxflag.ndim == 2:
+                rows, cols = np.where(boxflag)
+                data_selection = (slice(rows[0], rows[-1] + 1), slice(cols.min(), cols.max() + 1))
+                selection_mask = boxflag[data_selection]
+            elif domain:
+                selection_mask = boxflag
 
-        if self.parameters.sample_only_inside:
-            P = np.hstack((self.X_dict[xkeys[0]],self.X_dict[xkeys[1]]))
-            inside = domain.inside(P)
-            mask = np.where(inside!=0)
+            def select_dataset(dataset):
+                arr = np.asarray(dataset[data_selection])
+                if selection_mask is not None:
+                    arr = arr[selection_mask]
+                return arr.reshape(-1, 1)
+
+            def select_array(arr):
+                arr = np.asarray(arr[data_selection])
+                if selection_mask is not None:
+                    arr = arr[selection_mask]
+                return arr.reshape(-1, 1)
+
+            # load the coordinates
             for k in X.keys():
-                self.X_dict[k] = self.X_dict[k][mask]
-            for k,v in self.parameters.name_map.items():
-                self.data_dict[k] = self.data_dict[k][mask]
+                self.X_dict[k] = select_array(X_arrays[k])
+
+            inside_mask = None
+            if self.parameters.sample_only_inside:
+                P = np.hstack((self.X_dict[xkeys[0]], self.X_dict[xkeys[1]]))
+                inside_mask = np.asarray(domain.inside(P)).astype(bool).reshape(-1)
+                for k in X.keys():
+                    self.X_dict[k] = self.X_dict[k][inside_mask]
+
+            # load all variables from parameters.name_map
+            for k, v in self.parameters.name_map.items():
+                if v not in data.keys():
+                    raise KeyError(
+                        f"{v} is not found in the data from {self.parameters.data_path}, "
+                        "please specify the mapping in 'name_map'"
+                    )
+                data_values = select_dataset(data[v])*self.parameters.scaling.get(k, 1.0)
+                if inside_mask is not None:
+                    data_values = data_values[inside_mask]
+                self.data_dict[k] = data_values
 
     def plot(self, data_names=[], vranges={}, axs=None, **kwargs):
         """ TODO: scatter plot of the selected data from data_names
@@ -86,7 +123,7 @@ class H5Data(DataBase, Constants):
 
         # prepare x,y coordinates
         X_temp = self.get_ice_coordinates()
-        max_data_size = X_temp.shape[0]
+        sample_cache = {}
 
         # go through all keys in data_dict
         for k in self.data_dict:
@@ -96,11 +133,13 @@ class H5Data(DataBase, Constants):
                     # apply ice mask
                     sol_temp = self.data_dict[k].flatten()[:,None]
                     # random choose to a downscale sampling of the scatter data
-                    idx = down_sample(X_temp, data_size[k])
+                    cache_key = str(data_size[k]).lower()
+                    if cache_key not in sample_cache:
+                        sample_cache[cache_key] = down_sample(X_temp, data_size[k])
+                    idx = sample_cache[cache_key]
                     self.X[k] = X_temp[idx, :]
                     self.sol[k] = sol_temp[idx, :]
                 else:
                     # if the size is None, then only use boundary conditions
                     raise ValueError(f"{k} can not be set to None in .mat data. \
                                      If {k} is not needed in training, please remove it from `data_size`")
-
