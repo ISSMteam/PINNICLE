@@ -15,6 +15,27 @@ def test_Constants():
     assert phy.equations[0].variable_lb.keys() == phy.equations[0].variable_ub.keys()
     assert all([phy.equations[0].variable_lb[k] < phy.equations[0].variable_ub[k] for k in phy.equations[0].variable_lb])
 
+def test_update_global_variables():
+    phy = Physics(PhysicsParameter({"equations": {}}))
+    local_var_list = [
+        {"x": 0, "y": 1},
+        {"y": 0, "t": 1},
+        {"z": 0, "x": 1},
+    ]
+
+    assert phy._update_global_variables(local_var_list) == ["x", "y", "t", "z"]
+
+def test_apply_manual_values():
+    phy = Physics(PhysicsParameter({"equations": {}}))
+    phy.output_var = ["u", "v", "H"]
+    values = [1.0, 2.0, 3.0]
+
+    phy._apply_manual_values(values, {"H": 30.0, "missing": 99.0, "u": 10.0})
+    assert values == [10.0, 2.0, 30.0]
+
+    phy._apply_manual_values(values, None)
+    assert values == [10.0, 2.0, 30.0]
+
 def test_update_cid():
     p = SSAEquationParameter({"scalar_variables":{"B":1}})
     ssa = SSA(p)

@@ -51,11 +51,6 @@ SSA = {}
 SSA["scalar_variables"] = {"B":1.26802073401e+08}
 hp["equations"] = {"SSA":SSA}
 
-@pytest.fixture(autouse=True)
-def close_figures():
-    yield
-    plt.close("all")
-
 def test_cmap_Rignot():
     cr = pinn.utils.plotting.cmap_Rignot()
     assert cr.colors.shape == (128,3)

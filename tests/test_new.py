@@ -118,7 +118,6 @@ def regular_grid():
     Xg, Yg = np.meshgrid(x, y)
     return Xg.ravel(), Yg.ravel()
 
-
 def test_as_1d_float_array_converts_masked_values_to_nan():
     arr = np.ma.array([[1.0, 2.0], [3.0, 4.0]], mask=[[False, True], [False, False]])
 

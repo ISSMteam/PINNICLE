@@ -311,6 +311,11 @@ class PhysicsParameter(ParameterBase):
         self.equations = {}
         self.manual_data_weights = None
 
+        # NOTE: these two settings will override the default and single equation settings, 
+        # but if the data has large range, PINNICLE will still follow the data in the end
+        self.manual_output_lb = None
+        self.manual_output_ub = None
+
     def check_consistency(self):
         pass
 

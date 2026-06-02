@@ -31,16 +31,26 @@ class Physics:
             self.output_ub.append(max([p.output_ub[k] for p in self.equations if k in p.output_ub]))
             self.data_weights.append(max([p.data_weights[k] for p in self.equations if k in p.data_weights]))
         
+        # manualy override output lower and/or upper bounds
+        self._apply_manual_values(self.output_lb, self.parameters.manual_output_lb)
+        self._apply_manual_values(self.output_ub, self.parameters.manual_output_ub)
+
         # manualy update data weights
-        if self.parameters.manual_data_weights is not None:
-             for k in self.parameters.manual_data_weights:
-                 if k in self.output_var:
-                     kid = self.output_var.index(k)
-                     self.data_weights[kid] = self.parameters.manual_data_weights[k]
+        self._apply_manual_values(self.data_weights, self.parameters.manual_data_weights)
 
         # update residual list
         self.residuals = list(itertools.chain.from_iterable([p.residuals for p in self.equations]))
         self.pde_weights = list(itertools.chain.from_iterable([p.pde_weights for p in self.equations]))
+
+    def _apply_manual_values(self, values, manual_values):
+        """Update settings related to output with a variable-name mapping."""
+        if manual_values is None:
+            return
+
+        output_ids = {name: i for i, name in enumerate(self.output_var)}
+        for name, value in manual_values.items():
+            if name in output_ids:
+                values[output_ids[name]] = value
 
     def _update_global_variables(self, local_var_list):
         """ Update global variables based on a list of local variables,
