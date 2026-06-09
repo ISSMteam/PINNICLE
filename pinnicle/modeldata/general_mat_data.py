@@ -94,6 +94,11 @@ class MatData(DataBase, Constants):
             # if datasize has the key, then add to X and sol
             if k in data_size:
                 if data_size[k] is not None:
+                    # Handle "Max" data size
+                    if isinstance(data_size[k], str):
+                        if data_size[k].lower() == 'max':
+                            # use all the points
+                            data_size[k] = max_data_size
                     # apply ice mask
                     sol_temp = self.data_dict[k].flatten()[:,None]
                     # random choose to a downscale sampling of the scatter data
