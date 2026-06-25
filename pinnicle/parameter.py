@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from .utils import data_misfit
 from deepxde.backend import backend_name
+import numpy as np
 
 
 class ParameterBase(ABC):
@@ -461,6 +462,11 @@ class TrainingParameter(ParameterBase):
         # length of epochs should match optimizers
         if len(self.epochs) != len(self.optimizers):
             raise ValueError("Length of epochs does not match the length of optimizers")
+        # we need to check the random seeds
+        if type(self.random_seed) is not int:
+            raise TypeError("Random seed must be an integer")
+        if (self.random_seed < 1) or (self.random_seed > 9999):
+            raise ValueError("Random seed not supported, must be between 1 and 9999")
 
 
     def check_callbacks(self):
@@ -524,6 +530,9 @@ class TrainingParameter(ParameterBase):
     def update(self):
         """ convert dict to class LossFunctionParameter
         """
+        if self.random_seed is None:
+            self.random_seed = np.random.randint(1, 9999)
+
         # update additional loss
         if self.additional_loss:
             self.additional_loss = {k:LossFunctionParameter(self.additional_loss[k]) for k in self.additional_loss}

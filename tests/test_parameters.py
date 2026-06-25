@@ -216,6 +216,18 @@ def test_training_parameters():
     p = TrainingParameter(hp)
     assert len(p.epochs) == 2
 
+    with pytest.raises(TypeError):
+        hp['random_seed'] = 0.1
+        p = TrainingParameter(hp)
+
+    with pytest.raises(ValueError):
+        hp['random_seed'] = 0
+        p = TrainingParameter(hp)
+
+    with pytest.raises(ValueError):
+        hp['random_seed'] = 10000
+        p = TrainingParameter(hp)
+
 def test_training_callbacks():
     hp = {}
     p = TrainingParameter(hp)

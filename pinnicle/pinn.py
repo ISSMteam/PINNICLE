@@ -28,23 +28,12 @@ class PINN:
 
         self.params = Parameters(params)
 
-        # set up the model according to self.params
-        self.setup() 
-        
-        # if random seed not defined, randomly choose
-        if self.params.training.random_seed is None:
-            warnings.warn('Random seed is undefined by user (None). Generating random seed...')
-            rand_seed = np.random.randint(1, 9999)
-            self.update_parameters({"random_seed":rand_seed})
-        # edge cases
-        if type(self.params.training.random_seed) is not int:
-            raise TypeError("Random seed must be an integer")
-        if (self.params.training.random_seed < 1) or (self.params.training.random_seed > 9999):
-            raise ValueError("Random seed not supported, must be between 1 and 9999")
- 
         # initialize random seed
         print('Configuring random seed: '+str(self.params.training.random_seed))
         dde.config.set_random_seed(self.params.training.random_seed)
+
+        # set up the model according to self.params
+        self.setup() 
 
     def apply_transfer_learning(self, cfg=None):
         """load pretrained weights + freeze parameters based on cfg
