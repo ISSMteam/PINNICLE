@@ -23,7 +23,7 @@ hp["equations"] = {"SSA_VB": {}}
 
 # data
 issm = {}
-issm["data_size"] = {"u":"MAX", "v":"MAX", "s":"MAX", "H":"MAX"}
+issm["data_size"] = {"u":4000, "v":4000, "s":4000, "H":4000}
 issm["data_path"] = "PIG.mat"
 B = {"data_size":{"B":"MAX"}, "data_path":"B.mat", "source":"mat"}
 C = {"data_size":{"C":"MAX"}, "data_path":"C.mat", "source":"mat"}
