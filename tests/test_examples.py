@@ -55,8 +55,12 @@ def test_example1_runs_with_10_epochs(monkeypatch, tmp_path, expfolder, expname)
     called = {"ok": False, "epochs_seen": None}
 
     def PINN_wrapper(hp, *args, **kwargs):
-        # Force epochs to 10, without changing the script
-        hp["epochs"] = 5
+        # Force epochs to 5, without changing the script
+        if type(hp["epochs"]) is int:
+            hp["epochs"] = [5]
+        elif type(hp["epochs"]) is list:
+            hp["epochs"] = [5 for i in hp["epochs"]]
+
         called["ok"] = True
         called["epochs_seen"] = hp["epochs"]
         return RealPINN(hp, *args, **kwargs)
@@ -69,7 +73,7 @@ def test_example1_runs_with_10_epochs(monkeypatch, tmp_path, expfolder, expname)
 
     # Assert our patch was actually used
     assert called["ok"], f"{expname} did not call pinnicle.PINN as expected"
-    assert called["epochs_seen"] == 5
+    assert all([k==5 for k in called["epochs_seen"]])
 
     # Optional: if the script leaves `experiment` in globals, you can sanity-check it
     # (only if PINN exposes something like hp / config)
@@ -77,5 +81,5 @@ def test_example1_runs_with_10_epochs(monkeypatch, tmp_path, expfolder, expname)
         exp = globals_after["experiment"]
         # Try a couple of common patterns; adjust if you know the exact attribute
         if hasattr(exp, "hp"):
-            assert exp.hp.get("epochs") == 5
+            assert all([k==5 for k in exp.hp.get("epochs")])
 
