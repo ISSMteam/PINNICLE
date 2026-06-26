@@ -6,6 +6,18 @@ from deepxde.backend import backend_name
 import pytest
 import pinnicle
 
+EXAMPLE_RUNS_WITH_5_EPOCHS = [
+    ("example1_Helheim_inverse", "example1.py"),
+    ("example2_PIG", "example2.py"),
+    ("example3_Helheim_Transient", "example3.py"),
+    ("example4_Coupled_Physics", "Coupled_Physics.py"),
+]
+
+if backend_name == "pytorch":
+    EXAMPLE_RUNS_WITH_5_EPOCHS.append(
+        ("example2_PIG", "example2_for_pytorch_only.py")
+    )
+
 def _link_or_copy(src: Path, dst: Path):
     dst.parent.mkdir(parents=True, exist_ok=True)
     if dst.exists():
@@ -30,12 +42,7 @@ def _mirror_example_inputs(example_dir: Path, workdir: Path):
         _link_or_copy(p, workdir / p.name)
 
 @pytest.mark.skipif(backend_name in ["jax"], reason="skip testing examples with JAX")
-@pytest.mark.parametrize("expfolder, expname", [
-    ("example1_Helheim_inverse", "example1.py"),
-    ("example2_PIG", "example2.py"),
-    ("example3_Helheim_Transient", "example3.py"),
-    ("example4_Coupled_Physics", "Coupled_Physics.py"),
-])
+@pytest.mark.parametrize("expfolder, expname", EXAMPLE_RUNS_WITH_5_EPOCHS)
 def test_example_runs_with_5_epochs(monkeypatch, tmp_path, expfolder, expname):
     # Path to your script
     repo_root = Path(__file__).resolve().parents[1]
