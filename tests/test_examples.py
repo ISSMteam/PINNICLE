@@ -36,7 +36,7 @@ def _mirror_example_inputs(example_dir: Path, workdir: Path):
     ("example3_Helheim_Transient", "example3.py"),
     ("example4_Coupled_Physics", "Coupled_Physics.py"),
 ])
-def test_example1_runs_with_10_epochs(monkeypatch, tmp_path, expfolder, expname):
+def test_example_runs_with_5_epochs(monkeypatch, tmp_path, expfolder, expname):
     # Path to your script
     repo_root = Path(__file__).resolve().parents[1]
     script = repo_root / "examples" / expfolder / expname
