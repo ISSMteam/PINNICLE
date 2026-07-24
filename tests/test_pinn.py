@@ -386,6 +386,8 @@ def test_save_and_load_train(tmp_path):
     vel_loss['function'] = "VEL_LOG"
     vel_loss['weight'] = 1.0
     hp_local["additional_loss"] = {"vel":vel_loss, "sx":{"function":"MSE"},"sy":{"function":"MAE"}}
+    hp_local["manual_output_lb"] = {'s':5000}
+    hp_local["manual_output_ub"] = {'H':-10}
     experiment = pinn.PINN(params=hp_local)
     experiment.compile()
     experiment.train()
@@ -394,6 +396,12 @@ def test_save_and_load_train(tmp_path):
     experiment_load = pinn.PINN(params=hp_local)
     experiment_load.load_model(path=tmp_path, fileformat=extension)
     assert np.all(experiment_load.model.predict(experiment.model_data.X['u'])==experiment.model.predict(experiment.model_data.X['u']))
+    assert np.all([k in experiment_load.params.nn.output_variables for k in experiment_load.params.param_dict["manual_output_lb"].keys()])
+    assert np.all([k in experiment_load.params.nn.output_variables for k in experiment_load.params.param_dict["manual_output_ub"].keys()])
+    assert experiment_load.params.param_dict["manual_output_ub"]["H"] > -10
+    assert experiment_load.params.param_dict["manual_output_lb"]["s"] < 5000
+    # {'u': np.float64(-0.00031709791983764585), 'v': np.float64(-0.00031709791983764585), 's': np.float64(-1000.0), 'H': np.float64(-20.0), 'C': np.float64(1e-06)}
+    # {'u': np.float64(0.00031709791983764585), 'v': np.float64(0.00031709791983764585), 's': np.float64(3600.0), 'H': np.float64(1360.382674708082), 'C': np.float64(10000.0)}
 
 @pytest.mark.skipif(backend_name in ["jax"], reason="save model is not implemented in deepxde for jax")
 def test_train_with_callbacks(tmp_path):
