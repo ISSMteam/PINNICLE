@@ -98,16 +98,16 @@ def test_nn_parameter():
     assert d.input_size == 0
 
     d = NNParameter({"fft":True})
-    assert d.input_size == 2*d.num_space_fourier_feature
-    assert isinstance(d.space_sigma, list)
+    assert d.input_size == 2*d.num_fourier_feature
+    assert isinstance(d.sigma, list)
     assert d.is_input_scaling()
-    assert d.space_B is None
+    assert d.B is None
 
-    d = NNParameter({"fft":True, "num_space_fourier_feature":4, "space_B":[[1,2,3,4]]})
-    assert d.space_B is not None
+    d = NNParameter({"fft":True, "num_fourier_feature":4, "B":[[1,2,3,4]]})
+    assert d.B is not None
     with pytest.raises(Exception):
-        d = NNParameter({"fft":True, "num_space_fourier_feature":4, "space_B":1})
-        d = NNParameter({"fft":True, "num_space_fourier_feature":4, "space_B":[[1,2]]})
+        d = NNParameter({"fft":True, "num_fourier_feature":4, "B":1})
+        d = NNParameter({"fft":True, "num_fourier_feature":4, "B":[[1,2]]})
     
     d = NNParameter({"fft":True, "time_dependent":True, "num_time_fourier_feature":4, "time_B":[[1,2,3,4]]})
     assert d.time_B is not None
@@ -116,28 +116,28 @@ def test_nn_parameter():
         d = NNParameter({"fft":True, "time_dependent":True, "num_time_fourier_feature":4, "time_B":[[1,2]]})
 
     d = NNParameter({"fft":True, "time_dependent":True})
-    assert d.input_size == (2*d.num_space_fourier_feature + 2*d.num_time_fourier_feature)
-    assert isinstance(d.space_sigma, list)
+    assert d.input_size == (2*d.num_fourier_feature + 2*d.num_time_fourier_feature)
+    assert isinstance(d.sigma, list)
     assert isinstance(d.time_sigma, list)
     assert d.is_input_scaling()
-    assert d.space_B is None
+    assert d.B is None
     assert d.time_B is None
 
     with pytest.raises(Exception):
         d = NNParameter({"fft":True, "is_parallel":True})
 
-    d = NNParameter({"fft":True, "space_sigma":[1,10], "num_neurons":23, "num_layers":3})
-    assert d.space_sigma_size == 2
-    assert d.input_size == 2*d.num_space_fourier_feature*d.space_sigma_size
+    d = NNParameter({"fft":True, "sigma":[1,10], "num_neurons":23, "num_layers":3})
+    assert d.sigma_size == 2
+    assert d.input_size == 2*d.num_fourier_feature*d.sigma_size
     assert isinstance(d.num_neurons, list)
     assert d.num_layers == 3
     assert len(d.num_neurons) == d.num_layers
     assert d.num_neurons[-1] == 23
     
-    d = NNParameter({"fft":True, "time_dependent":True, "space_sigma":[1,10], "time_sigma":[1,10], "num_neurons":23, "num_layers":3})
-    assert d.space_sigma_size == 2
+    d = NNParameter({"fft":True, "time_dependent":True, "sigma":[1,10], "time_sigma":[1,10], "num_neurons":23, "num_layers":3})
+    assert d.sigma_size == 2
     assert d.time_sigma_size == 2
-    assert d.input_size == (2*d.num_space_fourier_feature*d.space_sigma_size + 2*d.num_time_fourier_feature*d.time_sigma_size)
+    assert d.input_size == (2*d.num_fourier_feature*d.sigma_size + 2*d.num_time_fourier_feature*d.time_sigma_size)
     assert isinstance(d.num_neurons, list)
     assert d.num_layers == 3
     assert len(d.num_neurons) == d.num_layers
