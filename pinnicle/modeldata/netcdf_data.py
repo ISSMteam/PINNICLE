@@ -112,7 +112,7 @@ class NetCDFData(DataBase, Constants):
 
             if self.parameters.sample_only_inside:
                 P = np.hstack((self.X_dict[xkeys[0]], self.X_dict[xkeys[1]]))
-                mask = np.asarray(domain.inside(P)).astype(bool).reshape(-1)
+                mask = np.asarray(domain.inside_polygon(P)).astype(bool).reshape(-1)
                 self.X_dict[xkeys[0]] = self.X_dict[xkeys[0]][mask]
                 self.X_dict[xkeys[1]] = self.X_dict[xkeys[1]][mask]
                 for k, v in self.parameters.name_map.items():

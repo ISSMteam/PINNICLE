@@ -63,7 +63,7 @@ class MatData(DataBase, Constants):
 
         if self.parameters.sample_only_inside:
             P = np.hstack((self.X_dict[xkeys[0]],self.X_dict[xkeys[1]]))
-            inside = domain.inside(P)
+            inside = domain.inside_polygon(P)
             mask = np.where(inside!=0)
             for k in X.keys():
                 self.X_dict[k] = self.X_dict[k][mask]

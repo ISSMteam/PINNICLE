@@ -90,7 +90,7 @@ class H5Data(DataBase, Constants):
             inside_mask = None
             if self.parameters.sample_only_inside:
                 P = np.hstack((self.X_dict[xkeys[0]], self.X_dict[xkeys[1]]))
-                inside_mask = np.asarray(domain.inside(P)).astype(bool).reshape(-1)
+                inside_mask = np.asarray(domain.inside_polygon(P)).astype(bool).reshape(-1)
                 for k in X.keys():
                     self.X_dict[k] = self.X_dict[k][inside_mask]
 

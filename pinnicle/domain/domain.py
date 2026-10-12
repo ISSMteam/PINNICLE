@@ -3,6 +3,7 @@ from ..utils import is_file_ext
 import pandas as pd
 import numpy as np
 import deepxde as dde
+from matplotlib.path import Path
 
 class Domain:
     def __init__(self, parameters=DomainParameter()):
@@ -67,6 +68,15 @@ class Domain:
         else:
             return self.geometry.inside(x)
 
+    def inside_polygon(self, x):
+                    """
+                    return if given points are inside the polygon domain (if sample_only_inside==True)
+                    """
+                    # only check the spatial domain
+                    # TODO: time domain needed?
+                    poly_path = Path(self.vertices)
+                    return poly_path.contains_points(x)
+    
     def bbox(self):
         """
         return the bbox of the domain
